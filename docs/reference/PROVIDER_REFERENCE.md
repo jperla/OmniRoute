@@ -1,14 +1,14 @@
 ---
 title: "Provider Reference"
 version: 3.8.55
-lastUpdated: 2026-11-16
+lastUpdated: 2026-11-26
 ---
 
 # Provider Reference
 
 > **Auto-generated** from `src/shared/constants/providers.ts` — do not edit by hand.
 > Regenerate with: `npm run gen:provider-reference`
-> **Last generated:** 2026-11-16
+> **Last generated:** 2026-11-26
 
 Total providers: **394**. See category breakdown below.
 
@@ -112,7 +112,7 @@ Use the dashboard at `/dashboard/providers` to enable, configure, and test each 
 | `muse-spark-web` | `ms-web` | Muse Spark Web (Meta AI) | Web cookie | [link](https://www.meta.ai) | Paste your ecto_1_sess cookie AND the ecto1:... WS auth token from meta.ai. Capture the ecto1: token in DevTools → Network → WS → the clippy request's Authorization query param. Example: ecto_1_sess=4240a308...NVDg0; ecto1:ABCD... | emulated |
 | `notion-web` | `nw` | Notion AI Web (Unofficial/Experimental) | Web cookie | [link](https://www.notion.so) | Paste only the token_v2 cookie VALUE from app.notion.com (DevTools → Application → Cookies → token_v2). Do not paste token_v2= or the full Cookie header. Workspace is auto-detected; space_id / notion_user_id are optional. | — |
 | `notrack-web` | `ntw` | NoTrack Web (Free) | Web cookie | [link](https://notrack.ai) | Log in to notrack.ai, then paste the full Cookie header (DevTools → Network → any /api request → Request Headers → Cookie). It must contain uid, si_usr_id, and si_ses_id. | emulated |
-| `perplexity-web` | `pplx-web` | Perplexity Web (Pro/Max) | Web cookie | [link](https://www.perplexity.ai) | Paste your __Secure-next-auth.session-token cookie value from perplexity.ai | emulated |
+| `perplexity-web` | `pplx-web` | Perplexity Web (Pro/Max) | Web cookie | [link](https://www.perplexity.ai) | Paste the current Perplexity session cookie header (__Secure-pplx.session.<UUID> and pplx.session-id), or the legacy __Secure-next-auth.session-token, from perplexity.ai | emulated |
 | `poe-web` | `poe` | Poe Web (Subscription) | Web cookie | [link](https://poe.com) | Paste your p-b cookie value from poe.com (DevTools → Application → Cookies → p-b) | — |
 | `promptql` | `pql` | PromptQL (Unofficial/Experimental) | Web cookie | [link](https://prompt.ql.app) | Paste the Bearer JWT from prompt.ql.app DevTools → Network → graphql → Authorization (token only). Optional projectId + session Cookie for refresh. | — |
 | `syntx` | `stx` | SYNTX.ai (Unofficial/Experimental) | Web cookie | [link](https://syntx.ai) | Paste the Authorization Bearer JWT from syntx.ai (DevTools → Network → api.syntx.ai → Request Headers). Chat, models, Limits, and media use this token. | emulated |
