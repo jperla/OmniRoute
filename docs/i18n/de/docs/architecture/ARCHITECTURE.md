@@ -504,10 +504,11 @@ Domänenzustandsdatenbank (SQLite):
 
 ## 5) Cloud-Synchronisierung
 
-- Scheduler-Initialisierung: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- Scheduler-Init: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
 - Periodische Aufgabe: `src/shared/services/cloudSyncScheduler.ts`
 - Periodische Aufgabe: `src/shared/services/modelSyncScheduler.ts`
-- Steuerungsroute: `src/app/api/sync/cloud/route.ts`
+- Regelmäßige Aufgabe (Opt-in pro Verbindung): `src/shared/services/modelHealthCheckScheduler.ts` — testet die Modelle einer Verbindung, blendet Fehler automatisch aus und stellt nur das wieder her, was sie selbst verborgen hat (`src/lib/db/modelHealthAutoHidden.ts`)
+- Kontrollweg: `src/app/api/sync/cloud/route.ts`
 
 ## Anfragelebenszyklus (`/v1/chat/completions`)
 

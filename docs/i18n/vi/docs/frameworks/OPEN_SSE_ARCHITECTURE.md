@@ -228,30 +228,30 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 
 Hỗ trợ** 22 chiến lược định tuyến** (xem `src/shared/constants/routingStrategies.ts`):
 
-| Chiến lược          | Hành vi                                                                                                 |
-| ------------------- | ------------------------------------------------------------------------------------------------------- |
-| `priority`          | Danh sách đặt hàng mục tiêu đầu tiên                                                                    |
-| `weighted`          | Xác suất theo trọng lượng trên mỗi mục tiêu                                                             |
-| `round-robin`       | Duyệt qua các mục tiêu theo thứ tự                                                                      |
-| `context-relay`     | Phân bổ bối cảnh cho các mục tiêu                                                                       |
-| `fill-first`        | Điền vào hạn ngạch trước khi chuyển sang phần tiếp theo                                                 |
-| `p2c`               | Sức mạnh của hai sự lựa chọn                                                                            |
-| `random`            | Thống nhất ngẫu nhiên                                                                                   |
-| `least-used`        | Chọn cái có ít lần sử dụng gần đây nhất                                                                 |
-| `cost-optimized`    | Mục tiêu lành mạnh rẻ nhất đầu tiên                                                                     |
-| `reset-aware`       | Nhận biết các cửa sổ thiết lập lại nhà cung cấp                                                         |
-| `reset-window`      | Đặt lại định tuyến dựa trên cửa sổ                                                                      |
-| `expiry-first`      | Chi tiêu tài khoản có hạn ngạch sẽ hết hạn mà không sử dụng trước                                       |
-| `headroom`          | Phần lớn hạn ngạch còn lại đầu tiên                                                                     |
-| `quota-weighted`    | Bỏ qua các tài khoản đã cạn kiệt, sau đó rút theo hạn ngạch ÷ còn lại khi tải trong chuyến bay          |
-| `strict-random`     | Thực sự đồng nhất (không có trọng số chất lượng)                                                        |
-| `auto`              | Sử dụng tính điểm 16 yếu tố (`autoCombo/`)                                                              |
-| `lkgp`              | Nhà cung cấp tốt được biết đến lần cuối đầu tiên                                                        |
-| `context-optimized` | Tốt nhất cho các yêu cầu ngữ cảnh dài                                                                   |
-| `cache-optimized`   | Ghim từng tiền tố lời nhắc có thể sử dụng lại vào cùng một tài khoản (lần truy cập bộ đệm nhắc nhở)     |
-| `fusion`            | Quạt ra một bảng song song, sau đó tổng hợp thông qua một giám khảo (`fusion.ts`)                       |
-| `pipeline`          | Các bước chuỗi — đầu ra của mỗi mục tiêu sẽ cung cấp dữ liệu cho mục tiêu tiếp theo                     |
-| `jev`               | Chọn tham gia: TypeSafe Jev thừa nhận mục nào được xếp hạng sẽ chạy; nếu không thì đơn đặt hàng của bạn |
+| Chiến lược          | Hành vi                                                                                        |
+| ------------------- | ---------------------------------------------------------------------------------------------- |
+| `priority`          | Danh sách đặt hàng mục tiêu đầu tiên                                                           |
+| `weighted`          | Xác suất theo trọng lượng trên mỗi mục tiêu                                                    |
+| `round-robin`       | Duyệt qua các mục tiêu theo thứ tự                                                             |
+| `context-relay`     | Phân bổ bối cảnh cho các mục tiêu                                                              |
+| `fill-first`        | Điền vào hạn ngạch trước khi chuyển sang phần tiếp theo                                        |
+| `p2c`               | Sức mạnh của hai sự lựa chọn                                                                   |
+| `random`            | Trộn mới theo yêu cầu                                                                          |
+| `least-used`        | Chọn yêu cầu có ít yêu cầu được ghi lại nhất                                                   |
+| `cost-optimized`    | Giá đầu vào catalog thấp nhất trước                                                            |
+| `reset-aware`       | Cấp bách thiết lập lại hạn ngạch + còn lại                                                     |
+| `reset-window`      | Cửa sổ hạn ngạch đặt lại sớm nhất trước tiên                                                   |
+| `expiry-first`      | Chi tiêu tài khoản có hạn ngạch sẽ hết hạn mà không sử dụng trước                              |
+| `headroom`          | Phần lớn hạn ngạch còn lại đầu tiên                                                            |
+| `quota-weighted`    | Bỏ qua các tài khoản đã cạn kiệt, sau đó rút theo hạn ngạch ÷ còn lại khi tải trong chuyến bay |
+| `strict-random`     | Bộ bài xáo trộn: mỗi mục tiêu một lần trước khi lặp lại                                        |
+| `auto`              | Sử dụng tính điểm 16 yếu tố (`autoCombo/`)                                                     |
+| `lkgp`              | Nhà cung cấp tốt được biết đến lần cuối đầu tiên                                               |
+| `context-optimized` | Cửa sổ ngữ cảnh lớn nhất được biết đến đầu tiên                                                |
+| `cache-optimized`   | Ưu tiên tài khoản có khả năng giữ tiền tố lời nhắc trong bộ đệm                                |
+| `fusion`            | Quạt ra một bảng song song, sau đó tổng hợp thông qua một giám khảo (`fusion.ts`)              |
+| `pipeline`          | Các bước chuỗi — đầu ra của mỗi mục tiêu sẽ cung cấp dữ liệu cho mục tiêu tiếp theo            |
+| `jev`               | Chọn tham gia: TypeSafe Jev thừa nhận mục nào được xếp hạng sẽ chạy; đơn đặt hàng của bạn khác |
 
 ### base.ts (1170 LOC)
 
@@ -335,11 +335,11 @@ Dịch vụ là** các mô-đun tập trung, có mục đích duy nhất** mà n
 
 ## Người thực thi (150 mô-đun)
 
-Chủ yếu là một tập tin cho mỗi nhà cung cấp. Tất cả các lớp thực thi đều mở rộng `BaseExecutor` và ghi đè những gì khác biệt; các mô-đun khác là công cụ trợ giúp cho mỗi nhà cung cấp (lược đồ công cụ, bộ điều hợp fetch/TTS, trình xử lý quirk).
+Chủ yếu là một tập tin cho mỗi nhà cung cấp. Tất cả các lớp thực thi đều mở rộng `BaseExecutor` và ghi đè những gì khác biệt; các mô-đun khác là trình trợ giúp cho mỗi nhà cung cấp (lược đồ công cụ, bộ điều hợp fetch/TTS, trình xử lý quirk).
 
 ### Các mẫu chung
 
-Các nhà cung cấp được giải quyết thông qua `getExecutor(providerId)`, trả về trình thực thi được định cấu hình. Các nhà cung cấp OpenAI/Anthropic-compatible sử dụng `DefaultExecutor` (`executors/default.ts`). Hành vi dành riêng cho nhà cung cấp (cơ sở URL, tiêu đề xác thực, phiên bản API ) được định cấu hình trong `open-sse/config/providers/`, trong khi các chuyển đổi nội dung yêu cầu được xử lý trong `open-sse/translator/`.
+Các nhà cung cấp được giải quyết thông qua `getExecutor(providerId)`, trả về trình thực thi đã định cấu hình. Các nhà cung cấp OpenAI/Anthropic-compatible sử dụng `DefaultExecutor` (`executors/default.ts`). Hành vi dành riêng cho nhà cung cấp (cơ sở URL, tiêu đề xác thực, phiên bản API ) được định cấu hình trong `open-sse/config/providers/`, trong khi các chuyển đổi nội dung yêu cầu được xử lý trong `open-sse/translator/`.
 
 **URL tùy chỉnh** được đặt thông qua cấu hình nhà cung cấp:
 

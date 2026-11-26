@@ -431,7 +431,7 @@ Kiedy nie potrzebujesz już OmniRoute, udostępniamy dwa szybkie skrypty do czys
 ### VPS Wdrożenie
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -513,8 +513,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -772,7 +772,7 @@ OMNIROUTE_PEER_MAX_HOPS=4
 
 Tylko żądania wysłane do wyraźnie dozwolonego elementu równorzędnego URL otrzymują nagłówek `X-OmniRoute-Peer-Trace`. Brama odrzuca powtarzającą się instancję ID lub wyczerpany budżet przeskoku z HTTP `508 Loop Detected`; zwykli dostawcy wyższego szczebla nie otrzymują metadanych równorzędnych.
 
-Łańcuch równorzędny nie jest replikacją bazy danych ani przełączaniem awaryjnym hosta. Każda brama utrzymuje niezależny stan SQLite, pamięci podręczne, liczniki szybkości i sesje. Używaj sprawdzonego odwrotnego proxy lub przełączania awaryjnego klienta, aby zapewnić dostępność active/passive lub active/active i nigdy nie montuj jednej bazy danych SQLite w wielu działających instancjach OmniRoute.
+Łańcuch równorzędny nie jest replikacją bazy danych ani przełączaniem awaryjnym hosta. Każda brama utrzymuje niezależny stan SQLite, pamięci podręczne, liczniki szybkości i sesje. Aby zapewnić dostępność active/passive lub active/active, należy używać sprawdzonego odwrotnego proxy lub przełączania awaryjnego klienta i nigdy nie montować jednej bazy danych SQLite w wielu działających instancjach OmniRoute.
 
 ### Dedykowane trasy dostawców
 
@@ -882,8 +882,8 @@ Skonfiguruj przez** Pulpit nawigacyjny → Ustawienia → Routing** . Pulpit naw
 - `least-used` i `cost-optimized`
 - `auto` — na podstawie wyników u wszystkich kandydatów
 - `lkgp` (ostatni znany dobry dostawca) — przypina do ostatniego skutecznego dostawcy, a następnie powraca do zasad
-- `context-optimized` — wybiera model z największym oknem swobodnego kontekstu
-- `context-relay` — łączy modele o długim kontekście dla kolejnych tur
+- `context-optimized` — najpierw wypróbowuje model z największym znanym oknem kontekstowym
+- `context-relay` — kolejność priorytetów plus podsumowanie przekazania, gdy rozmowa zostanie przeniesiona na inne konto
 
 #### Zewnętrzny nagłówek sesji trwałej
 
@@ -1057,15 +1057,15 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 
 Strona ustawień jest zorganizowana w** 7 zakładek** dla łatwej nawigacji:
 
-| Patka              | Zawartość                                                                                                                                                                                              |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| **Ogólny**         | Narzędzia pamięci systemowej, zachowanie domyślne, widoczność tunelu punktu końcowego                                                                                                                  |
-| **Wygląd**         | Sterowanie motywem (light/dark/system), widoczność paska bocznego, przełączniki panelu dla kart tunelu Cloudflare/Tailscale/ngrok                                                                      |
-| **AI**             | Myślący budżet (przejściowy / automatyczny / niestandardowy / adaptacyjny — patrz [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), globalny monit systemowy, natychmiastowe statystyki pamięci podręcznej |
-| **Bezpieczeństwo** | ustawienia Login/Password, kontrola dostępu IP, uwierzytelnianie API dla `/models`, blokowanie dostawców, ochrona przed natychmiastowym wstrzyknięciem                                                 |
-| **Rozgromienie**   | Globalna strategia routingu (Fill First / Round Robin / P2C / Random / Najrzadziej używane / Optymalizacja kosztowa), aliasy modeli wieloznacznych, łańcuchy rezerwowe, domyślne kombinacje            |
-| **Odporność**      | Kolejka żądań, czas oczekiwania na połączenie, konfiguracja wyłącznika dostawcy i zachowanie oczekiwania na ochłodzenie                                                                                |
-| **Zaawansowany**   | Globalna konfiguracja serwera proxy (HTTP/SOCKS5), zastąpienie serwera proxy dla każdego dostawcy                                                                                                      |
+| Patka              | Zawartość                                                                                                                                                                                               |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Ogólny**         | Narzędzia pamięci systemowej, zachowanie domyślne, widoczność tunelu punktu końcowego                                                                                                                   |
+| **Wygląd**         | Sterowanie motywem (light/dark/system), widoczność paska bocznego, przełączniki panelu dla kart tunelu Cloudflare/Tailscale/ngrok                                                                       |
+| **AI**             | Myślący budżet (przejściowy / automatyczny / niestandardowy / adaptacyjny — patrz [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), globalny monit systemowy, natychmiastowe statystyki pamięci podręcznej  |
+| **Bezpieczeństwo** | ustawienia Login/Password, kontrola dostępu IP, uwierzytelnianie API dla `/models`, blokowanie dostawców, ochrona przed natychmiastowym wstrzyknięciem                                                  |
+| **Rozgromienie**   | Globalna strategia routingu (Fill First / Round Robin / P2C / Random / Najrzadziej używane / Optymalizacja kosztowa), aliasy modeli z symbolami wieloznacznymi, łańcuchy rezerwowe, domyślne kombinacje |
+| **Odporność**      | Kolejka żądań, czas oczekiwania na połączenie, konfiguracja wyłącznika dostawcy i zachowanie oczekiwania na ochłodzenie                                                                                 |
+| **Zaawansowany**   | Globalna konfiguracja serwera proxy (HTTP/SOCKS5), zastąpienie serwera proxy dla każdego dostawcy                                                                                                       |
 
 Ogólne nie duplikuje już notatek rejestrowania i pamięci podręcznej w trybie tylko do odczytu. Ustawienia przechowywania i optymalizacji bazy danych są zachowywane poprzez `/api/settings/database`; ręczne czyszczenie pamięci podręcznej wykorzystuje `DELETE /api/cache`. Limity wierszy żądań i dzienników proxy są kontrolowane przez `CALL_LOGS_TABLE_MAX_ROWS` i `PROXY_LOGS_TABLE_MAX_ROWS`.
 
@@ -1156,11 +1156,11 @@ Skonfiguruj równoważenie poszczególnych kombinacji** Pulpit nawigacyjny → C
 | **Najrzadziej używany**   | Trasy do modelu z najmniejszą liczbą ostatnich żądań (wykorzystuje metryki kombi) |
 | **Optymalizacja kosztów** | Trasy do najtańszego dostępnego modelu (korzysta z tabeli cen)                    |
 
-Można ustawić globalne domyślne kombinacje** Pulpit nawigacyjny → Ustawienia → Routing → Domyślne ustawienia kombinacji** . Limity czasu docelowego kombinacji domyślnie dziedziczą limit czasu bieżącego żądania. Używać** Docelowy limit czasu (sekundy)** na domyślnych kombinacjach lub na pojedynczej kombinacji tylko wtedy, gdy krótszy limit na cel powinien wywołać szybszy powrót.
+Można ustawić globalne domyślne kombinacje** Pulpit nawigacyjny → Ustawienia → Routing → Domyślne ustawienia kombinacji** . Limity czasu docelowego kombinacji domyślnie dziedziczą limit czasu bieżącego żądania. Używać** Docelowy limit czasu (sekundy)** w przypadku domyślnych kombinacji lub pojedynczej kombinacji tylko wtedy, gdy krótszy limit na cel powinien wywołać szybszy powrót.
 
-Optymalizacje kombinacji z zerowym opóźnieniem są opcjonalne. Wyjechać** Optymalizacje z zerowym opóźnieniem** wyłączone, aby uniemożliwić tym funkcjom opóźnienia ściganie się z celami zastępczymi, pomijanie celów w oparciu o historię TTFT lub kompresowanie żądań zastępczych; włączenie tej opcji umożliwia skonfigurowanie zabezpieczeń, predykcyjnych pominięć TTFT i proaktywną kompresję rezerwową w celu zamiany wierności routing/request na mniejsze opóźnienia.
+Optymalizacje kombinacji z zerowym opóźnieniem są opcjonalne. Wyjechać** Optymalizacje z zerowym opóźnieniem** wyłączone, aby uniemożliwić tym funkcjom opóźnienia ściganie się z celami zastępczymi, pomijanie celów na podstawie historii TTFT lub kompresowanie żądań zastępczych; włączenie tej opcji umożliwia skonfigurowanie zabezpieczeń, predykcyjnych pominięć TTFT i proaktywną kompresję rezerwową w celu zamiany wierności routing/request na mniejsze opóźnienia.
 
-Wyłączyć** Bufor tokenów rozumowania** gdy dostawcy wyższego szczebla wymagają ścisłych limitów `max_tokens` / `maxOutputTokens`. Po włączeniu routing kombinowany dodaje rezerwę modelu wnioskowania tylko dla modeli ze znanym limitem wyjściowym i pozostawia limit tokenów klienta niezmieniony, gdy wartość bezpiecznego buforowania przekroczy ten limit. Jeśli limit klienta jest już powyżej znanego limitu, OmniRoute ogranicza go do tego limitu przed wysłaniem żądania nadrzędnego.
+Wyłączyć** Bufor tokenów rozumowania** gdy dostawcy wyższego szczebla wymagają ścisłych limitów `max_tokens` / `maxOutputTokens`. Po włączeniu routing kombinowany dodaje zapas modelu rozumowania tylko dla modeli ze znanym limitem wyjściowym i pozostawia limit tokenów klienta niezmieniony, gdy wartość bezpiecznego buforowania przekroczy ten limit. Jeśli limit klienta jest już powyżej znanego limitu, OmniRoute ogranicza go do tego limitu przed wysłaniem żądania nadrzędnego.
 
 ---
 
@@ -1330,34 +1330,36 @@ Pełny katalog punktów końcowych oraz schematy żądań i odpowiedzi znajdzies
 
 ---
 
-## 💻 Wewnętrzny interfejs CLI
+## 💻 Wewnętrzne CLI
 
-OmniRoute zawiera wewnętrzny interfejs CLI (`omniroute …`) służący do konfiguracji, diagnostyki i sterowania środowiskiem uruchomieniowym. Jest on **niezależny od strony „Narzędzia CLI” w panelu**, która konfiguruje narzędzia CLI innych firm (Claude Code, Cursor, Codex, Cline, …), aby mogły komunikować się z OmniRoute.
+OmniRoute dostarcza wewnętrzne CLI (`omniroute …`) do konfiguracji, diagnostyki i kontroli czasu działania. To jest** oddzielnie od strony „Narzędzia CLI ” na pulpicie nawigacyjnym** , który konfiguruje CLIs innej firmy (kod Claude, Cursor, Codex, Cline,…), aby mogli rozmawiać z OmniRoute.
 
 ```bash
-omniroute setup                    # Interaktywny kreator (hasło, dostawcy, kombinacje)
-omniroute setup --non-interactive  # Przyjazny dla środowisk CI
-omniroute doctor                   # Diagnostyka stanu (katalog danych, baza danych, dostawcy, porty)
-omniroute providers available      # Wyświetla obsługiwanych dostawców
-omniroute providers list           # Wyświetla skonfigurowane połączenia
-omniroute providers test <id>      # Testuje na żywo połączenie z dostawcą
-omniroute combos list              # Wyświetla kombinacje
-omniroute combos switch <name>     # Ustawia domyślną kombinację
-omniroute models                   # Wyświetla dostępne modele (--json, --search)
-omniroute keys add | list | remove # Zarządza kluczami API z poziomu terminala
-omniroute backup                   # Tworzy migawkę konfiguracji i bazy danych
-omniroute restore [<timestamp>]    # Przywraca dane z migawki
-omniroute health                   # Szczegółowy stan (bezpieczniki, pamięć podręczna, pamięć)
-omniroute quota                    # Wykorzystanie limitów dostawców
-omniroute mcp status               # Stan serwera MCP
-omniroute a2a status               # Stan serwera A2A
-omniroute tunnel list|create|stop  # Tunele Cloudflare/Tailscale/ngrok
-omniroute reset-password           # Resetuje hasło administratora
-omniroute --mcp                    # Uruchamia serwer MCP przez stdio
-omniroute --port 3000              # Uruchamia serwer na niestandardowym porcie
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-Wskazówka: połącz `omniroute doctor --json` z narzędziem monitorującym, aby otrzymywać alerty o niesprawnych połączeniach z dostawcami.
+Wskazówka: sparuj `omniroute doctor --json` z narzędziem monitorującym, aby otrzymywać powiadomienia o nieprawidłowej instalacji lokalnej. `doctor` nie testuje połączeń z dostawcami; użyj do tego `omniroute providers test <id>`.
 
 ---
 

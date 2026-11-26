@@ -504,10 +504,11 @@ Domeinstatusdatabase (SQLite):
 
 ## 5) Cloudsynchronisatie
 
-- Initialisatie van de scheduler: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- Initiële planner: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
 - Periodieke taak: `src/shared/services/cloudSyncScheduler.ts`
 - Periodieke taak: `src/shared/services/modelSyncScheduler.ts`
-- Beheerroute: `src/app/api/sync/cloud/route.ts`
+- Periodieke taak (opt-in per verbinding): `src/shared/services/modelHealthCheckScheduler.ts` — test de modellen van een verbinding, verbergt automatisch fouten en herstelt alleen wat het zelf verborgen heeft (`src/lib/db/modelHealthAutoHidden.ts`)
+- Controleroute: `src/app/api/sync/cloud/route.ts`
 
 ## Levenscyclus van een verzoek (`/v1/chat/completions`)
 

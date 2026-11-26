@@ -431,7 +431,7 @@ omniroute autostart disable
 ### פריסת VPS
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -513,8 +513,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -870,7 +870,7 @@ curl http://localhost:20128/api/models/catalog
 | **P2C (כוח של שתי אפשרויות)** | בוחר 2 חשבונות אקראיים ומסלולים לאחד הבריא יותר — מאזנת עומס עם מודעות לבריאות    |
 | **אַקרַאִי**                  | בוחר באקראי חשבון עבור כל בקשה באמצעות ערבוב פישר-ייטס                            |
 | **הכי פחות בשימוש**           | מסלולים לחשבון עם חותמת הזמן הישנה ביותר `lastUsedAt`, חלוקת התנועה באופן שווה    |
-| **עלות אופטימלית**            | מנתב לחשבון עם ערך העדיפות הנמוך ביותר, אופטימיזציה לספקים בעלות הנמוכה ביותר     |
+| **אופטימיזציית עלות**         | מנתב לחשבון עם ערך העדיפות הנמוך ביותר, אופטימיזציה לספקים בעלות הנמוכה ביותר     |
 
 **אסטרטגיות משולבות ואוטומטיות מתקדמות** (ניתן להגדרה לכל שילוב או באמצעות קידומות `auto/*` — ראה [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
@@ -882,8 +882,8 @@ curl http://localhost:20128/api/models/catalog
 - `least-used` `cost-optimized`
 - `auto` — מונע על פני כל המועמדים
 - `lkgp` (הספק האחרון הידוע הטוב) — מצמיד את הספק האחרון שהצליח, ואז חוזר לכללים
-- `context-optimized` — בוחר את המודל עם חלון ההקשר הפנוי הגדול ביותר
-- `context-relay` — מרשתת דגמים עם הקשר ארוך להמשך פניות
+- `context-optimized` — מנסה תחילה את המודל עם חלון ההקשר הידוע הגדול ביותר
+- סדר עדיפות `context-relay` — בתוספת סיכום מסירה כאשר השיחה עוברת לחשבון אחר
 
 #### כותרת הפעלה דביקה חיצונית
 
@@ -1011,7 +1011,7 @@ OmniRoute מיישמת חוסן ברמת הספק עם חמישה מרכיבים
 
    מגבלות תעריף `429` בהיקף חיבור נשארות** קירור חיבור** ואל תספרו כלפי מפסק הספק.
 
-   מצב זמן הריצה של מפסק הספק מוצג** לוח מחוונים → Health** רַק.
+   מצב זמן הריצה של מפסק הספק מוצג** לוח המחוונים → Health** רַק.
 
 4. **המתן להתקררות** — אם כל חיבור מועמד כבר מתקרר, OmniRoute יכול לחכות להתקררות המוקדמת ביותר ולנסות שוב את אותה בקשת לקוח באופן אוטומטי.
 
@@ -1061,13 +1061,13 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | **כְּלָלִי**                | כלי אחסון מערכת, התנהגות ברירת מחדל, נראות מנהרת נקודת קצה                                                                                                                     |
 | **הוֹפָעָה**                | פקדי ערכת נושא (light/dark/system), נראות של סרגל צד, החלפת חלוניות עבור כרטיסי מנהרת Cloudflare/Tailscale/ngrok                                                               |
-| **AI**                      | תקציב חשיבה (מעבר / רצועה אוטומטית / מותאם אישית / אדפטיבי — see [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), הנחיית מערכת גלובלית, סטטיסטיקות מטמון פקודות                   |
+| **AI**                      | תקציב חשיבה (מעבר / הסרה אוטומטית / מותאם אישית / אדפטיבי — see [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), הנחיית מערכת גלובלית, סטטיסטיקות מטמון פקודות                    |
 | **בִּטָחוֹן**               | הגדרות Login/Password, בקרת גישה של IP, אישור API עבור `/models`, חסימת ספקים, שמירה על הזרקה מיידית                                                                           |
 | **ניתוב**                   | אסטרטגיית ניתוב גלובלית (Fill First / Round Robin / P2C / Random / Least Used / Cost Optimized), כינויים של מודלים עם תווים כלליים לחיפוש, שרשראות חוזרות, ברירות מחדל משולבות |
 | **כּוֹשֵׁר הִתאוֹשְׁשׁוּת** | תור לבקש, צינון חיבור, תצורת מפסק ספק והתנהגות המתנה לקירור                                                                                                                    |
 | **מִתקַדֵם**                | תצורת פרוקסי גלובלית (HTTP/SOCKS5), עקיפות פרוקסי לכל ספק                                                                                                                      |
 
-General כבר לא משכפל רישום והערות מטמון לקריאה בלבד. הגדרות שמירה ואופטימיזציה של מסדי נתונים נמשכות באמצעות `/api/settings/database`; ניקוי מטמון ידני משתמש `DELETE /api/cache`. מכסי שורות של בקשות ופרוקסי יומן פרוקסי נשלטות על ידי `CALL_LOGS_TABLE_MAX_ROWS` ו- `PROXY_LOGS_TABLE_MAX_ROWS`.
+General כבר לא משכפל רישום והערות מטמון לקריאה בלבד. הגדרות שמירה ואופטימיזציה של מסדי נתונים נמשכות באמצעות `/api/settings/database`; ניקוי מטמון ידני משתמש `DELETE /api/cache`. מכסי שורה של בקשות ו-proxy יומן נשלטים על ידי `CALL_LOGS_TABLE_MAX_ROWS` ו- `PROXY_LOGS_TABLE_MAX_ROWS`.
 
 ---
 
@@ -1152,11 +1152,11 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 | **עגול-רובין**        | מסתובב בין דגמים ברצף                                      |
 | **עֲדִיפוּת**         | תמיד מנסה את הדגם הראשון; נופל רק על טעות                  |
 | **אַקרַאִי**          | בוחר דגם אקראי מהשילוב עבור כל בקשה                        |
-| **מְשׁוּקלָל**        | מסלולים באופן פרופורציונלי על סמך משקלים שהוקצו לכל דגם    |
+| **מְשׁוּקלָל**        | מסלולים באופן פרופורציונלי על בסיס משקלים שהוקצו לכל דגם   |
 | **הכי פחות בשימוש**   | מנתב למודל עם הכי מעט בקשות אחרונות (משתמש במדדים משולבים) |
 | **אופטימיזציית עלות** | מסלולים לדגם הזול ביותר הזמין (משתמש בטבלת תמחור)          |
 
-ניתן להגדיר ברירת מחדל משולבת גלובלית** לוח המחוונים → הגדרות → ניתוב → Combo ברירת מחדל** . תפוגת יעד משולבת יורשת את הזמן הקצוב של הבקשה הנוכחית כברירת מחדל. לְהִשְׁתַמֵשׁ** פסק זמן יעד (שניות)** על ברירות מחדל משולבות או משולבות בודדות רק כאשר מגבלה קצרה יותר לכל יעד אמורה להפעיל ירידה מהירה יותר.
+ניתן להגדיר ברירת מחדל משולבת גלובלית** לוח המחוונים → הגדרות → ניתוב → Combo ברירת מחדל** . תפוגת יעד משולבת יורשת את הזמן הקצוב של הבקשה הנוכחית כברירת מחדל. לְהִשְׁתַמֵשׁ** פסק זמן יעד (שניות)** ברירות מחדל משולבות או משולבות בודדות רק כאשר מגבלה קצרה יותר לכל יעד אמורה להפעיל ירידה מהירה יותר.
 
 אופטימיזציות משולבות של אפס השהייה הן הסכמה. לַעֲזוֹב** אופטימיזציות של אפס השהייה** מושבתת כדי למנוע מתכונות האחזור הללו להתחרות במטרות חילופיות, לדלג על יעדים המבוססים על היסטוריית TTFT או לדחיסת בקשות חזרה; הפעלתו מאפשרת גידור מוגדר, דילוגים חזויים TTFT ודחיסת fallback פרואקטיבית כדי לסחור בנאמנות routing/request עבור חביון זנב נמוך יותר.
 
@@ -1166,7 +1166,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 ### לוח מחוונים לבריאות
 
-גישה דרך** לוח מחוונים → Health** . סקירת תקינות מערכת בזמן אמת עם 6 כרטיסים:
+גישה דרך** לוח המחוונים → Health** . סקירת תקינות מערכת בזמן אמת עם 6 כרטיסים:
 
 | כַּרְטִיס          | מה זה מראה                                                             |
 | ------------------ | ---------------------------------------------------------------------- |
@@ -1330,34 +1330,36 @@ curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUT
 
 ---
 
-## 💻 CLI פנימי
+## 💻 פנימי CLI
 
-OmniRoute כולל CLI פנימי (`omniroute …`) להגדרה, לאבחון ולשליטה בזמן ריצה. הוא **נפרד מהעמוד "כלי CLI" בלוח הבקרה**, שמגדיר כלי CLI של צד שלישי (Claude Code, Cursor, Codex, Cline, …) כדי שיוכלו לתקשר עם OmniRoute.
+OmniRoute שולחת CLI פנימי (`omniroute …`) להגדרה, אבחון ובקרת זמן ריצה. זֶהוּ** נפרד מהדף "כלי CLI " בלוח המחוונים** , שמגדיר CLIs של צד שלישי (Claude Code, Cursor, Codex, Cline, ...) כך שהם יכולים לדבר עם OmniRoute.
 
 ```bash
-omniroute setup                    # אשף אינטראקטיבי (סיסמה, ספקים, שילובים)
-omniroute setup --non-interactive  # מתאים ל-CI
-omniroute doctor                   # אבחון תקינות (ספריית נתונים, מסד נתונים, ספקים, יציאות)
-omniroute providers available      # הצגת הספקים הנתמכים
-omniroute providers list           # הצגת החיבורים המוגדרים
-omniroute providers test <id>      # בדיקה חיה של חיבור לספק
-omniroute combos list              # הצגת שילובים
-omniroute combos switch <name>     # הגדרת שילוב ברירת המחדל
-omniroute models                   # הצגת המודלים הזמינים (--json, --search)
-omniroute keys add | list | remove # ניהול מפתחות API מהמסוף
-omniroute backup                   # יצירת תמונת מצב של התצורה ומסד הנתונים
-omniroute restore [<timestamp>]    # שחזור מתמונת מצב
-omniroute health                   # מצב תקינות מפורט (מנתקי מעגל, מטמון, זיכרון)
-omniroute quota                    # שימוש במכסת הספק
-omniroute mcp status               # מצב שרת MCP
-omniroute a2a status               # מצב שרת A2A
-omniroute tunnel list|create|stop  # מנהרות Cloudflare/Tailscale/ngrok
-omniroute reset-password           # איפוס סיסמת מנהל המערכת
-omniroute --mcp                    # הפעלת שרת MCP דרך stdio
-omniroute --port 3000              # הפעלת השרת ביציאה מותאמת אישית
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-טיפ: שלבו את `omniroute doctor --json` עם כלי הניטור שלכם כדי לקבל התראות על חיבורים לא תקינים לספקים.
+טיפ: חבר `omniroute doctor --json` לכלי הניטור שלך כדי להתריע על התקנה מקומית פגומה. `doctor` לא בודק חיבורי ספקים; השתמש `omniroute providers test <id>` בשביל זה.
 
 ---
 

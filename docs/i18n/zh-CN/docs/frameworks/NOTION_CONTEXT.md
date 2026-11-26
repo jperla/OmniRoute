@@ -57,42 +57,31 @@ curl -X DELETE http://localhost:20128/api/settings/notion
 OmniRoute 会保存令牌并立即运行一次仅返回 1 条结果的测试搜索；如果 Notion
 返回错误对象，则会清除令牌，并使该调用以 `400` 失败。
 
-## MCP 工具（6 个）
+## MCP工具 (6)
 
-定义于 `open-sse/mcp-server/tools/notionTools.ts`。令牌会在调用时通过
-`getNotionToken()` 解析；如果未配置令牌，该工具会抛出
-`"未配置 Notion 集成令牌。请在“设置”>“上下文源”中进行设置。"`
+在`open-sse/mcp-server/tools/notionTools.ts`中定义。令牌在调用时通过`getNotionToken()`解析；如果没有配置，该工具会抛出`"Notion integration token not configured. Set it in Settings > Context Sources."`
 
-| 工具                         | 作用域         | 描述                                                                   |
-| ---------------------------- | -------------- | ---------------------------------------------------------------------- |
-| `notion_search`              | `read:notion`  | 按文本查询搜索页面和数据库（返回标题、ID 和 URL）。支持分页。          |
-| `notion_get_page`            | `read:notion`  | 按页面 ID 获取页面内容和元数据。                                       |
-| `notion_list_block_children` | `read:notion`  | 列出区块或页面的所有子区块（区块树）。支持分页。                       |
-| `notion_query_database`      | `read:notion`  | 使用可选的 `filter` + `sorts`（Notion API 格式）查询数据库。支持分页。 |
-| `notion_get_database`        | `read:notion`  | 按 ID 获取数据库的架构/元数据。                                        |
-| `notion_append_blocks`       | `write:notion` | 向现有区块或页面追加子区块（每次请求最多 100 个区块）。                |
+| 工具                         | 范围           | 描述                                                                |
+| ---------------------------- | -------------- | ------------------------------------------------------------------- |
+| `notion_search`              | `read:notion`  | 通过文本查询搜索页面和数据库（返回标题、 IDs、 URLs）。已分页。     |
+| `notion_get_page`            | `read:notion`  | 通过ID获取页面的内容和元数据。                                      |
+| `notion_list_block_children` | `read:notion`  | 列出块或页面（块树）的所有块子级。已分页。                          |
+| `notion_query_database`      | `read:notion`  | 使用可选的`filter` + `sorts` （Notion API格式）查询数据库。已分页。 |
+| `notion_get_database`        | `read:notion`  | 通过ID获取数据库的schema/metadata 。                                |
+| `notion_append_blocks`       | `write:notion` | 将块子级附加到现有块或页面（每个请求最多 100 个块）。               |
 
 ### 输入参数
 
-- `notion_search` — `query`（1–500 个字符）、`pageSize`（1–100，默认值为 20）、
-  `startCursor`（可选）。
-- `notion_get_page` — `pageId`（32 个字符的十六进制字符串或 UUID）。
-- `notion_list_block_children` — `blockId`、`pageSize`（1–100，默认值为 50）、
-  `startCursor`（可选）。
-- `notion_query_database` — `databaseId`、`filter`（可选，Notion 筛选器格式）、
-  `sorts`（可选数组）、`pageSize`（1–100，默认值为 50）、`startCursor`（可选）。
-- `notion_get_database` — `databaseId`。
-- `notion_append_blocks` — `blockId`、`children`（区块对象数组）、
-  `after`（可选位置）。
+- `notion_search` — `query` （1–500 个字符）、 `pageSize` （1–100，默认 20）、 `startCursor` （可选）。
+- `notion_get_page` — `pageId` （32 个字符的十六进制或UUID）。
+- `notion_list_block_children` — `blockId`、 `pageSize` （1–100，默认 50）、 `startCursor` （可选）。
+- `notion_query_database` — `databaseId`、 `filter` （可选， Notion过滤器格式）、 `sorts` （可选数组）、 `pageSize` （1–100，默认 50）、 `startCursor` （可选）。
+- `notion_get_database` — `databaseId`.
+- `notion_append_blocks` — `blockId`、 `children` （块对象数组）、 `after` （可选位置）。
 
-### 作用域
+### 范围
 
-读取工具需要 `read:notion`，写入工具需要 `write:notion`。
-仅当 `OMNIROUTE_MCP_ENFORCE_SCOPES=true` 时，
-`open-sse/mcp-server/server.ts` 中的 `withScopeEnforcement()` 才会强制执行作用域；
-调用方允许使用的作用域来自 `OMNIROUTE_MCP_SCOPES`（以逗号分隔），或来自
-已通过身份验证的 API 密钥的作用域上下文。有关完整的作用域模型，请参阅
-[MCP-SERVER.md](./MCP-SERVER.md)。
+读取工具需要`read:notion` ，写入工具需要`write:notion`。当`OMNIROUTE_MCP_ENFORCE_SCOPES=true`时，范围由`withScopeEnforcement()`在`open-sse/mcp-server/server.ts`中强制执行，并且始终适用于API密钥缺少`manage`/`admin`的HTTP/SSE调用者；调用者允许的范围来自`OMNIROUTE_MCP_SCOPES` （逗号分隔）或经过身份验证的API密钥的范围上下文。有关完整范围模型，请参阅[MCP-SERVER.md](./MCP-SERVER.md) 。
 
 ## 端点
 

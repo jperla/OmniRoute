@@ -512,11 +512,12 @@ Domenetilstandsdatabase (SQLite):
 - Autentisering ved WebSocket-håndtrykk: `src/lib/ws/handshake.ts` — validerer WS-oppgraderingsforespørsler via API-nøkkel eller øktinformasjonskapsel
 - WebSocket-autentisering for kontrollpanelet i sanntid: `src/server/ws/liveServer.ts` — sideprosessen (port `LIVE_WS_PORT`) godtar en øktinformasjonskapsel for kontrollpanelet eller en Bearer-API-nøkkel med administrasjonsomfang (`manage`/`admin`); nøkler som kun gjelder inferens, avvises. Det interne publiseringsendepunktet `POST /__omniroute_event` godtar bare lokale tilbakekoblingsnoder når ingen proxy-hopp-header (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`) er til stede
 
-## 5) Skysynkronisering
+## 5) Cloud Sync
 
-- Initialisering av planlegger: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- Planlegger init: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
 - Periodisk oppgave: `src/shared/services/cloudSyncScheduler.ts`
 - Periodisk oppgave: `src/shared/services/modelSyncScheduler.ts`
+- Periodisk oppgave (opt-in per tilkobling): `src/shared/services/modelHealthCheckScheduler.ts` — tester en tilkoblings modeller, skjuler feil automatisk og gjenoppretter bare det den gjemte selv (`src/lib/db/modelHealthAutoHidden.ts`)
 - Kontrollrute: `src/app/api/sync/cloud/route.ts`
 
 ## Forespørselens livssyklus (`/v1/chat/completions`)

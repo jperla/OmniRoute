@@ -432,7 +432,7 @@ Kun et enää tarvitse OmniRoute, tarjoamme kaksi nopeaa skriptiä puhtaaseen po
 ### VPS käyttöönotto
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -514,8 +514,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -883,8 +883,8 @@ Määritä kautta** Dashboard → Asetukset → Reititys** . Kojelauta näyttä�
 - `least-used` ja `cost-optimized`
 - `auto` — tulosperusteinen kaikkien ehdokkaiden osalta
 - `lkgp` (Last Known Good Provider) — kiinnittää viimeiseen onnistuneeseen tarjoajaan ja palaa sitten sääntöihin
-- `context-optimized` — valitsee mallin, jolla on suurin vapaa konteksti-ikkuna
-- `context-relay` — ketjuttaa pitkän kontekstin malleja seurantakäännöksiin
+- `context-optimized` — yrittää ensin mallia, jossa on suurin tunnettu kontekstiikkuna
+- `context-relay` — prioriteettijärjestys sekä yhteysvastuun yhteenveto, kun keskustelu siirtyy toiselle tilille
 
 #### Ulkoinen Sticky Session Header
 
@@ -1078,7 +1078,7 @@ Pääsy kautta** Kojelaudan → kustannukset** .
 
 | Tab             | Tarkoitus                                                                                                        |
 | --------------- | ---------------------------------------------------------------------------------------------------------------- |
-| **Budjetti**    | Aseta kulutusrajat API -avainta kohti daily/weekly/monthly -budjeteilla ja reaaliaikaisella seurannalla          |
+| **Budjetti**    | Aseta kulutusrajat API avainta kohti daily/weekly/monthly -budjeteilla ja reaaliaikaisella seurannalla           |
 | **Hinnoittelu** | Tarkastele ja muokkaa mallin hinnoittelumerkintöjä: — hinta 1 000 input/output -tunnusta palveluntarjoajaa kohti |
 
 ```bash
@@ -1155,7 +1155,7 @@ Määritä yhdistelmätasapainotus** Dashboard → Combos → Create/Edit → St
 | **Satunnainen**        | Valitsee satunnaisen mallin yhdistelmästä jokaiselle pyynnölle                         |
 | **Painotettu**         | Reitit suhteellisesti mallikohtaisten painojen perusteella                             |
 | **Vähiten käytetty**   | Reitit malliin, jolla on vähiten viimeaikaisia pyyntöjä (käyttää yhdistelmämittareita) |
-| **Kustannusoptimoitu** | Reitit halvimpaan saatavilla olevaan malliin (käyttää hintataulukkoa)                  |
+| **Kustannusoptimoitu** | Reitit halvimpaan saatavilla olevaan malliin (käyttää hinnoittelutaulukkoa)            |
 
 Yleiset yhdistelmäoletukset voidaan asettaa** Dashboard → Settings → Routing → Combo Oletukset** . Yhdistelmäkohteen aikakatkaisut perivät oletuksena nykyisen pyynnön aikakatkaisun. Käyttää** Tavoitteen aikakatkaisu (sekuntia)** yhdistelmä-oletusasetuksissa tai yksittäisessä yhdistelmässä vain silloin, kun lyhyemmän kohdekohtaisen rajan pitäisi käynnistää nopeampi palautus.
 
@@ -1333,32 +1333,34 @@ Täydellinen päätepisteluettelo sekä pyyntö- ja vastausskeemat ovat tiedosto
 
 ## 💻 Sisäinen CLI
 
-OmniRoute sisältää sisäisen CLI:n (`omniroute …`) määritystä, diagnostiikkaa ja suorituksenaikaista hallintaa varten. Tämä on **erillinen hallintapaneelin CLI-työkalut-sivusta**, jolla määritetään kolmansien osapuolten CLI-työkaluja (Claude Code, Cursor, Codex, Cline, …), jotta ne voivat viestiä OmniRouten kanssa.
+OmniRoute toimittaa sisäisen CLI (`omniroute …`) asennukseen, diagnostiikkaan ja ajonaikaiseen hallintaan. Tämä on** erillään kojelaudan "CLI Tools" -sivulta** , joka määrittää kolmannen osapuolen CLIs (Claude Code, Cursor, Codex, Cline, …), jotta he voivat keskustella OmniRoute kanssa.
 
 ```bash
-omniroute setup                    # Ohjattu interaktiivinen määritys (salasana, palveluntarjoajat, yhdistelmät)
-omniroute setup --non-interactive  # Soveltuu CI-ympäristöihin
-omniroute doctor                   # Kuntodiagnostiikka (datahakemisto, tietokanta, palveluntarjoajat, portit)
-omniroute providers available      # Luettele tuetut palveluntarjoajat
-omniroute providers list           # Luettele määritetyt yhteydet
-omniroute providers test <id>      # Testaa palveluntarjoajayhteys reaaliaikaisesti
-omniroute combos list              # Luettele yhdistelmät
-omniroute combos switch <name>     # Aseta oletusyhdistelmä
-omniroute models                   # Luettele käytettävissä olevat mallit (--json, --search)
-omniroute keys add | list | remove # Hallitse API-avaimia päätteestä
-omniroute backup                   # Luo tilannevedos määrityksistä ja tietokannasta
-omniroute restore [<timestamp>]    # Palauta tilannevedoksesta
-omniroute health                   # Yksityiskohtaiset kuntotiedot (katkaisimet, välimuisti, muisti)
-omniroute quota                    # Palveluntarjoajien kiintiöiden käyttö
-omniroute mcp status               # MCP-palvelimen tila
-omniroute a2a status               # A2A-palvelimen tila
-omniroute tunnel list|create|stop  # Cloudflare-/Tailscale-/ngrok-tunnelit
-omniroute reset-password           # Nollaa järjestelmänvalvojan salasana
-omniroute --mcp                    # Käynnistä MCP-palvelin stdio-yhteydellä
-omniroute --port 3000              # Käynnistä palvelin mukautetussa portissa
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-Vinkki: yhdistä `omniroute doctor --json` valvontatyökaluusi, jotta saat hälytyksen epäkuntoisista palveluntarjoajayhteyksistä.
+Vinkki: yhdistä `omniroute doctor --json` valvontatyökaluun varoittaaksesi viallisesta paikallisesta asennuksesta. `doctor` ei testaa palveluntarjoajan yhteyksiä; käytä siihen `omniroute providers test <id>` tä.
 
 ---
 

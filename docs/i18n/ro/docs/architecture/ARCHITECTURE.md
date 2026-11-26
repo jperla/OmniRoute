@@ -512,12 +512,13 @@ Baza de date pentru starea domeniului (SQLite):
 - Autentificarea negocierii WebSocket: `src/lib/ws/handshake.ts` — validează cererile de upgrade WS printr-o cheie API sau un cookie de sesiune
 - Autentificare WebSocket pentru panoul de control în timp real: `src/server/ws/liveServer.ts` — serviciul auxiliar (portul `LIVE_WS_PORT`) acceptă un cookie de sesiune al panoului de control sau o cheie API Bearer care deține un domeniu de administrare (`manage`/`admin`); cheile destinate exclusiv inferenței sunt refuzate. Endpointul său intern de publicare `POST /__omniroute_event` acceptă participanți loopback numai atunci când nu este prezent niciun antet pentru saltul prin proxy (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`)
 
-## 5) Sincronizare în cloud
+## 5) Cloud Sync
 
-- Inițializarea planificatorului: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- Scheduler init: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
 - Sarcină periodică: `src/shared/services/cloudSyncScheduler.ts`
 - Sarcină periodică: `src/shared/services/modelSyncScheduler.ts`
-- Rută de control: `src/app/api/sync/cloud/route.ts`
+- Sarcină periodică (opt-in per conexiune): `src/shared/services/modelHealthCheckScheduler.ts` — testează modelele unei conexiuni, ascunde automat eșecurile și restaurează doar ceea ce a ascuns ea însăși (`src/lib/db/modelHealthAutoHidden.ts`)
+- Calea de control: `src/app/api/sync/cloud/route.ts`
 
 ## Ciclul de viață al cererii (`/v1/chat/completions`)
 

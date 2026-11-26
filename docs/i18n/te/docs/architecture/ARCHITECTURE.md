@@ -514,10 +514,11 @@ FSM పరివర్తనాలు ఆటో కాంబో యొక్క 
 
 ## 5) క్లౌడ్ సింక్
 
-- షెడ్యూలర్ ప్రారంభీకరణ: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
-- ఆవర్తన టాస్క్: `src/shared/services/cloudSyncScheduler.ts`
-- ఆవర్తన టాస్క్: `src/shared/services/modelSyncScheduler.ts`
-- నియంత్రణ రూట్: `src/app/api/sync/cloud/route.ts`
+- షెడ్యూలర్ init: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- ఆవర్తన పని: `src/shared/services/cloudSyncScheduler.ts`
+- ఆవర్తన పని: `src/shared/services/modelSyncScheduler.ts`
+- ఆవర్తన విధి (కనెక్షన్కి ఎంపిక): `src/shared/services/modelHealthCheckScheduler.ts` — కనెక్షన్ యొక్క నమూనాలను పరీక్షిస్తుంది, వైఫల్యాలను స్వయంచాలకంగా దాచిపెడుతుంది మరియు అది దాచిన వాటిని మాత్రమే పునరుద్ధరిస్తుంది (`src/lib/db/modelHealthAutoHidden.ts`)
+- నియంత్రణ మార్గం: `src/app/api/sync/cloud/route.ts`
 
 ## అభ్యర్థన జీవితచక్రం (`/v1/chat/completions`)
 

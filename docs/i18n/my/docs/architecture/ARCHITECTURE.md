@@ -504,10 +504,11 @@ Domain အခြေအနေ DB (SQLite):
 
 ## 5) Cloud Sync
 
-- Scheduler စတင်ပြင်ဆင်ခြင်း: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
-- အချိန်မှန် လုပ်ဆောင်သည့် task: `src/shared/services/cloudSyncScheduler.ts`
-- အချိန်မှန် လုပ်ဆောင်သည့် task: `src/shared/services/modelSyncScheduler.ts`
-- ထိန်းချုပ်ရေး route: `src/app/api/sync/cloud/route.ts`
+- စီစဉ်သူ init- `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- အချိန်အခါအလိုက် လုပ်ဆောင်စရာ- `src/shared/services/cloudSyncScheduler.ts`
+- အချိန်အခါအလိုက် လုပ်ဆောင်စရာ- `src/shared/services/modelSyncScheduler.ts`
+- အချိန်အပိုင်းအခြားအလိုက် လုပ်ဆောင်စရာ (ချိတ်ဆက်မှုတစ်ခုအတွက် ရွေးချယ်မှု)- `src/shared/services/modelHealthCheckScheduler.ts` — ချိတ်ဆက်မှု၏ မော်ဒယ်များကို စမ်းသပ်သည်၊ ပျက်ကွက်မှုများကို အလိုအလျောက်ဖျောက်ကာ ၎င်းကိုယ်တိုင်ဝှက်ထားသောအရာကိုသာ ပြန်လည်ရယူသည် (`src/lib/db/modelHealthAutoHidden.ts`)
+- ထိန်းချုပ်ရေးလမ်းကြောင်း- `src/app/api/sync/cloud/route.ts`
 
 ## တောင်းဆိုမှု အသက်တာစက်ဝန်း (`/v1/chat/completions`)
 

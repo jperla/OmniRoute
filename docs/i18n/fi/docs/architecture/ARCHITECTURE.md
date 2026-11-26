@@ -512,12 +512,13 @@ Toimialueen tilatietokanta (SQLite):
 - WebSocket-kättelyn todennus: `src/lib/ws/handshake.ts` — validoi WS-päivityspyynnöt API-avaimella tai istuntoevästeellä
 - Hallintapaneelin reaaliaikainen WebSocket-todennus: `src/server/ws/liveServer.ts` — sivupalvelu (portti `LIVE_WS_PORT`) hyväksyy hallintapaneelin istuntoevästeen tai Bearer-API-avaimen, jolla on hallintaoikeusalue (`manage`/`admin`); pelkästään päättelyyn tarkoitetut avaimet hylätään. Sen sisäinen `POST /__omniroute_event`-julkaisupäätepiste hyväksyy loopback-vertaisilta tulevat pyynnöt vain, kun välityshypystä kertovaa otsaketta (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`) ei ole läsnä
 
-## 5) Pilvisynkronointi
+## 5) Cloud Sync
 
-- Ajastimen alustus: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- Aikataulun aloitus: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
 - Säännöllinen tehtävä: `src/shared/services/cloudSyncScheduler.ts`
 - Säännöllinen tehtävä: `src/shared/services/modelSyncScheduler.ts`
-- Hallintareitti: `src/app/api/sync/cloud/route.ts`
+- Säännöllinen tehtävä (opt-in per yhteys): `src/shared/services/modelHealthCheckScheduler.ts` — testaa yhteyden mallit, piilottaa viat automaattisesti ja palauttaa vain sen, minkä se piilotti itse (`src/lib/db/modelHealthAutoHidden.ts`)
+- Ohjausreitti: `src/app/api/sync/cloud/route.ts`
 
 ## Pyynnön elinkaari (`/v1/chat/completions`)
 

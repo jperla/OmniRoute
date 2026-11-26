@@ -419,7 +419,7 @@ omniroute autostart disable
 ### VPS部署
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -501,8 +501,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -599,7 +599,7 @@ post_install() {
 | `API_KEY_SECRET`                        | _（自动生成）_           | HMAC生成的API密钥的秘密—在第一次运行时自动生成并保存到`server.env`                       |
 | `REQUIRE_API_KEY`                       | `false`                  | 在`/v1/*`上强制执行 Bearer API密钥                                                       |
 | `ALLOW_API_KEY_REVEAL`                  | `false`                  | 允许经过身份验证的仪表板用户按需显示完整存储的API密钥值                                  |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | 缓存的提供者限制数据的服务器端刷新节奏； UI刷新按钮仍会触发手动同步                      |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | Server-side refresh cadence for cached Provider Limits data; UI刷新按钮仍会触发手动同步  |
 | `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | 在writes/import/restore之前禁用自动SQLite快照；手动备份仍然有效                          |
 | `APP_LOG_TO_FILE`                       | `true`                   | 启用应用程序和审核日志输出到磁盘                                                         |
 | `AUTH_COOKIE_SECURE`                    | `false`                  | 强制`Secure` auth cookie（在HTTPS反向代理后面）                                          |
@@ -870,12 +870,12 @@ curl http://localhost:20128/api/models/catalog
 - `least-used`和`cost-optimized`
 - `auto` —对所有考生进行分数驱动
 - `lkgp` （最后一个已知的良好提供者） —固定到最后一个成功的提供者，然后退回到规则
-- `context-optimized` —选择具有最大自由上下文窗口的模型
-- `context-relay` —链接长上下文模型以进行后续回合
+- `context-optimized` —首先尝试具有最大已知上下文窗口的模型
+- `context-relay` —优先顺序加上对话转移到另一个帐户时的移交摘要
 
 #### 外部粘性会话标头
 
-对于外部会话关联（例如，反向代理后面的Claude Code/Codex代理），发送：
+对于外部会话亲和性（例如，反向代理后面的Claude Code/Codex代理），发送：
 
 ```http
 X-Session-Id: your-session-key
@@ -1052,7 +1052,7 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 | **AI**     | 思考预算（直通/自动条带/自定义/自适应—参见[THINKING_BUDGET](./THINKING_BUDGET.md) ）、全局系统提示、提示缓存统计 |
 | **安全**   | Login/Password设置、 IP访问控制、 `/models`的API身份验证、提供者阻止、提示注入防护                               |
 | **路由**   | 全局路由策略（首先填充/循环/ P2C /随机/最少使用/成本优化）、通配符模型别名、后备链、组合默认值                   |
-| **弹力**   | 请求队列、连接冷却、提供者断路器配置和等待冷却行为                                                               |
+| **弹力**   | 请求队列、连接冷却、提供程序断路器配置和等待冷却行为                                                             |
 | **先进的** | 全局代理配置（HTTP/SOCKS5），每个提供者代理覆盖                                                                  |
 
 一般不再重复只读日志记录和缓存注释。数据库保留和优化设置通过`/api/settings/database`持久化；手动缓存清除使用`DELETE /api/cache`。请求和代理日志行上限由`CALL_LOGS_TABLE_MAX_ROWS`和`PROXY_LOGS_TABLE_MAX_ROWS`控制。
@@ -1078,11 +1078,11 @@ curl -X POST http://localhost:20128/api/usage/budget \
 curl http://localhost:20128/api/usage/budget
 ```
 
-**成本跟踪：**每个请求都会记录令牌的使用情况并使用定价表计算成本。查看细分**仪表板→用法**按提供者、型号和API密钥。
+**Cost Tracking:**每个请求都会记录令牌的使用情况并使用定价表计算成本。查看细分**仪表板→用法**按提供者、型号和API密钥。
 
 ---
 
-### 音频转录
+### Audio Transcription
 
 OmniRoute通过 OpenAI 兼容端点支持音频转录：
 
@@ -1106,8 +1106,8 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 - `groq/` （Groq Whisper Turbo）
 - `deepgram/` （诺瓦家族）
 - `assemblyai/`
-- `nvidia/` （鹦鹉、金丝雀）
-- `huggingface/` （耳语变体）
+- `nvidia/` (Parakeet, Canary)
+- `huggingface/` (whisper variants)
 - `qwen/`
 
 **文本转语音 (`POST /v1/audio/speech`)**提供者：
@@ -1135,20 +1135,20 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 配置每个组合的平衡**仪表板→组合→ Create/Edit →策略**。
 
-| 战略           | 描述                                     |
-| -------------- | ---------------------------------------- |
-| **循环赛**     | 按顺序轮换模型                           |
-| **优先事项**   | 总是尝试第一个模型；仅在错误时回退       |
-| **随机的**     | 为每个请求从组合中选择一个随机模型       |
-| **加权**       | 根据每个模型分配的权重按比例路由         |
-| **最少使用的** | 路由到最近请求最少的模型（使用组合指标） |
-| **成本优化**   | 通往最便宜可用型号的路线（使用定价表）   |
+| 战略               | 描述                                          |
+| ------------------ | --------------------------------------------- |
+| **循环赛**         | 按顺序轮换模型                                |
+| **优先事项**       | 总是尝试第一个模型； falls back only on error |
+| **随机的**         | 为每个请求从组合中选择一个随机模型            |
+| **Weighted**       | 根据每个模型分配的权重按比例路由              |
+| **Least-Used**     | 路由到最近请求最少的模型（使用组合指标）      |
+| **Cost-Optimized** | 通往最便宜可用型号的路线（使用定价表）        |
 
-全局组合默认值可以在**仪表板→设置→路由→组合默认值**。默认情况下，组合目标超时继承当前请求超时。使用**目标超时（秒）**仅当较短的每个目标限制应触发更快的回退时，才在组合默认值或单个组合上。
+全局组合默认值可以在**仪表板→设置→路由→组合默认值**。默认情况下，组合目标超时继承当前请求超时。使用**Target timeout (seconds)**仅当较短的每个目标限制应触发更快的回退时，才在组合默认值或单个组合上。
 
-零延迟组合优化是可选的。离开**零延迟优化**禁用以防止这些延迟功能与回退目标竞争、根据TTFT历史跳过目标或压缩回退请求；启用它允许配置对冲、预测TTFT跳过和主动回退压缩，以牺牲routing/request保真度来降低尾部延迟。
+零延迟组合优化是可选的。离开**零延迟优化**disabled to prevent these latency features from racing fallback targets, skipping targets based on TTFT history, or compressing fallback requests;启用它允许配置对冲、预测TTFT跳过和主动回退压缩，以牺牲routing/request保真度来降低尾部延迟。
 
-禁用**推理令牌缓冲区**当上游提供者需要严格的`max_tokens` / `maxOutputTokens`限制时。启用后，组合路由只会为具有已知输出上限的模型添加推理模型余量，并在安全缓冲值超过该上限时保持客户端令牌限制不变。如果客户端限制已经高于已知上限， OmniRoute在发送上游请求之前将其限制到该上限。
+禁用**推理令牌缓冲区**当上游提供者需要严格的`max_tokens` / `maxOutputTokens`限制时。 When enabled, combo routing only adds reasoning-model headroom for models with a known output cap and leaves the client token limit unchanged when the safe buffered value would exceed that cap.如果客户端限制已经高于已知上限， OmniRoute在发送上游请求之前将其限制到该上限。
 
 ---
 
@@ -1318,34 +1318,36 @@ curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUT
 
 ---
 
-## 💻 内部 CLI
+## 💻内部CLI
 
-OmniRoute 提供了一个内部 CLI（`omniroute …`），用于设置、诊断和运行时控制。它与仪表板中的“CLI 工具”页面**相互独立**；该页面用于配置第三方 CLI（Claude Code、Cursor、Codex、Cline 等），使其能够与 OmniRoute 通信。
+OmniRoute附带一个内部CLI (`omniroute …`)，用于设置、诊断和运行时控制。这是**与仪表板中的“CLI Tools”页面分开**，它配置第三方CLIs （Claude代码、 Cursor、 Codex、 Cline，...），以便他们可以与OmniRoute对话。
 
 ```bash
-omniroute setup                    # 交互式向导（密码、提供者、组合）
-omniroute setup --non-interactive  # 适用于 CI
-omniroute doctor                   # 健康诊断（数据目录、数据库、提供者、端口）
-omniroute providers available      # 列出支持的提供者
-omniroute providers list           # 列出已配置的连接
-omniroute providers test <id>      # 实时测试提供者连接
-omniroute combos list              # 列出组合
-omniroute combos switch <name>     # 设置默认组合
-omniroute models                   # 列出可用模型（--json、--search）
-omniroute keys add | list | remove # 从终端管理 API 密钥
-omniroute backup                   # 创建配置和数据库快照
-omniroute restore [<timestamp>]    # 从快照恢复
-omniroute health                   # 详细健康状态（断路器、缓存、内存）
-omniroute quota                    # 提供者配额使用情况
-omniroute mcp status               # MCP 服务器状态
-omniroute a2a status               # A2A 服务器状态
-omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok 隧道
-omniroute reset-password           # 重置管理员密码
-omniroute --mcp                    # 通过 stdio 启动 MCP 服务器
-omniroute --port 3000              # 在自定义端口上启动服务器
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-提示：将 `omniroute doctor --json` 与监控工具配合使用，以便在提供者连接不健康时发出警报。
+提示：将`omniroute doctor --json`与您的监控工具配对，以针对损坏的本地安装发出警报。 `doctor`不测试提供者连接；使用`omniroute providers test <id>`来实现这一点。
 
 ---
 

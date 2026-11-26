@@ -373,7 +373,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI स्वचालित रूपमा `~/.omniroute/.env` वा `./.env` बाट `.env` लोड गर्छ। कार्य निर्देशिकामा `./.env` कुञ्जीहरूको छोटो अनुमति सूची मात्र सेट गर्न सक्छ (`REQUIRE_API_KEY`, लोकेल, समय क्षेत्र र रङ सेटिङहरू, पोर्टहरू होइन); सबै कुरा `~/.omniroute/.env` मा राख्नुहोस्। [CLI सुरुवात सम्झौताहरू](CLI-LAUNCH-CONTRACTS.md#working-directory-env) हेर्नुहोस्।
+CLI स्वचालित रूपमा `~/.omniroute/.env` वा `./.env` बाट `.env` लोड गर्दछ। कार्य निर्देशिकामा `./.env` कुञ्जीहरूको छोटो अनुमति सूची मात्र सेट गर्न सक्छ (`REQUIRE_API_KEY`, लोकेल, समय क्षेत्र र रङ सेटिङहरू, पोर्टहरू होइन); सबै कुरा `~/.omniroute/.env` मा राख्नुहोस्। [CLI सुरुवात सम्झौताहरू](CLI-LAUNCH-CONTRACTS.md#working-directory-env) हेर्नुहोस्।
 
 ### ट्रे मोड
 
@@ -432,7 +432,7 @@ omniroute autostart disable
 ### VPS तैनाती
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -499,7 +499,7 @@ CLI बाइनरीहरूसँग होस्ट-एकीकृत म�
 
 ### शून्य Linux (xbps-src)
 
-Void Linux प्रयोगकर्ताहरूले `xbps-src` क्रस-कम्पाइलेशन ढाँचा प्रयोग गरेर नेटिभ रूपमा OmniRoute प्याकेज र स्थापना गर्न सक्छन्। यसले आवश्यक `better-sqlite3` नेटिभ बाइन्डिङहरू सहित Node.js स्ट्यान्डअलोन निर्माणलाई स्वचालित बनाउँछ।
+Void Linux प्रयोगकर्ताहरूले `xbps-src` क्रस-कम्पाइलेशन ढाँचा प्रयोग गरेर नेटिभ रूपमा OmniRoute प्याकेज र स्थापना गर्न सक्छन्। यसले Node.js स्ट्यान्डअलोन निर्माणलाई आवश्यक `better-sqlite3` नेटिभ बाइन्डिङहरू सहित स्वचालित बनाउँछ।
 
 <details>
 <summary><b>xbps-src टेम्प्लेट हेर्नुहोस्</b></summary>
@@ -514,8 +514,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -705,7 +705,7 @@ curl -X POST http://localhost:20128/api/provider-models \
 
 नोट:
 
-- OpenRouter र OpenAI/Anthropic-compatible प्रदायकहरू बाट व्यवस्थित छन्** उपलब्ध मोडेलहरू** मात्र। म्यानुअल थप्नुहोस्, आयात गर्नुहोस्, र एउटै उपलब्ध मोडेल सूचीमा सबै भूमि स्वत सिंक गर्नुहोस्, त्यसैले ती प्रदायकहरूको लागि कुनै छुट्टै अनुकूलन मोडेलहरू खण्ड छैन।
+- OpenRouter र OpenAI/Anthropic-compatible प्रदायकहरू बाट व्यवस्थित छन्** उपलब्ध मोडेलहरू** मात्र। एउटै उपलब्ध मोडेल सूचीमा सबै भूमि म्यानुअल थप्नुहोस्, आयात गर्नुहोस्, र स्वत: सिंक गर्नुहोस्, त्यसैले ती प्रदायकहरूको लागि कुनै छुट्टै अनुकूलन मोडेल खण्ड छैन।
 - द** अनुकूलन मोडेलहरू** खण्ड व्यवस्थित उपलब्ध-मोडेल आयातहरू पर्दाफाश नगर्ने प्रदायकहरूको लागि हो।
 
 ### अनुकूलन OpenAI-कम्प्याटिबल प्रदायकहरू
@@ -735,7 +735,7 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 यी कुञ्जीहरू जडानको `providerSpecificData` मा जान्छन् (उदाहरणका लागि `PUT /api/providers/{id}` मार्फत):
 
-- `toolNameMaxLength` (पूर्णांक, 1–1024) — OpenAI च्याट-ढाँचा मिल्दो जडानहरूको लागि जसको गेटवेले लामो उपकरण नामहरू अस्वीकार गर्दछ। लामो नामहरू छोटो उपनामको रूपमा पठाइन्छ र प्रतिक्रियामा पुनर्स्थापित गरिन्छ। OpenAI, Azure OpenAI, Azure AI फाउन्ड्री, Mistral, NVIDIA, OpenCode Zen/Go र Muse Code पहिले नै कुनै सेटिङ बिना 64 वर्णहरू भन्दा बढी नामहरू छन्। जडान मानले Azure OpenAI / Azure AI फाउन्ड्री पूर्वनिर्धारित (एक कडा गेटवे पछाडि Azure जडान) लाई प्रतिस्थापन गर्दछ र अनुकूल अनुकूल नोडको लागि सीमा सेट गर्दछ; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go र Muse Code ले तिनीहरूको रजिस्ट्री सीमा राख्छ र यसलाई बेवास्ता गर्दछ।
+- `toolNameMaxLength` (पूर्णांक, 1–1024) — OpenAI च्याट-ढाँचा मिल्दो जडानहरूको लागि जसको गेटवेले लामो उपकरण नामहरू अस्वीकार गर्दछ। लामो नामहरू छोटो उपनामको रूपमा पठाइन्छ र प्रतिक्रियामा पुनर्स्थापित गरिन्छ। OpenAI, Azure OpenAI, Azure AI फाउन्ड्री, Mistral, NVIDIA, OpenCode Zen/Go र Muse Code पहिले नै कुनै सेटिङ बिना 64 वर्णहरू भन्दा बढी नामहरू छन्। जडान मानले Azure OpenAI / Azure AI फाउन्ड्री पूर्वनिर्धारित (एक कडा गेटवे पछाडि Azure जडान) लाई प्रतिस्थापन गर्दछ र अनुकूल अनुकूल नोडको लागि सीमा सेट गर्दछ; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go र Muse Code ले आफ्नो रजिस्ट्री सीमा राख्छ र यसलाई बेवास्ता गर्छ।
 - `quotaEndpoint` — गेटवेको quota/credits अन्त्य बिन्दु, ड्यासबोर्ड कोटा स्ट्रिप र कोटा-सचेत मार्गका लागि पढ्नुहोस्। OpenAI- र Anthropic-compatible जडानहरूमा काम गर्दछ; पूर्ण आकार `open-sse/services/usage/openaiCompatible.ts` मा दस्तावेज गरिएको छ।
 
 ```json
@@ -815,18 +815,18 @@ curl http://localhost:20128/api/models/catalog
 
 ### क्लाउड सिंक
 
-- सिंक प्रदायकहरू, कम्बोहरू, र यन्त्रहरूमा सेटिङहरू
+- यन्त्रहरूमा प्रदायकहरू, कम्बोहरू र सेटिङहरू सिंक गर्नुहोस्
 - टाइमआउट + फेल-फास्टको साथ स्वचालित पृष्ठभूमि सिंक
 - उत्पादनमा सर्भर-साइड `NEXT_PUBLIC_BASE_URL`/`NEXT_PUBLIC_CLOUD_URL` लाई प्राथमिकता दिनुहोस्
 
 ### Cloudflare द्रुत टनेल
 
 - मा उपलब्ध छ** ड्यासबोर्ड → अन्त्य बिन्दुहरू** Docker र अन्य स्व-होस्ट गरिएको परिनियोजनका लागि
-- एउटा अस्थायी `https://*.trycloudflare.com` URL सिर्जना गर्दछ जुन तपाइँको हालको OpenAI- संगत `/v1` अन्त्य बिन्दुमा फर्वार्ड गर्दछ।
+- एउटा अस्थायी `https://*.trycloudflare.com` URL सिर्जना गर्दछ जुन तपाइँको हालको OpenAI- संगत `/v1` अन्त्य बिन्दुमा फर्वार्ड गर्दछ
 - पहिले आवश्यक हुँदा मात्र `cloudflared` स्थापनाहरू सक्षम गर्नुहोस्; पछि पुन: सुरु हुन्छ उही व्यवस्थित बाइनरी पुन: प्रयोग
 - द्रुत टनेलहरू OmniRoute वा कन्टेनर पुन: सुरु भएपछि स्वत: पुनर्स्थापित हुँदैनन्; आवश्यक पर्दा ड्यासबोर्डबाट तिनीहरूलाई पुन: सक्षम गर्नुहोस्
 - टनेल URLs क्षणिक हो र तपाईंले सुरुङ stop/start हरेक पटक परिवर्तन हुन्छ
-- बन्द कन्टेनरहरूमा शोर QUIC UDP बफर चेतावनीहरूबाट बच्न HTTP/2 यातायातमा द्रुत टनेलहरू पूर्वनिर्धारित रूपमा व्यवस्थित गरियो
+- सीमित कन्टेनरहरूमा शोर QUIC UDP बफर चेतावनीहरूबाट बच्नको लागि HTTP/2 यातायातमा व्यवस्थित द्रुत टनेलहरू पूर्वनिर्धारित
 - यदि तपाइँ व्यवस्थित यातायात विकल्प ओभरराइड गर्न चाहनुहुन्छ भने `CLOUDFLARED_PROTOCOL=quic` वा `auto` सेट गर्नुहोस्
 - यदि तपाइँ व्यवस्थित डाउनलोडको सट्टा पूर्वस्थापित `cloudflared` बाइनरी प्रयोग गर्न चाहनुहुन्छ भने `CLOUDFLARED_BIN` सेट गर्नुहोस्।
 - Cloudflare क्विक टनेल, Tailscale फनेल, र ngrok टनेल प्यानलहरू देखाउन वा लुकाउन सकिन्छ** सेटिङहरू → उपस्थिति** । प्यानल लुकाउँदा चलिरहेको सुरुङ रोकिदैन।
@@ -883,8 +883,8 @@ curl http://localhost:20128/api/models/catalog
 - `least-used` र `cost-optimized`
 - सबै उम्मेद्वारहरूमा`auto` — स्कोर-संचालित
 - `lkgp` (अन्तिम ज्ञात राम्रो प्रदायक) — अन्तिम सफल प्रदायकमा पिन गर्छ, त्यसपछि नियमहरूमा फर्किन्छ।
-- `context-optimized` — सबैभन्दा ठूलो नि: शुल्क सन्दर्भ विन्डोको साथ मोडेल छान्छ
-- `context-relay` — फलो-अप पालोहरूको लागि लामो-सन्दर्भ मोडेलहरू चेन गर्दछ
+- `context-optimized` — ले सबैभन्दा ठूलो ज्ञात सन्दर्भ सञ्झ्यालको साथ मोडेल प्रयास गर्दछ
+- `context-relay` — प्राथमिकता आदेश र कुराकानी अर्को खातामा सर्दा ह्यान्डअफ सारांश
 
 #### बाह्य स्टिकी सत्र हेडर
 
@@ -1018,7 +1018,7 @@ OmniRoute पाँच कम्पोनेन्टहरूसँग प्�
 
 5. **मूल्य सीमा स्वतः पत्ता लगाउने** — जब अपस्ट्रिम प्रदायकहरूले स्पष्ट प्रतीक्षा विन्डोहरू फर्काउँछन्, ती संकेतहरूले स्थानीय जडान कूलडाउनलाई ओभरराइड गर्दछ जब सेटिङ सक्षम हुन्छ।
 
-**प्रो सुझाव:** प्रयोग गर्नुहोस्** स्वास्थ्य** आउटेज पछि प्रत्यक्ष प्रदायक ब्रेकरहरू निरीक्षण गर्न र रिसेट गर्न पृष्ठ। लचिलोपन पृष्ठले मात्र कन्फिगरेसन परिवर्तन गर्दछ।
+**प्रो टिप:** प्रयोग गर्नुहोस्** स्वास्थ्य** आउटेज पछि प्रत्यक्ष प्रदायक ब्रेकरहरू निरीक्षण गर्न र रिसेट गर्न पृष्ठ। लचिलोपन पृष्ठले मात्र कन्फिगरेसन परिवर्तन गर्दछ।
 
 ---
 
@@ -1153,7 +1153,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 | **राउन्ड-रोबिन**   | क्रमिक रूपमा मोडेलहरू मार्फत घुमाउँछ                                              |
 | **प्राथमिकता**     | सधैं पहिलो मोडेल कोसिस गर्छ; गल्तीमा मात्र फर्किन्छ                               |
 | **अनियमित**        | प्रत्येक अनुरोधको लागि कम्बोबाट अनियमित मोडेल छान्छ                               |
-| **भारित**          | प्रति मोडेल तोकिएको तौलमा आधारित समानुपातिक मार्गहरू                              |
+| **भारित**          | प्रति मोडेल तोकिएको तौलमा आधारित मार्गहरू समानुपातिक रूपमा                        |
 | **कम प्रयोग हुने** | सबैभन्दा थोरै अनुरोधहरू भएका मोडेलका लागि मार्गहरू (कम्बो मेट्रिक्स प्रयोग गर्दछ) |
 | **लागत-अनुकूलित**  | सस्तो उपलब्ध मोडेलका लागि मार्गहरू (मूल्य निर्धारण तालिका प्रयोग गर्दछ)           |
 
@@ -1161,7 +1161,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 शून्य विलम्बता कम्बो अनुकूलनहरू अप्ट-इन छन्। छोड्नुहोस्** शून्य विलम्बता अनुकूलन** रेसिङ फलब्याक लक्ष्यहरू, TTFT इतिहासमा आधारित लक्ष्यहरू छोड्न, वा फलब्याक अनुरोधहरू कम्प्रेस गर्नबाट यी विलम्बता सुविधाहरू रोक्न असक्षम गरिएको छ; यसलाई सक्षम गर्नाले कन्फिगर गरिएको हेजिङ, प्रेडिक्टिव TTFT स्किपहरू, र प्रोएक्टिभ फलब्याक कम्प्रेसनलाई कम टेल विलम्बताको लागि routing/request फिडेलिटी ट्रेड गर्न अनुमति दिन्छ।
 
-असक्षम गर्नुहोस्** तर्क टोकन बफर** जब अपस्ट्रीम प्रदायकहरूलाई कडा `max_tokens` / `maxOutputTokens` सीमा चाहिन्छ। सक्षम हुँदा, कम्बो राउटिङले ज्ञात आउटपुट क्याप भएका मोडेलहरूका लागि तर्क-मोडल हेडरूम मात्र थप्छ र सुरक्षित बफर गरिएको मान त्यो क्याप नाघिसकेको अवस्थामा क्लाइन्ट टोकन सीमालाई अपरिवर्तित छोड्छ। यदि क्लाइन्ट सीमा पहिले नै ज्ञात क्याप भन्दा माथि छ भने, OmniRoute अपस्ट्रीम अनुरोध पठाउनु अघि यसलाई त्यो क्यापमा तल राख्छ।
+असक्षम पार्नुहोस्** तर्क टोकन बफर** जब अपस्ट्रीम प्रदायकहरूलाई कडा `max_tokens` / `maxOutputTokens` सीमा चाहिन्छ। सक्षम हुँदा, कम्बो राउटिङले ज्ञात आउटपुट क्याप भएका मोडेलहरूका लागि तर्क-मोडल हेडरूम मात्र थप्छ र सुरक्षित बफर गरिएको मान त्यो क्याप नाघिसकेको अवस्थामा क्लाइन्ट टोकन सीमालाई अपरिवर्तित छोड्छ। यदि क्लाइन्ट सीमा पहिले नै ज्ञात क्याप भन्दा माथि छ भने, OmniRoute अपस्ट्रीम अनुरोध पठाउनु अघि यसलाई त्यो क्यापमा तल राख्छ।
 
 ---
 
@@ -1178,7 +1178,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 | **हस्ताक्षर क्यास**        | डुप्लिकेशन क्यास तथ्याङ्कहरू (सक्रिय कुञ्जीहरू, हिट दर)  |
 | **विलम्बता टेलिमेट्री**    | प्रति प्रदायक p50/p95/p99 विलम्बता एकत्रीकरण             |
 
-**प्रो सुझाव:** स्वास्थ्य पृष्ठ प्रत्येक 10 सेकेन्डमा स्वत: रिफ्रेस हुन्छ। कुन प्रदायकहरूले समस्याहरू भोगिरहेका छन् भनेर पहिचान गर्न सर्किट ब्रेकर कार्ड प्रयोग गर्नुहोस्।
+**प्रो टिप:** स्वास्थ्य पृष्ठ प्रत्येक 10 सेकेन्डमा स्वत: रिफ्रेस हुन्छ। कुन प्रदायकहरूले समस्याहरू भोगिरहेका छन् भनेर पहिचान गर्न सर्किट ब्रेकर कार्ड प्रयोग गर्नुहोस्।
 
 ---
 
@@ -1333,32 +1333,34 @@ curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUT
 
 ## 💻 आन्तरिक CLI
 
-OmniRoute ले सेटअप, निदान र रनटाइम नियन्त्रणका लागि आन्तरिक CLI (`omniroute …`) उपलब्ध गराउँछ। यो ड्यासबोर्डको **"CLI Tools" पृष्ठभन्दा अलग हो**, जसले तेस्रो-पक्षीय CLI हरू (Claude Code, Cursor, Codex, Cline, …) लाई OmniRoute सँग सञ्चार गर्न सक्ने गरी कन्फिगर गर्छ।
+OmniRoute सेटअप, निदान, र रनटाइम नियन्त्रणको लागि आन्तरिक CLI (`omniroute …`) पठाउँछ। यो हो** ड्यासबोर्डमा "CLI उपकरणहरू" पृष्ठबाट अलग गर्नुहोस्** , जसले तेस्रो-पक्ष CLIs कन्फिगर गर्दछ (Claude Code, Cursor, Codex, Cline, …) ताकि तिनीहरू OmniRoute मा कुरा गर्न सक्छन्।
 
 ```bash
-omniroute setup                    # अन्तरक्रियात्मक विजार्ड (पासवर्ड, प्रदायकहरू, संयोजनहरू)
-omniroute setup --non-interactive  # CI-अनुकूल
-omniroute doctor                   # स्वास्थ्य निदान (डेटा डाइरेक्टरी, DB, प्रदायकहरू, पोर्टहरू)
-omniroute providers available      # समर्थित प्रदायकहरूको सूची
-omniroute providers list           # कन्फिगर गरिएका जडानहरूको सूची
-omniroute providers test <id>      # प्रदायक जडानको प्रत्यक्ष परीक्षण
-omniroute combos list              # संयोजनहरूको सूची
-omniroute combos switch <name>     # पूर्वनिर्धारित संयोजन सेट गर्नुहोस्
-omniroute models                   # उपलब्ध मोडेलहरूको सूची (--json, --search)
-omniroute keys add | list | remove # टर्मिनलबाट API कुञ्जीहरू व्यवस्थापन गर्नुहोस्
-omniroute backup                   # कन्फिगरेसन + DB को स्न्यापसट
-omniroute restore [<timestamp>]    # स्न्यापसटबाट पुनर्स्थापना गर्नुहोस्
-omniroute health                   # विस्तृत स्वास्थ्य जानकारी (ब्रेकरहरू, क्यास, मेमोरी)
-omniroute quota                    # प्रदायक कोटा प्रयोग
-omniroute mcp status               # MCP सर्भरको स्थिति
-omniroute a2a status               # A2A सर्भरको स्थिति
-omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok टनेलहरू
-omniroute reset-password           # प्रशासकको पासवर्ड रिसेट गर्नुहोस्
-omniroute --mcp                    # stdio मार्फत MCP सर्भर सुरु गर्नुहोस्
-omniroute --port 3000              # आफूले रोजेको पोर्टमा सर्भर सुरु गर्नुहोस्
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-सुझाव: अस्वस्थ प्रदायक जडानहरूबारे चेतावनी प्राप्त गर्न `omniroute doctor --json` लाई आफ्नो निगरानी उपकरणसँग जोड्नुहोस्।
+सुझाव: बिग्रिएको स्थानीय स्थापनामा सचेत गराउनको लागि तपाईंको निगरानी उपकरणसँग `omniroute doctor --json` जोडा गर्नुहोस्। `doctor` प्रदायक जडानहरू परीक्षण गर्दैन; यसको लागि `omniroute providers test <id>` प्रयोग गर्नुहोस्।
 
 ---
 

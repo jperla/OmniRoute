@@ -512,12 +512,13 @@ FSM ሽግግሮች ወደ አውቶ ኮምቦ ነጥብ ይመገባሉ፣ ር�
 - የWebSocket handshake ማረጋገጫ፦ `src/lib/ws/handshake.ts` — የWS upgrade ጥያቄዎችን በAPI ቁልፍ ወይም በsession cookie ያረጋግጣል
 - የቀጥታ ዳሽቦርድ WebSocket ማረጋገጫ፦ `src/server/ws/liveServer.ts` — sidecar-ው (port `LIVE_WS_PORT`) የዳሽቦርድ session cookie ወይም የአስተዳደር ወሰን (`manage`/`admin`) ያለውን Bearer API ቁልፍ ይቀበላል፤ ለinference ብቻ የሚያገለግሉ ቁልፎች ውድቅ ይደረጋሉ። ውስጣዊው `POST /__omniroute_event` የአታሚ endpoint ምንም የproxy-hop header (`x-forwarded-*`፣ `x-real-ip`፣ `forwarded`፣ `via`) በማይኖርበት ጊዜ loopback peersን ብቻ ይቀበላል
 
-## 5) የCloud ማመሳሰል
+## 5) ክላውድ ማመሳሰል
 
-- የScheduler ማስጀመሪያ፦ `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
-- ወቅታዊ ተግባር፦ `src/shared/services/cloudSyncScheduler.ts`
-- ወቅታዊ ተግባር፦ `src/shared/services/modelSyncScheduler.ts`
-- የመቆጣጠሪያ route፦ `src/app/api/sync/cloud/route.ts`
+- መርሐግብር አስያዥ init `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- ወቅታዊ ተግባር `src/shared/services/cloudSyncScheduler.ts`
+- ወቅታዊ ተግባር `src/shared/services/modelSyncScheduler.ts`
+- ወቅታዊ ተግባር (በአንድ ግኑኝነት መርጦ መግባት)፡- `src/shared/services/modelHealthCheckScheduler.ts` — የግንኙነት ሞዴሎችን ይፈትሻል፣ አለመሳካቶችን በራስ ሰር ይደብቃል እና የደበቀውን ብቻ ወደነበረበት ይመልሳል (`src/lib/db/modelHealthAutoHidden.ts`)
+- የመቆጣጠሪያ መንገድ: `src/app/api/sync/cloud/route.ts`
 
 ## የጥያቄ የሕይወት ዑደት (`/v1/chat/completions`)
 

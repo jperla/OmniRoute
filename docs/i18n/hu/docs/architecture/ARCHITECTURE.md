@@ -502,12 +502,13 @@ Tartományi állapotadatbázis (SQLite):
 - WebSocket-kézfogás hitelesítése: `src/lib/ws/handshake.ts` — API-kulccsal vagy munkamenet-cookie-val ellenőrzi a WS-frissítési kéréseket
 - Az élő vezérlőpult WebSocket-hitelesítése: `src/server/ws/liveServer.ts` — a segédfolyamat (a `LIVE_WS_PORT` porton) vezérlőpult-munkamenet-cookie-t vagy kezelési hatókörrel (`manage`/`admin`) rendelkező Bearer API-kulcsot fogad el; a csak következtetésre jogosító kulcsokat elutasítja. A belső `POST /__omniroute_event` közzétevő végpont csak akkor fogad el loopback társtól érkező kapcsolatot, ha nincs jelen proxyugrást jelző fejléc (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`)
 
-## 5) Felhőalapú szinkronizálás
+## 5) Cloud Sync
 
-- Ütemező inicializálása: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- Ütemező init: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
 - Időszakos feladat: `src/shared/services/cloudSyncScheduler.ts`
 - Időszakos feladat: `src/shared/services/modelSyncScheduler.ts`
-- Vezérlési útvonal: `src/app/api/sync/cloud/route.ts`
+- Időszakos feladat (opt-in csatlakozásonként): `src/shared/services/modelHealthCheckScheduler.ts` — teszteli a kapcsolat modelljeit, automatikusan elrejti a hibákat, és csak azt állítja vissza, amit elrejtett (`src/lib/db/modelHealthAutoHidden.ts`)
+- Irányítási útvonal: `src/app/api/sync/cloud/route.ts`
 
 ## Kérés életciklusa (`/v1/chat/completions`)
 

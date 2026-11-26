@@ -512,12 +512,13 @@ Baza stanja domena (SQLite):
 - Аутентификација WebSocket руковања: `src/lib/ws/handshake.ts` — проверава захтеве за WS надоградњу путем API кључа или колачића сесије
 - WebSocket аутентификација контролне табле уживо: `src/server/ws/liveServer.ts` — пратећи процес (порт `LIVE_WS_PORT`) прихвата колачић сесије контролне табле или Bearer API кључ са управљачким опсегом (`manage`/`admin`); кључеви намењени искључиво инференцији се одбијају. Његова интерна издавачка крајња тачка `POST /__omniroute_event` прихвата повезивања са повратне петље само када није присутно заглавље прокси скока (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`)
 
-## 5) Sinhronizacija u oblaku
+## 5) Цлоуд Синц
 
-- Inicijalizacija planera: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
-- Periodični zadatak: `src/shared/services/cloudSyncScheduler.ts`
-- Periodični zadatak: `src/shared/services/modelSyncScheduler.ts`
-- Kontrolna ruta: `src/app/api/sync/cloud/route.ts`
+- Покретање планера: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- Периодични задатак: `src/shared/services/cloudSyncScheduler.ts`
+- Периодични задатак: `src/shared/services/modelSyncScheduler.ts`
+- Периодични задатак (омогућавање по вези): `src/shared/services/modelHealthCheckScheduler.ts` — тестира моделе везе, аутоматски сакрива грешке и враћа само оно што је сам сакрио (`src/lib/db/modelHealthAutoHidden.ts`)
+- Контролни пут: `src/app/api/sync/cloud/route.ts`
 
 ## Životni ciklus zahteva (`/v1/chat/completions`)
 

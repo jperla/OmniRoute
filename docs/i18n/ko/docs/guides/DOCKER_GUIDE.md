@@ -9,21 +9,22 @@
 ## 목차
 
 - [빠른 실행](#quick-run)
-- [환경 파일 사용](#with-environment-file)
-- [Docker Compose](#docker-compose)
+- [환경 파일 포함](#with-environment-file)
+- [Docker 작성](#docker-compose)
 - [사용 가능한 프로필](#available-profiles)
-- [OmniRoute가 Docker에서 실행될 때 호스트 CLI 도구 구성](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
+- [용기 경화](#container-hardening)
+- [OmniRoute Docker 에서 실행될 때 호스트 CLI 도구 구성](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
 - [Redis 사이드카](#redis-sidecar)
-- [프로덕션 Compose](#production-compose)
-- [Dockerfile 스테이지](#dockerfile-stages)
-- [중요 환경 변수](#critical-environment-variables)
-- [Caddy를 사용하는 Docker Compose(HTTPS)](#docker-compose-with-caddy-https-auto-tls)
-- [Cloudflare Quick Tunnel](#cloudflare-quick-tunnel)
+- [프로덕션 작성](#production-compose)
+- [Dockerfile 단계](#dockerfile-stages)
+- [중요한 환경 변수](#critical-environment-variables)
+- [Docker 캐디로 작성(HTTPS)](#docker-compose-with-caddy-https-auto-tls)
+- [Cloudflare 빠른 터널](#cloudflare-quick-tunnel)
 - [이미지 태그](#image-tags)
-- [Docker에서 대시보드 업데이트](#dashboard-updates-in-docker)
-- [가용성: 기본 SQLite는 단일 복제본](#availability-default-sqlite-is-single-replica)
+- [Docker 의 대시보드 업데이트](#dashboard-updates-in-docker)
+- [가용성: 기본 SQLite 는 단일 복제본입니다.](#availability-default-sqlite-is-single-replica)
 - [Docker 내부의 Gemini 지역 오류](#gemini-regional-errors-inside-docker)
-- [중요 참고 사항](#important-notes)
+- [중요 사항](#important-notes)
 
 ---
 
@@ -89,6 +90,30 @@ OmniRoute는 주요 배포 형태를 위한 Compose 프로필을 제공합니다
 | `web`          | `omniroute-web`  | 브라우저가 필요한 웹 세션 공급자(`gemini-web`, `claude-web`, `claude-turnstile`)를 사용하는 경우(`runner-web` 빌드, Chromium 포함)          | `docker compose --profile web up -d`         |
 
 > 여러 프로필을 조합할 수 있습니다: `docker compose --profile cli --profile cliproxyapi up -d`.
+
+## 용기 경화
+
+`docker-compose.yml` 의 `base`, `web`, `cli` 및 `host` 앱 서비스는 `cap_drop: [ALL]` 및 `no-new-privileges:true` 보안 옵션을 사용합니다. 이미지는 루트가 아닌 사용자 `node` 로 실행되고 높은 포트에서 수신 대기하므로 Linux 기능이 필요하지 않습니다. 보안 옵션은 프로세스가 setuid 바이너리를 통해 권한을 얻는 것을 방지합니다.
+
+`cli` 프로파일만 자동 업데이트용 Docker 소켓을 마운트합니다. 보안에 대한 내용은 [이스케이프 해치: 컨테이너 자체 CLIs 구성을](#escape-hatch-configure-the-containers-own-clis-use-sparingly) 참조하세요.
+
+루트 파일 시스템은 기본적으로 쓰기 가능한 상태로 유지됩니다. `cli` 프로필은 CLI 구성을 작성하고 컨테이너의 홈 디렉터리에 캐시하며, `web` 프로필은 Chromium 세션 상태를 저장하고, Next.js 런타임은 `/app/data` 외부에 캐시를 작성할 수 있습니다.
+
+`base` 프로필을 사용하여 읽기 전용 루트 파일 시스템을 사용해 보려면 이를 `docker-compose.yml` 옆에 `docker-compose.override.yml` 로 저장하세요. Compose는 재정의를 자동으로 읽습니다.
+
+```yaml
+services:
+  omniroute-base:
+    read_only: true
+    tmpfs:
+      - /tmp
+```
+
+```bash
+docker compose --profile base up -d
+```
+
+기존 `/app/data` 마운트는 쓰기 가능한 상태로 유지됩니다. 다른 경로에 써야 할 수도 있으므로 프로덕션에서 이 재정의를 사용하기 전에 워크로드를 테스트하세요.
 
 ## OmniRoute가 Docker에서 실행될 때 호스트 CLI 도구 구성하기
 
@@ -272,7 +297,7 @@ docker build --target runner-base \
   -t omniroute:base .
 ```
 
-`webpackBuildWorker` 활성화되었으므로 `next build` 상위를 실행합니다.** 그리고** 작업자 프로세스이며 각각은 `OMNIROUTE_BUILD_MEMORY_MB` 개별적으로 존중합니다. 컨테이너 한도의 크기를 한 번이 아니라 대략 해당 값의 두 배 이상으로 조정합니다.
+`webpackBuildWorker` 활성화되었으므로 `next build` 상위를 실행합니다.** 그리고** 작업자 프로세스이며 각각은 `OMNIROUTE_BUILD_MEMORY_MB` 개별적으로 존중합니다. 컨테이너 한도 크기를 한 번이 아니라 대략 해당 값의 두 배 이상으로 조정합니다.
 
 이 트리에서 측정됨(`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
 
@@ -295,9 +320,9 @@ Docker 의 메모리 동작:
 
 ### 코딩 에이전트를 위한 런타임 RAM
 
-1 GiB Docker 기본값은 생산 규모가 아닌 dashboard/light-chat 층입니다. 긴 `POST /v1/responses` 본문(수백 개의 메시지, 수십 개의 도구)은 압축 중에 여러 개의 인메모리 그래프를 유지합니다. 두 개의 중복되는 ~ 3 MiB / ~ 750k-token 요청으로 인해 V8이 중단되었습니다.** GiB** old-space (`FATAL ERROR: Reached heap limit`) 또한 16 GiB cgroup OOM 에 도달했습니다. [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849) 참조하세요.
+1 GiB Docker 기본값은 프로덕션 크기가 아닌 dashboard/light-chat 층입니다. 긴 `POST /v1/responses` 본문(수백 개의 메시지, 수십 개의 도구)은 압축 중에 여러 개의 인메모리 그래프를 유지합니다. 두 개의 중복되는 ~ 3 MiB / ~ 750k-token 요청으로 인해 V8이 중단되었습니다.** GiB** old-space (`FATAL ERROR: Reached heap limit`) 또한 16 GiB cgroup OOM 에 도달했습니다. [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849) 참조하세요.
 
-크기** 힙 위의 cgroup `--memory`** — 기본 버퍼, SQLite 및 압축 중간 버퍼는 V8 외부에 있습니다.
+크기** 힙 위의 cgroup `--memory`** — 기본 버퍼, SQLite 및 압축 중간체는 V8 외부에 있습니다.
 
 | 작업량                               | `OMNIROUTE_MEMORY_MB`               | 컨테이너/cgroup   | 메모                                                                       |
 | ------------------------------------ | ----------------------------------- | ----------------- | -------------------------------------------------------------------------- |
@@ -582,7 +607,7 @@ sudo systemctl enable --now omniroute-update.path
 | 강제                               | 결과                                                                                                                                                                                                                                                                                     |
 | ---------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | 단일 작가                          | 하다** ~ 아니다** 동일한 SQLite 파일에 대해 여러 복제본을 실행합니다. 이는 DB 를 손상시킵니다.                                                                                                                                                                                           |
-| 재생성/다시 시작/ HEALTHCHECK 종료 | **전체 중단** 진행 중인 SSE, 대시보드 세션 및 메모리 내 상태. 연결된 모든 클라이언트가 삭제됩니다. 빈 엔드포인트 기간 동안의 새 요청은 역방향 프록시를 얻습니다.**`502 Bad Gateway: Unknown error`** , OmniRoute JSON 아님 — 클라이언트는 이를 공급자 오류와 구별할 수 없습니다(#11015). |
+| 재생성/다시 시작/ HEALTHCHECK 종료 | **전체 중단** 진행 중인 SSE, 대시보드 세션 및 메모리 내 상태. 연결된 모든 클라이언트가 삭제됩니다. 빈 엔드포인트 기간 동안의 새 요청은 역방향 프록시를 얻습니다.**`502 Bad Gateway: Unknown error`** , OmniRoute 아님 JSON — 클라이언트는 이를 공급자 오류(#11015)와 구별할 수 없습니다. |
 | `/healthz` 와 동일한 이벤트 루프   | 바쁜 카탈로그 또는 압축 틱으로 인해 프로브가 지연될 수 있습니다. 짧은 시간 초과 후 다시 시작됩니다.** 오직** 레플리카.                                                                                                                                                                   |
 
 **프로브 매트릭스** ( [Kubernetes 프로브 권장 사항](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) 참조):
@@ -593,9 +618,9 @@ sudo systemctl enable --now omniroute-update.path
 | 준비    | HTTP `GET /healthz`                                        | 바쁜 이벤트 루프를 죽은 것으로 처리하는 엄격한 시간 제한 |
 | 딥/인간 | `/api/monitoring/health`                                   | 자동화된 kubelet 활성                                    |
 
-**업그레이드:** 모든 세션이 중단될 것으로 예상합니다. 가능하다면 고객을 배출하십시오. 기본 SQLite 에는 롤링 업데이트가 없습니다. Compose `restart: unless-stopped` 와 Docker `HEALTHCHECK` 컨테이너가 비정상일 때(동일한 폭발 반경) 유일한 프로세스를 대체합니다.
+**업그레이드:** 모든 세션이 중단될 것으로 예상합니다. 가능하다면 고객을 배출하십시오. 기본 SQLite 에는 롤링 업데이트가 없습니다. Compose `restart: unless-stopped` 와 Docker `HEALTHCHECK` 컨테이너가 비정상 — 동일한 폭발 반경일 때 유일한 프로세스를 대체합니다.
 
-기성 매니페스트와 Helm 차트가 `deploy/kubernetes/` 및 `deploy/helm/omniroute/` 에 있습니다. [Kubernetes 배포 가이드를](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md) 참조하세요.
+기성 매니페스트와 Helm 차트는 `deploy/kubernetes/` 및 `deploy/helm/omniroute/` — 에 라이브로 제공되며 [Kubernetes 배포 가이드를](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md) 참조하세요.
 
 Kubernetes 스니펫** 단일 복제본** (재생성이 필요합니다. 하나의 SQLite 파일에 대해 `replicas` 발생시키지 마십시오):
 
@@ -624,9 +649,9 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop` sleep을 사용하면 kube가 SIGTERM 전에 서비스 엔드포인트를 삭제할 수 있습니다.** 새로운** 트래픽이 죽어가는 과정을 멈춥니다. 비행 중 `/v1/responses` SSE 는 헤비급 허용 임대(#11015)를 통해 최대 `SHUTDOWN_TIMEOUT_MS` (기본값 30초)까지 소모됩니다. 여전히 프로세스에 도달하는 새 요청은 `503` + `Retry-After: 5` 얻습니다. 교체가 준비될 때까지 빈 엔드포인트 간격을 다시 생성하면 하드 중단이 유지됩니다. 이는 프로브 구성 오류가 아닌 SQLite 토폴로지입니다.
+`preStop` sleep을 사용하면 kube가 SIGTERM 전에 서비스 엔드포인트를 삭제할 수 있습니다.** 새로운** 트래픽이 죽어가는 과정을 멈춥니다. 비행 중 `/v1/responses` SSE 는 중량 승인 임대(#11015)를 통해 최대 `SHUTDOWN_TIMEOUT_MS` (기본값 30초)까지 소모됩니다. 여전히 프로세스에 도달하는 새로운 요청은 `503` + `Retry-After: 5` 얻습니다. 교체가 준비될 때까지 빈 엔드포인트 간격을 다시 생성하는 것은 프로브 구성 오류가 아닌 SQLite 토폴로지인 하드 중단 — 로 유지됩니다.
 
-외부 Postgres /멀티라이터 HA 는** ~ 아니다** 문서화된 재고 경로. HA 필요한 경우 단일 복제본을 유지하거나 프로젝트에서 별도로 테스트하고 문서화한 토폴로지를 실행하세요. Postgres/MySQL 작업은 [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) 에 있습니다. 그것이 출시될 때까지, 곱셈을 지원하는 유일한 방법은** 크기가 큰** `/v1/responses` 용량은 하나의 볼륨에 있는 `replicas > 1` 아니라 N개의 독립적인 프로세스(다음 섹션)입니다.
+외부 Postgres /멀티라이터 HA 는** ~ 아니다** 문서화된 재고 경로. HA 필요한 경우 단일 복제본을 유지하거나 프로젝트에서 별도로 테스트하고 문서화한 토폴로지를 실행하세요. Postgres/MySQL 작업은 [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075) 에 있습니다. 그것이 출시될 때까지, 곱셈을 지원하는 유일한 방법은** 크기가 큰** `/v1/responses` 용량은 하나의 볼륨에 있는 `replicas > 1` 아닌 N개의 독립적인 프로세스(다음 섹션)입니다.
 
 ## 확장: N개의 독립적인 프로세스
 
@@ -636,11 +661,11 @@ spec:
 
 패시브 인스턴스는 새로 고침이 필요할 때 연결을 다시 읽고 만료되지 않은 다른 액세스 토큰만 채택합니다. 그렇지 않으면 연결이 만료되거나 비활성화되거나 새로 고침 차단 실패가 계산되지 않고 새로 고침이 비활성화됩니다. 실제 업스트림 인증 실패는 여전히 일반 실패 계산, 지수 쿨다운 및 일반 클라이언트 오류를 사용합니다. 계정 비활성화는 영구적으로 유지됩니다. 액세스 토큰이 만료되기 전에 소유자의 순환된 토큰을 동기화하거나(기본 사전 새로 고침 리드는 5분) Codex 인증 파일을 다시 가져옵니다. 수동 가져오기는 제공된 토큰을 토큰 엔드포인트에서 검증하지 않고 저장합니다. 수동 dashboard/API 새로 고침은 `409 refresh_disabled` 를 반환합니다. 새로운 OAuth 로그인은 변경되지 않습니다. [환경 참조 를](../reference/ENVIRONMENT.md#passive-codex-token-refresh) 참조하세요.
 
-원노드 프로세스는** V8 힙 1개** . 두 개의 겹치는 ~ 3 MiB / ~ 750k 토큰 코딩 에이전트 `POST /v1/responses` (RTK + Caveman)는 ~ 12 Gi (`FATAL ERROR: Reached heap limit`)에서 해당 힙을 중단하고 16 Gi cgroup을 OOM 할 수 있습니다. [#7849를](https://github.com/diegosouzapw/OmniRoute/issues/7849) 참조하세요. 해당 측정값은** 메모리 예산** 경고, 두 개의 동시 long `/v1/responses` 제품의 hard-max가 아닙니다. 헤비급 채팅 허용은 동일한 V8/cgroup 한도 — 에서 크기가 지정된 자동 파생 수집 바이트 예산(`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`)에 의해 제어됩니다. 이미 크기가 지정된 프로세스에서 이를 상향 조정하거나 기존 `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` 요청 수 한도를 설정하면 중단이 다시 발생합니다. 소규모 채팅인 `/healthz`, `/v1/models` 및 MCP 은** ~ 아니다** 그 모자에.
+원노드 프로세스는** V8 힙 1개** . 두 개의 겹치는 ~ 3 MiB / ~ 750k 토큰 코딩 에이전트 `POST /v1/responses` (RTK + Caveman)는 ~ 12 Gi (`FATAL ERROR: Reached heap limit`)에서 해당 힙을 중단하고 16 Gi cgroup을 OOM 할 수 있습니다. [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849) 참조하세요. 해당 측정값은** 메모리 예산** 경고, 두 개의 동시 long `/v1/responses` 제품의 hard-max가 아닙니다. 헤비급 채팅 허용은 동일한 V8/cgroup 상한 — 에서 크기가 지정된 자동 파생 수집 바이트 예산(`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`)에 의해 제어됩니다. 이미 크기가 지정된 프로세스에서 이를 상향 조정하거나 기존 `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` 요청 수 한도를 설정하면 중단이 다시 발생합니다. 소규모 채팅인 `/healthz`, `/v1/models` 및 MCP 는** ~ 아니다** 그 모자에.
 
 ### 단일 프로세스: 두 개 이상의 긴 `/v1/responses`
 
-에이** 건강한** 프로세스( `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` 아래의 힙, 기본값 `0.75`)** 5월** 프로세스 전체의 인플라이트 바이트 예산(`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110)에 아직 공간이 있는 경우 두 개 이상의 동시 긴 `POST /v1/responses` 실행합니다. `OMNIROUTE_CHAT_LARGE_BODY_BYTES` 이상의 본문(기본값 256 KiB)은 구조가 많은 요청과 동일한 중량 임대를 사용하고 동일한 [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` 이스케이프(`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`)를 사용합니다. 수십 개의 동시 긴 SSE 클라이언트(운영자는 종종 40~50개가 필요함)는** 메모리 예산** 질문 — 크기 힙 + primary/headroom 슬롯 + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — 엄격한 "최대 2" 제품 제한이 아닙니다. 압력이 가해진 힙은 여전히 재시도 가능한 `503` 로 인해 발생하므로 #7849가 반환되지 않습니다.
+에이** 건강한** 프로세스( `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO` 아래의 힙, 기본값 `0.75`)** 5월** 프로세스 전체의 인플라이트 바이트 예산(`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110)에 아직 공간이 있는 경우 두 개 이상의 동시 긴 `POST /v1/responses` 실행합니다. `OMNIROUTE_CHAT_LARGE_BODY_BYTES` 이상의 본문(기본값 256 KiB)은 구조가 많은 요청과 동일한 중량급 임대를 취하고 동일한 [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` 이스케이프(`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`)를 사용합니다. 수십 개의 동시 긴 SSE 클라이언트(운영자에게는 종종 40-50이 필요함)는** 메모리 예산** 질문 — 크기 힙 + primary/headroom 슬롯 + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — 엄격한 "최대 2" 제품 제한이 아닙니다. 압력이 가해진 힙은 여전히 재시도 가능한 `503` 로 인해 발생하므로 #7849 반환되지 않습니다.
 
 에게** 힙을 곱하다** (독립적인 V8 Old-Spaces)** 오늘** :
 
@@ -654,7 +679,7 @@ spec:
 
 세션-계정 친화성은 Redis 통해 공유될 수도 있습니다. 각 프로세스에 `OMNIROUTE_SESSION_AFFINITY_STORE=redis` 및 `REDIS_URL` 동일한 `REDIS_KEY_PREFIX` 및 양수 `sessionAffinityTtlMs` 설정으로 설정합니다. 핀은 해시된 사용 계정 ID를 각 프로세스의 적합한 로컬 연결로 확인하므로 ID 메타데이터가 일치하는 OAuth 계정에는 IDs 연결이 일치할 필요가 없습니다. 알려진 계정 ID는 핀 확인 및 보호 퇴거에서 모순되는 로컬 IDs 보다 우선합니다. 신원이 없는 기록(또는 신원이 없는 퇴거 호출자)은 기존 ID 가드를 유지합니다. 안정적인 사용 ID가 없는 계정에는 여전히 IDs 일치가 필요합니다. Redis 오류 또는 100ms를 초과하는 호출은 로컬 SQLite 로 대체됩니다. 각 Redis 친화성 저장소는 미해결 작업을 8로 제한하고, 가득 차면 즉시 Redis 우회하며, 호출자 최종 기한이 아닌 기본 작업이 안정될 때만 슬롯을 해제합니다. Redis 가동 중단 중에는 공유된 진실이 없습니다. 각 인스턴스는 자체 로컬 선호도로 돌아가고, 세션은 인스턴스당 한 번씩 다시 고정될 수 있으며, 인스턴스가 분기될 수 있습니다. 끈적임은 회복되면 Redis 통해 다시 수렴됩니다. 대기 시간은 폴백 이후에 도착할 수 있는 EVAL 전송이 아닌 대기 시간입니다. 라우팅 쓰기는 새로운 변이 시간 읽기가 아닌 라우팅 결정에 의해 관찰된 정확한 값을 비교합니다. 관찰된 누락 또는 SQLite 폴백 관찰은 Redis 키가 없는 것으로 비교됩니다. 사용되지 않는 핀은 하나의 CAS 에서 교체되므로 늦은 명령으로 새로운 다른 핀을 교체하거나 삭제할 수 없습니다. Redis 읽기는 원자적으로 값과 나머지 서버 TTL 반환합니다. 양수 PTTL (또는 만료 없음)는 작성자의 JSON 타임스탬프나 독자의 시계가 아닌 활성 상태를 결정합니다. 로컬 스냅샷은 남은 TTL 로컬 최종 기한에 매핑합니다. 기존 JSON 키는 읽기 가능한 상태로 유지되며 해당 원시 바이트는 CAS 에 대해 유지됩니다. Redis 응답하는 동안 유일한 진실 소스입니다. 확인된 공유 upsert, 터치 및 삭제는 로컬 항목을 제거하고 절대 설치하거나 새로 고치지 마십시오. Redis 경로의 SQLite Redis 오류, 시간 초과 또는 승인 포화, 이전과 같이 TTL 제한으로 인한 이 인스턴스 자체 폴백 결정만 보유합니다. 나중에 중단될 때 로컬 핀이 누락되면 계정이 잘못되거나 제거되는 것이 아니라 새로운 선택(프롬프트 캐시 누락 1회)이 발생합니다. 거부된 upsert는 공유 우승자와 나머지 TTL 원자적으로 반환합니다. 일반 선택은 매핑된 로컬 기한을 다시 확인하고 아직 유효한 적격 우승자를 사용하여 다른 공유 쓰기 없이 해당 계정에 대한 사용 및 로깅을 터치합니다. 사용할 수 없는 경우 선택하면 로컬 후보가 유지되고 공유 핀은 변경되지 않은 채로 유지되며 하나의 디버그 메시지가 표시됩니다. 거부된 CAS SQLite 쓰지 않습니다. Redis 오류, 시간 초과 또는 승인 포화는 대신 기존 로컬 작업을 적용합니다. 전송된 변형의 응답이 시간 초과(수락, 거부 또는 오류) 후에 도착하는 경우 동기식 정확한 직렬 값 비교 및 삭제는 바이트와 동일한 시간 초과 대체 행만 제거합니다. 비교와 삭제 사이에는 대기가 없습니다. 최신 중단 쓰기가 보존됩니다. 보호된 제거는 Redis 작동 중지된 상태에서도 실패한 계정의 자체 로컬 핀을 제거하고 공유 제거가 확인된 후 다시 정리합니다. 공유 성공은 SQLite 쓰지 않기 때문에 보류 중인 이전 공유 응답은 제거된 로컬 핀을 복원할 수 없습니다. 추후 중단 대체를 통해 계정을 다시 고정할 수 있습니다. 나중에 허용되는 공유 쓰기는 Redis 에만 존재합니다. Redis 누락은 로컬 폴백 상태를 참조하지 않습니다. 드라이버를 끈 상태에서 새로 선택한 핀은 기존의 4필드 SQLite JSON 모양을 유지합니다. Redis 라우팅만이 해시된 계정 ID를 추가합니다. 프리페치된 핀은 만료 경계에서 다시 확인됩니다. Redis 비임대 선택은 매장을 다시 읽지만 동기식 임대 계획은 여전히 프리페치와 계획(허용되는 최선의 노력 기간) 사이에 제거된 핀을 사용할 수 있습니다. 임대 커밋은 지속형 청구 후에 계정을 전환할 수 없습니다. upsert가 거부되면 해당 요청에 대해 청구된 후보만 유지하고 공유 승자는 그대로 유지되므로 인스턴스 간 합의는 해당 경로로 제한됩니다. 표의 나머지 부분은 여전히 적용됩니다. 이는 콤보 세션 고정성, 기본 Codex 턴 핀, 계정 세마포어, 잠금, 지출 한도, 구성 또는 통화 기록을 공유하지 않습니다.
 
-하드웨어: 인스턴스당 동시 long `/v1/responses` 는** 메모리 예산** 질문(힙 + inflight-byte / #10110). `N` 독립 `DATA_DIR` s는 여전히 힙을 곱합니다. 호스트 RAM "N = 8이 있는 하나의 16 Gi 포드"가 아니라 `N × cgroup` 커버해야 합니다. 하나의 SQLite 파일에 `replicas > 1` 사용하지 마십시오.
+하드웨어: 인스턴스당 동시 long `/v1/responses` 는** 메모리 예산** 질문(힙 + inflight-byte / #10110). `N` 독립 `DATA_DIR` 는 여전히 힙을 곱합니다. 호스트 RAM "N = 8이 있는 하나의 16 Gi 포드"가 아닌 `N × cgroup` 커버해야 합니다. 하나의 SQLite 파일에 `replicas > 1` 사용하지 마십시오.
 
 스케치 작성(힙 2개, 볼륨 — 아님 `deploy.replicas: 2`):
 
@@ -683,7 +708,7 @@ volumes:
   omniroute-b-data:
 ```
 
-공정 중 밀도( HTTP 분리물 압축)는 [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023) 입니다. 공유 내구성 상태의 논리적 클러스터 중 하나는 [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075) 입니다.
+공정 내 밀도( HTTP 분리물 압축)는 [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023) 입니다. 공유 내구성 상태의 논리적 클러스터 중 하나는 [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075) 입니다.
 
 ## Docker 내부의 Gemini 지역 오류
 
@@ -691,11 +716,11 @@ Google AI Studio / Gemini API FAILED_PRECONDITION 및 `User location is not supp
 
 ### 연결별 프록시를 선호하세요
 
-영향을 받는 Gemini 연결에 대해 OmniRoute 의 [연결별 프록시 구성을](../ops/PROXY_GUIDE.md#4-level-proxy-system) 사용한 다음 반복하세요.** 연결 테스트** 동일한 모델에 대한 작은 요청입니다. 이렇게 하면 라우팅 변경 범위가 해당 연결로 유지됩니다. 컨테이너에서 프록시에 연결할 수 있는지, 연결이 실제로 프록시를 선택하는지 확인하세요. 경로를 변경한다고 해서 업스트림 지역 자격이 보장되는 것은 아닙니다.
+영향을 받은 Gemini 연결에 대해 OmniRoute 의 [연결별 프록시 구성을](../ops/PROXY_GUIDE.md#4-level-proxy-system) 사용한 다음 반복하십시오.** 연결 테스트** 동일한 모델에 대한 작은 요청입니다. 이렇게 하면 라우팅 변경 범위가 해당 연결로 유지됩니다. 컨테이너에서 프록시에 연결할 수 있는지, 연결이 실제로 프록시를 선택하는지 확인하세요. 경로를 변경한다고 해서 업스트림 지역 자격이 보장되는 것은 아닙니다.
 
 ### 호스트 및 컨테이너 네트워킹 비교
 
-인증된 결과를 비교할 때 키, 모델 및 요청을 동일하게 유지하십시오. 자격 증명, 프록시 비밀번호 또는 전체 인증 헤더를 이슈에 붙여넣지 마십시오. 먼저 호스트와 컨테이너 내부에서 동일한 명령을 사용하여 OS 확인자가 제공하는 주소 계열을 검사합니다.
+인증된 결과를 비교할 때 키, 모델 및 요청을 동일하게 유지하십시오. 자격 증명, 프록시 비밀번호 또는 전체 인증 헤더를 이슈에 붙여넣지 마세요. 먼저 호스트와 컨테이너 내부에서 동일한 명령을 사용하여 OS 확인자가 제공하는 주소 계열을 검사합니다.
 
 ```bash
 node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
@@ -706,7 +731,7 @@ docker compose exec omniroute node -e 'require("node:dns").lookup("generativelan
 
 ### 호스트 수준 대안: IPv6 및 확인자 정책 작동
 
-[#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) 의 보고자는 컨테이너 IPv6 활성화하고 glibc 주소 선택을 변경하여 해당 환경에서 액세스를 복원했습니다. 이를 환경별 대안으로 취급하십시오. 확인자 기본 설정을 조정하기 전에 작업 호스트 IPv6, 컨테이너 egress/routing 및 방화벽 규칙을 확인하세요. 비공개 ULA 주소 자체로는 공개 IPv6 연결을 설정하지 않습니다.
+[#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) 의 보고자는 컨테이너 IPv6 활성화하고 glibc 주소 선택을 변경하여 해당 환경에서 액세스를 복원했습니다. 이를 환경별 대안으로 취급하십시오. 확인자 기본 설정을 조정하기 전에 작업 호스트 IPv6, 컨테이너 egress/routing 및 방화벽 규칙을 확인하세요. 비공개 ULA 주소 자체로는 공개 IPv6 연결을 설정하지 않습니다.
 
 Compose의 기본 네트워크에 이미 연결된 서비스의 경우 이 조각은 해당 네트워크에서 IPv6 활성화합니다. 나머지 서비스, 포트, 볼륨 및 구성을 유지합니다.
 
@@ -722,7 +747,7 @@ networks:
 
 이는 다음에 대한 OS 주소 선택을 변경합니다.** 해당 컨테이너의 모든 아웃바운드 트래픽** . 모든 애플리케이션이 IPv6 선택하도록 강요하지는 않습니다. 노드의 DNS 순서와 연결 선택도 중요합니다. 특히, `--dns-result-order=ipv4first` IPv4 선호하며 IPv4-only 실패에 대한 해결책은 아닙니다. [노드 DNS 순서를](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder) 참조하세요.
 
-호스트 수준 변경 후 Gemini와 다른 공급자를 다시 테스트하십시오. 롤백하려면 사용자 정의 `gai.conf` 마운트를 제거하고 이전 네트워크 구성을 복원한 후 유지 관리 기간 동안 영향을 받은 service/network 다시 생성하십시오. 네트워크를 다시 생성하면 네트워크에 연결된 다른 컨테이너가 중단될 수 있습니다. 영구 데이터 볼륨을 삭제하지 마십시오.
+호스트 수준 변경 후 Gemini 및 기타 공급자를 다시 테스트하십시오. 롤백하려면 사용자 정의 `gai.conf` 마운트를 제거하고 이전 네트워크 구성을 복원한 후 유지 관리 기간 동안 영향을 받은 service/network 다시 생성하세요. 네트워크를 다시 생성하면 네트워크에 연결된 다른 컨테이너가 중단될 수 있습니다. 영구 데이터 볼륨을 삭제하지 마십시오.
 
 ## 중요 참고 사항
 

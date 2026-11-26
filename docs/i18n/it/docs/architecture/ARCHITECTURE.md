@@ -502,12 +502,13 @@ DB dello stato dei domini (SQLite):
 - Autenticazione dell'handshake WebSocket: `src/lib/ws/handshake.ts` — convalida le richieste di upgrade WS tramite chiave API o cookie di sessione
 - Autenticazione WebSocket della dashboard in tempo reale: `src/server/ws/liveServer.ts` — il sidecar (porta `LIVE_WS_PORT`) accetta un cookie di sessione della dashboard o una chiave API Bearer con un ambito di gestione (`manage`/`admin`); le chiavi destinate esclusivamente all'inferenza vengono rifiutate. Il relativo endpoint interno di pubblicazione `POST /__omniroute_event` accetta peer di loopback solo quando non è presente alcuna intestazione relativa a passaggi attraverso proxy (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`)
 
-## 5) Sincronizzazione cloud
+## 5) Sincronizzazione nel cloud
 
 - Inizializzazione dello scheduler: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
-- Attività periodica: `src/shared/services/cloudSyncScheduler.ts`
-- Attività periodica: `src/shared/services/modelSyncScheduler.ts`
-- Route di controllo: `src/app/api/sync/cloud/route.ts`
+- Compito periodico: `src/shared/services/cloudSyncScheduler.ts`
+- Compito periodico: `src/shared/services/modelSyncScheduler.ts`
+- Attività periodica (attivazione per connessione): `src/shared/services/modelHealthCheckScheduler.ts` — testa i modelli di una connessione, nasconde automaticamente gli errori e ripristina solo ciò che ha nascosto (`src/lib/db/modelHealthAutoHidden.ts`)
+- Via di controllo: `src/app/api/sync/cloud/route.ts`
 
 ## Ciclo di vita della richiesta (`/v1/chat/completions`)
 

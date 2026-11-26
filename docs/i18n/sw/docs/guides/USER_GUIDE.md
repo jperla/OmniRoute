@@ -431,7 +431,7 @@ Wakati hauitaji tena OmniRoute, tunatoa hati mbili za haraka za uondoaji safi:
 ### VPS Upelekaji
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -513,8 +513,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -601,7 +601,7 @@ post_install() {
 | Inaweza kubadilika                      | Chaguomsingi                        | Maelezo                                                                                                                                                              |
 | --------------------------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `JWT_SECRET`                            | _(iliyotengenezwa kiotomatiki)_     | JWT ya kutia saini kwa siri — ilitolewa kiotomatiki kwa mara ya kwanza na kuendelea hadi `server.env`; iweke kwa uwazi wakati saraka ya data ni ya muda mfupi        |
-| `INITIAL_PASSWORD`                      | _(haijawekwa)_                      | Nenosiri la kwanza la kuingia. usakinishaji wa npm/source huanza na `CHANGEME`: ubadilishe. Haijawekwa: mchawi wa kuabiri                                            |
+| `INITIAL_PASSWORD`                      | _(haijawekwa)_                      | Nenosiri la kwanza la kuingia. usakinishaji wa npm/source huanza na `CHANGEME`: ubadilishe. Haijawekwa: mchawi wa kuingia                                            |
 | `DATA_DIR`                              | `~/.omniroute`                      | Saraka ya data (db, matumizi, kumbukumbu)                                                                                                                            |
 | `PORT`                                  | msingi wa mfumo                     | Bandari ya huduma (`20128` katika mifano)                                                                                                                            |
 | `HOSTNAME`                              | msingi wa mfumo                     | Unganisha seva pangishi (Docker chaguomsingi kwa `0.0.0.0`)                                                                                                          |
@@ -734,8 +734,8 @@ Chagua kiambishi awali tofauti (`mygw`, `acme-proxy`). Ikiwa maombi ya nodi maal
 
 Vifunguo hivi huenda kwenye `providerSpecificData` ya unganisho (kwa mfano kupitia `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (integer, 1–1024) — kwa miunganisho inayooana ya umbizo la OpenAI ambalo lango lake linakataa majina ya zana ndefu. Majina marefu hutumwa kama lakabu fupi na kurejeshwa katika jibu. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go na Msimbo wa Muse tayari zina majina zaidi ya vibambo 64 bila mpangilio wowote. Thamani ya muunganisho inachukua nafasi ya chaguo-msingi la Azure OpenAI / Azure AI Foundry (muunganisho wa Azure nyuma ya lango kali zaidi) na kuweka kikomo kwa nodi maalum inayoendana; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go na Msimbo wa Muse huweka kikomo chao cha usajili na kupuuza.
-- `quotaEndpoint` — lango la quota/credits la mwisho, soma kwa ukanda wa kiasi cha dashibodi na uelekezaji wa ufahamu wa kiasi. Inafanya kazi kwenye viunganisho vinavyoendana na OpenAI- na Anthropic; umbo kamili umeandikwa katika `open-sse/services/usage/openaiCompatible.ts`.
+- `toolNameMaxLength` (idadi kamili, 1–1024) — kwa miunganisho inayooana ya umbizo la OpenAI ambalo lango lake linakataa majina ya zana ndefu. Majina marefu hutumwa kama lakabu fupi na kurejeshwa katika jibu. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go na Msimbo wa Muse tayari zina majina zaidi ya vibambo 64 bila mpangilio wowote. Thamani ya muunganisho inachukua nafasi ya chaguo-msingi la Azure OpenAI / Azure AI Foundry (muunganisho wa Azure nyuma ya lango kali zaidi) na kuweka kikomo kwa nodi maalum inayoendana; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go na Msimbo wa Muse huweka kikomo chao cha usajili na kupuuza.
+- `quotaEndpoint` — sehemu ya mwisho ya quota/credits ya lango, soma kwa ukanda wa kiasi cha dashibodi na uelekezaji wa kufahamu kiasi. Inafanya kazi kwenye viunganisho vinavyoendana na OpenAI- na Anthropic; umbo kamili umeandikwa katika `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
 {
@@ -882,8 +882,8 @@ Sanidi kupitia** Dashibodi → Mipangilio → Njia** . Dashibodi inafichua mikak
 - `least-used` na `cost-optimized`
 - `auto` — inayotokana na alama kwa watahiniwa wote
 - `lkgp` (Mtoa Huduma Bora Anayejulikana Mwisho) — hubandika kwa mtoaji aliyefaulu wa mwisho, kisha inarudi kwenye sheria
-- `context-optimized` — huchagua kielelezo chenye dirisha kubwa zaidi la muktadha lisilolipishwa
-- `context-relay` — hufunga mifano ya muktadha mrefu kwa zamu za ufuatiliaji
+- `context-optimized` — hujaribu modeli na dirisha kubwa zaidi la muktadha linalojulikana kwanza
+- `context-relay` — agizo la kipaumbele pamoja na muhtasari wa hati mazungumzo yanapohamishiwa kwenye akaunti nyingine
 
 #### Kijajuu cha Kikao chenye Nata cha Nje
 
@@ -1075,10 +1075,10 @@ Kwa ujumla hairudishi tena ukataji wa kusoma tu na madokezo ya akiba. Mipangilio
 
 Ufikiaji kupitia** Dashibodi → Gharama** .
 
-| Kichupo        | Kusudi                                                                                                                |
-| -------------- | --------------------------------------------------------------------------------------------------------------------- |
-| **Bajeti**     | Weka vikomo vya matumizi kwa kila ufunguo wa API ukitumia bajeti daily/weekly/monthly na ufuatiliaji wa wakati halisi |
-| **Kuweka bei** | Tazama na uhariri maingizo ya bei ya muundo — gharama kwa tokeni 1K input/output kwa kila mtoaji                      |
+| Kichupo    | Kusudi                                                                                                                |
+| ---------- | --------------------------------------------------------------------------------------------------------------------- |
+| **Bajeti** | Weka vikomo vya matumizi kwa kila ufunguo wa API ukitumia bajeti daily/weekly/monthly na ufuatiliaji wa wakati halisi |
+| **Bei**    | Tazama na uhariri maingizo ya bei ya muundo — gharama kwa tokeni 1K input/output kwa kila mtoaji                      |
 
 ```bash
 # API: Set a budget
@@ -1145,7 +1145,7 @@ Miundo ya sauti inayotumika kwa unukuzi: `mp3`, `wav`, `m4a`, `flac`, `ogg`, `we
 
 ### Mikakati ya Kusawazisha Combo
 
-Sanidi usawazishaji wa kila-combo** Dashibodi → Combos → Create/Edit →** .
+Sanidi usawazishaji wa kila mseto ndani** Dashibodi → Combos → Create/Edit →** .
 
 | Mkakati                     | Maelezo                                                                                         |
 | --------------------------- | ----------------------------------------------------------------------------------------------- |
@@ -1330,34 +1330,36 @@ Tazama [API_REFERENCE.md](../reference/API_REFERENCE.md) kwa orodha kamili ya en
 
 ---
 
-## 💻 CLI ya Ndani
+## 💻 CLI ya ndani
 
-OmniRoute huja na CLI ya ndani (`omniroute …`) kwa ajili ya usanidi, uchunguzi na udhibiti wakati wa utekelezaji. Hii ni **tofauti na ukurasa wa "Zana za CLI" kwenye dashibodi**, ambao husanidi CLI za wahusika wengine (Claude Code, Cursor, Codex, Cline, …) ili ziweze kuwasiliana na OmniRoute.
+OmniRoute husafirisha CLI ya ndani (`omniroute …`) kwa usanidi, uchunguzi na udhibiti wa wakati wa utekelezaji. Hii ni** tofauti na ukurasa wa " Zana za CLI " kwenye dashibodi** , ambayo husanidi CLIs ya wahusika wengine (Claude Code, Cursor, Codex, Cline, …) ili waweze kuzungumza na OmniRoute.
 
 ```bash
-omniroute setup                    # Mchawi shirikishi (nenosiri, watoa huduma, michanganyiko)
-omniroute setup --non-interactive  # Inafaa kwa CI
-omniroute doctor                   # Uchunguzi wa afya (saraka ya data, DB, watoa huduma, porti)
-omniroute providers available      # Orodhesha watoa huduma wanaotumika
-omniroute providers list           # Orodhesha miunganisho iliyosanidiwa
-omniroute providers test <id>      # Jaribu moja kwa moja muunganisho wa mtoa huduma
-omniroute combos list              # Orodhesha michanganyiko
-omniroute combos switch <name>     # Weka mchanganyiko chaguo-msingi
-omniroute models                   # Orodhesha modeli zinazopatikana (--json, --search)
-omniroute keys add | list | remove # Dhibiti funguo za API kutoka kwenye terminali
-omniroute backup                   # Hifadhi picha ya muda ya usanidi + DB
-omniroute restore [<timestamp>]    # Rejesha kutoka kwenye picha ya muda
-omniroute health                   # Afya ya kina (vikataji, akiba, kumbukumbu)
-omniroute quota                    # Matumizi ya kiwango cha mtoa huduma
-omniroute mcp status               # Hali ya seva ya MCP
-omniroute a2a status               # Hali ya seva ya A2A
-omniroute tunnel list|create|stop  # Vichuguu vya Cloudflare/Tailscale/ngrok
-omniroute reset-password           # Weka upya nenosiri la msimamizi
-omniroute --mcp                    # Anzisha seva ya MCP kupitia stdio
-omniroute --port 3000              # Anzisha seva kwenye porti maalum
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-Kidokezo: unganisha `omniroute doctor --json` na zana yako ya ufuatiliaji ili kutoa arifa kuhusu miunganisho ya watoa huduma isiyo na afya.
+Kidokezo: oanisha `omniroute doctor --json` na zana yako ya ufuatiliaji ili kutahadharisha juu ya usakinishaji ulioharibika wa ndani. `doctor` haijaribu miunganisho ya mtoaji; tumia `omniroute providers test <id>` kwa hiyo.
 
 ---
 

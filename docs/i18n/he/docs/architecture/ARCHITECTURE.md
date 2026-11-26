@@ -514,10 +514,11 @@ Cloud Agents עוטף פלטפורמות קוד סוכני מתארחות של �
 
 ## 5) סנכרון ענן
 
-- אתחול המתזמן: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- מתזמן init: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
 - משימה תקופתית: `src/shared/services/cloudSyncScheduler.ts`
 - משימה תקופתית: `src/shared/services/modelSyncScheduler.ts`
-- נתיב בקרה: `src/app/api/sync/cloud/route.ts`
+- משימה תקופתית (הצטרפות לכל חיבור): `src/shared/services/modelHealthCheckScheduler.ts` — בודק מודלים של חיבור, מסתיר כשלים אוטומטית ומשחזר רק את מה שהסתיר בעצמו (`src/lib/db/modelHealthAutoHidden.ts`)
+- מסלול שליטה: `src/app/api/sync/cloud/route.ts`
 
 ## מחזור חיי הבקשה (`/v1/chat/completions`)
 

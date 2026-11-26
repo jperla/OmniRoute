@@ -422,7 +422,7 @@ omniroute autostart disable
 ### VPS স্থাপনা
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -504,8 +504,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -597,7 +597,7 @@ post_install() {
 | `PORT`                                  | ফ্রেমওয়ার্ক ডিফল্ট       | পরিষেবা পোর্ট (উদাহরণস্বরূপ `20128` )                                                                                                                      |
 | `HOSTNAME`                              | ফ্রেমওয়ার্ক ডিফল্ট       | হোস্ট বাঁধুন (Docker ডিফল্ট `0.0.0.0`)                                                                                                                     |
 | `NODE_ENV`                              | রানটাইম ডিফল্ট            | স্থাপনের জন্য `production` সেট করুন                                                                                                                        |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`  | পাবলিক বেস URL ড্যাশবোর্ডে উপস্থিত হয়েছে এবং সার্ভারে উন্মুক্ত হয়েছে (লেগেসি `BASE_URL` প্রতিস্থাপন করে)                                                 |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`  | পাবলিক বেস URL ড্যাশবোর্ডে উপস্থিত হয়েছে এবং সার্ভারের কাছে উন্মুক্ত হয়েছে (লেগেসি `BASE_URL` প্রতিস্থাপন করে)                                           |
 | `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`   | ক্লাউড সিঙ্ক এন্ডপয়েন্ট বেস URL (লেগেসি `CLOUD_URL` প্রতিস্থাপন করে)                                                                                      |
 | `API_KEY_SECRET`                        | _(স্বয়ংক্রিয়ভাবে তৈরি)_ | জেনারেটেড API কীগুলির জন্য HMAC সিক্রেট — প্রথম রানে স্বয়ংক্রিয়ভাবে তৈরি হয় এবং `server.env` এ স্থির থাকে                                               |
 | `REQUIRE_API_KEY`                       | `false`                   | `/v1/*` এ Bearer API কী প্রয়োগ করুন                                                                                                                       |
@@ -816,7 +816,7 @@ curl http://localhost:20128/api/models/catalog
 - প্রথমে প্রয়োজন হলেই `cloudflared` ইনস্টল করতে সক্ষম করুন; পরে পুনরায় আরম্ভ করে একই পরিচালিত বাইনারি পুনরায় ব্যবহার করে
 - একটি OmniRoute বা কন্টেইনার পুনরায় চালু করার পরে দ্রুত টানেলগুলি স্বয়ংক্রিয়ভাবে পুনরুদ্ধার করা হয় না; প্রয়োজনে ড্যাশবোর্ড থেকে তাদের পুনরায় সক্রিয় করুন
 - টানেল URLs ক্ষণস্থায়ী এবং আপনি যখনই টানেল stop/start তখন পরিবর্তন হয়
-- সীমাবদ্ধ পাত্রে গোলমাল QUIC UDP বাফার সতর্কতা এড়াতে HTTP/2 পরিবহনে ডিফল্ট পরিচালিত কুইক টানেল
+- সীমাবদ্ধ পাত্রে কোলাহলপূর্ণ QUIC UDP বাফার সতর্কতা এড়াতে HTTP/2 পরিবহনে ডিফল্ট পরিচালিত কুইক টানেল
 - যদি আপনি পরিচালিত পরিবহন পছন্দ ওভাররাইড করতে চান তাহলে `CLOUDFLARED_PROTOCOL=quic` বা `auto` সেট করুন
 - যদি আপনি পরিচালিত ডাউনলোডের পরিবর্তে একটি পূর্ব-ইন্সটল করা `cloudflared` বাইনারি ব্যবহার করতে চান তাহলে `CLOUDFLARED_BIN` সেট করুন
 - Cloudflare কুইক টানেল, Tailscale ফানেল এবং ngrok টানেল প্যানেল দেখানো বা লুকানো যেতে পারে** সেটিংস → চেহারা** . একটি প্যানেল লুকানো একটি চলমান সুড়ঙ্গ বন্ধ করে না.
@@ -858,23 +858,23 @@ curl http://localhost:20128/api/models/catalog
 | ---------------------------- | ----------------------------------------------------------------------------------------------------------------- |
 | **প্রথমে পূরণ করুন**         | অগ্রাধিকার ক্রমে অ্যাকাউন্ট ব্যবহার করে — প্রাথমিক অ্যাকাউন্ট অনুপলব্ধ না হওয়া পর্যন্ত সমস্ত অনুরোধ পরিচালনা করে |
 | **রাউন্ড রবিন**              | একটি কনফিগারযোগ্য স্টিকি সীমা সহ সমস্ত অ্যাকাউন্টের মাধ্যমে চক্র (ডিফল্ট: প্রতি অ্যাকাউন্টে 3টি কল)               |
-| **P2C (দুই পছন্দের ক্ষমতা)** | 2টি — অ্যাকাউন্ট এবং স্বাস্থ্যের জন্য রুট বেছে নেয়                                                               |
+| **P2C (দুই পছন্দের ক্ষমতা)** | 2টি এলোমেলো অ্যাকাউন্ট এবং স্বাস্থ্যের জন্য — রুট বেছে নেয়                                                       |
 | **এলোমেলো**                  | Fisher-Yates শাফেল ব্যবহার করে প্রতিটি অনুরোধের জন্য এলোমেলোভাবে একটি অ্যাকাউন্ট নির্বাচন করে                     |
-| **সবচেয়ে কম ব্যবহৃত**       | সবচেয়ে পুরনো `lastUsedAt` টাইমস্ট্যাম্প সহ অ্যাকাউন্টে যাওয়ার রুট, ট্রাফিক সমানভাবে বন্টন করে                   |
-| **খরচ অপ্টিমাইজড**           | সর্বনিম্ন অগ্রাধিকার মান সহ অ্যাকাউন্টে রুট, সর্বনিম্ন-খরচ প্রদানকারীদের জন্য অপ্টিমাইজ করা                       |
+| **সবচেয়ে কম ব্যবহৃত**       | সবচেয়ে পুরানো `lastUsedAt` টাইমস্ট্যাম্প সহ অ্যাকাউন্টে যাওয়ার রুট, ট্রাফিক সমানভাবে বিতরণ করে                  |
+| **খরচ অপ্টিমাইজ করা**        | সর্বনিম্ন অগ্রাধিকার মান সহ অ্যাকাউন্টের রুট, সর্বনিম্ন-খরচ প্রদানকারীদের জন্য অপ্টিমাইজ করা                      |
 
 **উন্নত কম্বো এবং স্বয়ংক্রিয় কৌশল** (কম্বো প্রতি কনফিগারযোগ্য বা `auto/*` উপসর্গের মাধ্যমে — দেখুন [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
 - `priority` — কঠোর আদেশ, কখনও রাউন্ড-রবিন নয়
-- `weighted` — আনুপাতিক ট্রাফিক প্রতি-মডেলের ওজন দ্বারা বিভক্ত
+- `weighted` — আনুপাতিক ট্রাফিক প্রতি মডেল ওজন দ্বারা বিভক্ত
 - `fill-first` — প্রথম মডেল ড্রেন যতক্ষণ না সীমা আঘাত
 - `round-robin` / `strict-random` / `random`
 - `p2c` (দুই পছন্দের ক্ষমতা)
 - `least-used` এবং `cost-optimized`
 - সমস্ত প্রার্থীদের মধ্যে`auto` — স্কোর-চালিত
-- `lkgp` (সর্বশেষ পরিচিত ভাল প্রদানকারী) — শেষ সফল প্রদানকারীকে পিন করে, তারপরে নিয়মে ফিরে আসে
-- `context-optimized` — সবচেয়ে বড় মুক্ত প্রসঙ্গ উইন্ডো সহ মডেলটি বেছে নেয়
-- ফলো-আপ টার্নের জন্য `context-relay` — দীর্ঘ-প্রসঙ্গ মডেল চেইন করে
+- `lkgp` (সর্বশেষ পরিচিত ভাল প্রদানকারী) — শেষ সফল প্রদানকারীকে পিন করে, তারপর নিয়মে ফিরে আসে
+- `context-optimized` — প্রথমে সবচেয়ে বড় পরিচিত প্রসঙ্গ উইন্ডো দিয়ে মডেলটি চেষ্টা করে
+- যখন কথোপকথন অন্য অ্যাকাউন্টে চলে যায় তখন `context-relay` — অগ্রাধিকার আদেশ এবং একটি হ্যান্ডঅফ সারাংশ
 
 #### এক্সটার্নাল স্টিকি সেশন হেডার
 
@@ -965,7 +965,7 @@ omniroute combo create free-stack \
 
 #### 3. মাল্টিমোডাল/ভিশন এবং টেক্সট পাইপলাইন
 
-ইমেজ বোঝার এবং কোড জেনারেশন জড়িত ওয়ার্কফ্লোগুলির জন্য উচ্চ-গতির পাঠ্য প্রজন্মের সাথে বিশেষ দৃষ্টি মডেল জোড়া।
+ইমেজ বোঝার এবং কোড জেনারেশন জড়িত কর্মপ্রবাহের জন্য উচ্চ-গতির পাঠ্য প্রজন্মের সাথে বিশেষ দৃষ্টি মডেল যুক্ত করা।
 
 - **প্যাটার্ন** : একটি `Priority` কম্বো যা দৃষ্টি-সক্ষম মডেলগুলিকে প্রথমে তালিকাভুক্ত করে এবং একটি উচ্চ-থ্রুপুট text/code মডেল সর্বশেষে৷
 - **মডেল** :
@@ -1147,11 +1147,11 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 | **সবচেয়ে কম ব্যবহৃত** | সবচেয়ে কম সাম্প্রতিক অনুরোধ সহ মডেলের রুট (কম্বো মেট্রিক্স ব্যবহার করে) |
 | **খরচ-অপ্টিমাইজড**     | সবচেয়ে সস্তা উপলব্ধ মডেলের রুট (মূল্য সারণী ব্যবহার করে)                |
 
-গ্লোবাল কম্বো ডিফল্ট সেট করা যেতে পারে** ড্যাশবোর্ড → সেটিংস → রাউটিং → কম্বো ডিফল্ট** . কম্বো টার্গেট টাইমআউট ডিফল্টরূপে বর্তমান অনুরোধের সময়সীমার উত্তরাধিকারী হয়। ব্যবহার করুন** টার্গেট টাইমআউট (সেকেন্ড)** কম্বো ডিফল্টে বা একটি স্বতন্ত্র কম্বো শুধুমাত্র তখনই যখন প্রতি-টার্গেটের একটি ছোট সীমা দ্রুত ফলব্যাক ট্রিগার করবে।
+গ্লোবাল কম্বো ডিফল্ট সেট করা যেতে পারে** ড্যাশবোর্ড → সেটিংস → রাউটিং → কম্বো ডিফল্ট** . কম্বো টার্গেট টাইমআউট ডিফল্টরূপে বর্তমান অনুরোধের সময়সীমার উত্তরাধিকারী হয়। ব্যবহার করুন** টার্গেট টাইমআউট (সেকেন্ড)** কম্বো ডিফল্টে বা একটি স্বতন্ত্র কম্বোতে শুধুমাত্র তখনই যখন একটি ছোট প্রতি-টার্গেট সীমা দ্রুত ফলব্যাক ট্রিগার করবে।
 
 জিরো-লেটেন্সি কম্বো অপ্টিমাইজেশান অপ্ট-ইন। ছেড়ে দিন** জিরো-লেটেন্সি অপ্টিমাইজেশান** এই লেটেন্সি বৈশিষ্ট্যগুলিকে রেসিং ফলব্যাক লক্ষ্য, TTFT ইতিহাসের উপর ভিত্তি করে লক্ষ্যগুলি এড়িয়ে যাওয়া বা ফলব্যাক অনুরোধগুলি সংকুচিত করা থেকে প্রতিরোধ করতে অক্ষম করা হয়েছে; এটি সক্রিয় করা কনফিগার করা হেজিং, ভবিষ্যদ্বাণীমূলক TTFT স্কিপস এবং প্রোঅ্যাকটিভ ফলব্যাক কম্প্রেশনকে লোয়ার টেইল লেটেন্সির জন্য routing/request ফিডেলিটি ট্রেড করার অনুমতি দেয়।
 
-নিষ্ক্রিয় করুন** যুক্তি টোকেন বাফার** যখন আপস্ট্রিম প্রদানকারীদের কঠোর `max_tokens` / `maxOutputTokens` সীমার প্রয়োজন হয়। সক্রিয় থাকা অবস্থায়, কম্বো রাউটিং শুধুমাত্র একটি পরিচিত আউটপুট ক্যাপ সহ মডেলগুলির জন্য যুক্তি-মডেল হেডরুম যোগ করে এবং ক্লায়েন্ট টোকেন সীমা অপরিবর্তিত রাখে যখন নিরাপদ বাফার করা মান সেই ক্যাপ অতিক্রম করবে। যদি ক্লায়েন্টের সীমা ইতিমধ্যেই একটি পরিচিত ক্যাপের উপরে থাকে, তাহলে আপস্ট্রিম অনুরোধ পাঠানোর আগে OmniRoute এটিকে সেই ক্যাপে ক্ল্যাম্প করে।
+নিষ্ক্রিয় করুন** যুক্তি টোকেন বাফার** যখন আপস্ট্রিম প্রদানকারীদের কঠোর `max_tokens` / `maxOutputTokens` সীমার প্রয়োজন হয়। সক্রিয় থাকা অবস্থায়, কম্বো রাউটিং শুধুমাত্র একটি পরিচিত আউটপুট ক্যাপ সহ মডেলগুলির জন্য যুক্তি-মডেল হেডরুম যোগ করে এবং ক্লায়েন্ট টোকেন সীমা অপরিবর্তিত রাখে যখন নিরাপদ বাফার করা মান সেই ক্যাপ অতিক্রম করবে। যদি ক্লায়েন্টের সীমা ইতিমধ্যেই একটি পরিচিত ক্যাপের উপরে থাকে, তাহলে আপস্ট্রিম অনুরোধ পাঠানোর আগে OmniRoute সেটিকে সেই ক্যাপে ক্ল্যাম্প করে।
 
 ---
 
@@ -1323,32 +1323,34 @@ curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUT
 
 ## 💻 অভ্যন্তরীণ CLI
 
-সেটআপ, ডায়াগনস্টিকস এবং রানটাইম নিয়ন্ত্রণের জন্য OmniRoute-এর সঙ্গে একটি অভ্যন্তরীণ CLI (`omniroute …`) রয়েছে। এটি ড্যাশবোর্ডের **"CLI Tools" পৃষ্ঠা থেকে আলাদা**, যেখানে তৃতীয়-পক্ষের CLI-গুলোকে (Claude Code, Cursor, Codex, Cline, …) কনফিগার করা হয়, যাতে সেগুলো OmniRoute-এর সঙ্গে যোগাযোগ করতে পারে।
+OmniRoute সেটআপ, ডায়াগনস্টিকস এবং রানটাইম নিয়ন্ত্রণের জন্য একটি অভ্যন্তরীণ CLI (`omniroute …`) পাঠায়। এই** ড্যাশবোর্ডের "CLI টুলস" পৃষ্ঠা থেকে আলাদা** , যা তৃতীয় পক্ষের CLIs কনফিগার করে (Claude কোড, Cursor, Codex, Cline, …) যাতে তারা OmniRoute সাথে কথা বলতে পারে।
 
 ```bash
-omniroute setup                    # ইন্টার্যাক্টিভ উইজার্ড (পাসওয়ার্ড, প্রোভাইডার, কম্বো)
-omniroute setup --non-interactive  # CI-বান্ধব
-omniroute doctor                   # স্বাস্থ্য ডায়াগনস্টিকস (ডেটা ডিরেক্টরি, DB, প্রোভাইডার, পোর্ট)
-omniroute providers available      # সমর্থিত প্রোভাইডারগুলোর তালিকা দেখান
-omniroute providers list           # কনফিগার করা সংযোগগুলোর তালিকা দেখান
-omniroute providers test <id>      # কোনো প্রোভাইডার সংযোগের লাইভ পরীক্ষা করুন
-omniroute combos list              # কম্বোগুলোর তালিকা দেখান
-omniroute combos switch <name>     # ডিফল্ট কম্বো নির্ধারণ করুন
-omniroute models                   # উপলভ্য মডেলগুলোর তালিকা দেখান (--json, --search)
-omniroute keys add | list | remove # টার্মিনাল থেকে API কী পরিচালনা করুন
-omniroute backup                   # কনফিগারেশন + DB-এর স্ন্যাপশট নিন
-omniroute restore [<timestamp>]    # একটি স্ন্যাপশট থেকে পুনরুদ্ধার করুন
-omniroute health                   # বিস্তারিত স্বাস্থ্যতথ্য (ব্রেকার, ক্যাশ, মেমরি)
-omniroute quota                    # প্রোভাইডারের কোটা ব্যবহার
-omniroute mcp status               # MCP সার্ভারের অবস্থা
-omniroute a2a status               # A2A সার্ভারের অবস্থা
-omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok টানেল
-omniroute reset-password           # অ্যাডমিন পাসওয়ার্ড রিসেট করুন
-omniroute --mcp                    # stdio-এর মাধ্যমে MCP সার্ভার চালু করুন
-omniroute --port 3000              # কাস্টম পোর্টে সার্ভার চালু করুন
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-পরামর্শ: অস্বাস্থ্যকর প্রোভাইডার সংযোগ সম্পর্কে সতর্কতা পেতে আপনার মনিটরিং টুলের সঙ্গে `omniroute doctor --json` ব্যবহার করুন।
+টিপ: একটি ভাঙা স্থানীয় ইনস্টলে সতর্ক করতে আপনার মনিটরিং টুলের সাথে `omniroute doctor --json` যুক্ত করুন। `doctor` প্রদানকারী সংযোগ পরীক্ষা করে না; এর জন্য `omniroute providers test <id>` ব্যবহার করুন।
 
 ---
 

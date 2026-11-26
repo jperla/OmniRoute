@@ -514,10 +514,11 @@ FSM ٹرانزیشنز آٹو کومبو کے اسکورنگ میں شامل ہ�
 
 ## 5) کلاؤڈ سنک
 
-- Scheduler کی ابتدا: `src/lib/initCloudSync.ts`، `src/shared/services/initializeCloudSync.ts`، `src/shared/services/modelSyncScheduler.ts`
-- دورانیہ وار کام: `src/shared/services/cloudSyncScheduler.ts`
-- دورانیہ وار کام: `src/shared/services/modelSyncScheduler.ts`
-- کنٹرول route: `src/app/api/sync/cloud/route.ts`
+- شیڈولر شروع: `src/lib/initCloudSync.ts`، `src/shared/services/initializeCloudSync.ts`، `src/shared/services/modelSyncScheduler.ts`
+- متواتر کام: `src/shared/services/cloudSyncScheduler.ts`
+- متواتر کام: `src/shared/services/modelSyncScheduler.ts`
+- متواتر کام (آپٹ ان فی کنکشن): `src/shared/services/modelHealthCheckScheduler.ts` — کنکشن کے ماڈلز کی جانچ کرتا ہے، ناکامیوں کو خود سے چھپاتا ہے اور صرف وہی بحال کرتا ہے جو اس نے خود کو چھپا رکھا ہے (`src/lib/db/modelHealthAutoHidden.ts`)
+- کنٹرول کا راستہ: `src/app/api/sync/cloud/route.ts`
 
 ## درخواست کا دورِ حیات (`/v1/chat/completions`)
 

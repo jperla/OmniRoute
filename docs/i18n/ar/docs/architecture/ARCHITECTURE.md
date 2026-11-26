@@ -514,9 +514,10 @@ flowchart LR
 
 ## 5) المزامنة السحابية
 
-- تهيئة المجدول: `src/lib/initCloudSync.ts`، و`src/shared/services/initializeCloudSync.ts`، و`src/shared/services/modelSyncScheduler.ts`
-- المهمة الدورية: `src/shared/services/cloudSyncScheduler.ts`
-- المهمة الدورية: `src/shared/services/modelSyncScheduler.ts`
+- الحرف الأول لجدولة: `src/lib/initCloudSync.ts`، `src/shared/services/initializeCloudSync.ts`، `src/shared/services/modelSyncScheduler.ts`
+- مهمة دورية: `src/shared/services/cloudSyncScheduler.ts`
+- مهمة دورية: `src/shared/services/modelSyncScheduler.ts`
+- المهمة الدورية (الاشتراك لكل اتصال): يقوم `src/shared/services/modelHealthCheckScheduler.ts` — باختبار نماذج الاتصال وإخفاء حالات الفشل تلقائيًا واستعادة ما أخفاه بنفسه فقط (`src/lib/db/modelHealthAutoHidden.ts`)
 - مسار التحكم: `src/app/api/sync/cloud/route.ts`
 
 ## دورة حياة الطلب (`/v1/chat/completions`)

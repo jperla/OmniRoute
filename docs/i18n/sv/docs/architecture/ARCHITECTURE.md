@@ -502,12 +502,13 @@ Domäntillståndsdatabas (SQLite):
 - Autentisering vid WebSocket-handskakning: `src/lib/ws/handshake.ts` — validerar WS-uppgraderingsbegäranden via API-nyckel eller sessionscookie
 - WebSocket-autentisering för kontrollpanelen i realtid: `src/server/ws/liveServer.ts` — sidoprocessen (port `LIVE_WS_PORT`) godtar en sessionscookie för kontrollpanelen eller en Bearer-API-nyckel med ett hanteringsomfång (`manage`/`admin`); nycklar enbart för inferens nekas. Dess interna publiceringsslutpunkt `POST /__omniroute_event` godtar endast loopback-motparter när inget huvud för proxyhopp (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`) finns med
 
-## 5) Molnsynkronisering
+## 5) Cloud Sync
 
-- Initiering av schemaläggare: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- Schemaläggare init: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
 - Periodisk uppgift: `src/shared/services/cloudSyncScheduler.ts`
 - Periodisk uppgift: `src/shared/services/modelSyncScheduler.ts`
-- Kontrollrutt: `src/app/api/sync/cloud/route.ts`
+- Periodisk uppgift (opt-in per anslutning): `src/shared/services/modelHealthCheckScheduler.ts` — testar en anslutnings modeller, döljer automatiskt fel och återställer endast vad den gömde själv (`src/lib/db/modelHealthAutoHidden.ts`)
+- Kontrollväg: `src/app/api/sync/cloud/route.ts`
 
 ## Livscykel för begäran (`/v1/chat/completions`)
 

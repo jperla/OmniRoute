@@ -34,69 +34,34 @@ npm run test:e2e           # 선택 사항이지만 권장
 /capture-release-evidences-cc
 ```
 
-## npm Trusted Publishing (v3.8.51부터 기본값) — 요청 시 staged, 대체 수단으로 direct
+## npm Trusted Publishing(v3.8.51 이후 기본값) 요청 시 — 준비, 폴백으로 직접 설정
 
-`npm-publish.yml`은 기본적으로 **npm Trusted Publishing (OIDC)** 을 통해 게시합니다.
-`stage-npm` 작업(github-hosted)은 실행마다 GitHub의 id-token을 단기 npm
-자격 증명으로 교환합니다. 저장소 시크릿에 장기 npm 토큰이 필요하지 않고, 2FA 프롬프트도 없으며, provenance가 연결됩니다.
-이는 2FA를 건너뛰는 토큰이 폐기되는 현재 npm 제재를 우회하는 방법입니다.
-또한 토큰이 유출되어도 단독으로 게시할 수 없다는 WS1.3 보장을 유지하면서,
-v3.8.48까지 프로젝트가 사용하던 완전 자동화 흐름을 복원합니다.
+`npm-publish.yml` 다음을 통해 게시합니다.** npm 신뢰할 수 있는 게시(OIDC)** 기본적으로 `stage-npm` 작업(github 호스팅)은 GitHub 의 id-token을 해당 실행에 대한 단기 npm 자격 증명으로 교환합니다. — 저장소 비밀에 장기 npm 토큰이 없고 2FA 프롬프트가 없으며 출처가 첨부되어 있습니다. 이는 이제 2FA를 건너뛰는 토큰이 폐기됨에 따라 npm 제재를 우회하는 것입니다. 이는 WS1.3 보장을 유지하면서 프로젝트가 최대 v3.8.48까지 가졌던 완전 자동 흐름을 복원합니다(유출된 토큰은 — 토큰 없이 단독으로 게시할 수 없습니다).
 
-**일회성 설정(소유자):** npmjs.com → 패키지 `omniroute` → Settings → _Trusted
-Publisher_ → GitHub: owner `diegosouzapw`, repo `OmniRoute`, workflow `npm-publish.yml`
-(environment: none). 이 설정이 존재할 때까지 자동 단계는 `ENEEDAUTH`와 함께 실패합니다.
-`publish_mode=staged`(아래 참조) 또는 `direct`로 다시 디스패치하세요.
+**일회성 설정(소유자):** npmjs.com → 패키지 `omniroute` → 설정 → _Trusted Publisher_ → GitHub: 소유자 `diegosouzapw`, repo `OmniRoute`, 워크플로 `npm-publish.yml` (환경: 없음). 그것이 존재할 때까지 자동 단계는 `ENEEDAUTH` 로 실패합니다: `publish_mode=staged` (아래) 또는 `direct` 로 다시 디스패치합니다.
 
-### Staged 게시 (요청 시 — `publish_mode=staged`)
+### 단계적 게시(요청 시 — `publish_mode=staged`)
 
-npm-publish 워크플로는 더 이상 직접 게시하지 않습니다. 패키징된 tarball을
-부팅(`check:pack-boot`)한 다음 `npm stage publish`를 실행합니다. 정확한 바이트가
-레지스트리에 보관되지만 **소유자가 승인하기 전에는 설치할 수 없습니다.**
-사람의 2FA 게이트는 이전이 아니라 증명 이후로 이동했습니다.
+npm-publish 워크플로는 더 이상 직접 게시하지 않습니다. 압축된 tarball(`check:pack-boot`)을 부팅한 다음 `npm stage publish` — 실행합니다. 정확한 바이트는 레지스트리에 저장됩니다.** 설치할 수 없음** 주인이 승인할 때까지. 인간 2FA 게이트는 이전이 아닌 증거를 AFTER 로 이동했습니다.
 
-**워크플로가 green 상태가 된 후 소유자가 수행할 흐름:**
+**워크플로가 녹색으로 전환된 후 소유자 흐름:**
 
-1. `npm stage list omniroute` — stage id를 찾습니다(워크플로 요약에도 출력됨).
-2. 스테이징된 바이트를 확인합니다(권장): `npm stage download <id>`를 실행한 다음,
-   다운로드한 tarball을 임시 prefix에 설치하고 부팅합니다(`npm run check:pack-boot`가
-   CI에서 동일한 pack→install→boot 판정을 자동화함).
-3. `npm stage approve <id>` — 2FA 프롬프트가 곧 게시입니다. `npm stage reject <id>`는 폐기합니다.
-4. 게시 후 네트워크 확인: (v3.8.49 계획의 WS1.4인) 게시 후 검증기가
-   공개 레지스트리에서 게시된 버전을 깨끗한 컨테이너에 설치하고 부팅합니다.
+1. `npm stage list omniroute` — 단계 ID를 찾습니다(워크플로 요약에도 인쇄되어 있음).
+2. 준비된 바이트를 확인합니다(권장): `npm stage download <id>`. 그런 다음 다운로드한 tarball을 임시 접두사에 설치하고 부팅합니다(`npm run check:pack-boot` CI 에서 동일한 팩 → install → 부팅 판정을 자동화합니다).
+3. `npm stage approve <id>` — 2FA 프롬프트 IS 게시. `npm stage reject <id>` 폐기합니다.
+4. 사후 게시 넷: 사후 게시 검증자(v3.8.49 계획의 WS1.4)는 공개 레지스트리의 게시된 버전을 깨끗한 컨테이너에 설치하고 부팅합니다.
 
-**긴급 대체 수단:** `workflow_dispatch`에서 `publish_mode=direct`를 사용하면
-기존의 즉시 `npm publish`가 복원됩니다(스테이징 자체에 문제가 있을 때만 사용하고, 이유를 기록하세요).
+**긴급 폴백:** `workflow_dispatch` 와 `publish_mode=direct` 는 레거시 즉각적인 `npm publish` 복원합니다(스테이징 자체가 오작동하는 경우에만 사용하고 이유를 기록하십시오).
 
-**일회성 강화(소유자, npmjs.com):** `omniroute`의 Trusted Publisher를
-stage-only 모드로 구성하여 유출된 장기 토큰으로 어디서든 `npm publish`를 직접
-실행할 수 없도록 하세요 — CI는 스테이징만 할 수 있고, 소유자의 2FA만 릴리스를 수행합니다.
+**일회성 강화(소유자, npmjs.com):** 유출된 장기 토큰이 어디에서든 직접 `npm publish` 할 수 없도록 스테이지 전용 모드에서 `omniroute` 에 대해 신뢰할 수 있는 게시자를 구성합니다. — CI 스테이지만 할 수 있습니다. 소유자의 2FA 릴리스만 가능합니다.
 
-**손상된 아티팩트 대응 절차(변경 없음):** 기본 대응으로
-`npm deprecate omniroute@<bad> "<reason> — use <fixed>"`를 사용하세요
-(수 분 내 처리 가능하며 되돌릴 수 있음). `npm unpublish`는 72시간/종속 항목 없음
-조건 내에서만 사용하고, 첫 조치로는 절대 사용하지 마세요. Docker에서는 버전 태그를
-다시 작성하지 마세요 — 롤백은 `latest`를 마지막 정상 digest로 다시 가리키는 것입니다.
+**손상된 아티팩트 플레이북(변경되지 않음):** 기본 반사로 `npm deprecate omniroute@<bad> "<reason> — use <fixed>"` (분, 가역성); `npm unpublish` 72h/no-dependents 창 내부에서만 가능하며 결코 첫 번째 이동으로 사용되지 않습니다. Docker: 버전 태그를 다시 작성하지 않습니다. — 롤백은 `latest` 마지막 양호한 다이제스트로 다시 지정합니다.
 
-**Docker Hub `latest` (모든 안정 SemVer 게시에 필수):**
-`docker-publish` 워크플로는 **`X.Y.Z`와, `should-promote-latest.sh`가 이것이
-가장 높은 안정 SemVer라고 판단하는 경우 `:latest`도 모두 태그해야 하며**, 두 태그는
-동일한 digest를 사용해야 합니다. 작업 후 Hub의 `latest` digest는 새 SemVer digest와
-같아야 하고 `last_updated`도 변경되어야 합니다. 릴리스 노트에서 git에만 존재하는
-수정 사항을 언급하면서 `:latest`를 이전 빌드에 그대로 두지 마세요.
-Compose 빠른 시작은 `:latest`를 사용하고, GitOps에서는 계속 `X.Y.Z`를 고정해야 합니다.
-[Docker 릴리스 채널](../guides/DOCKER_GUIDE.md#release-channels) 및 #10317을 참조하세요.
+**Docker Hub `latest` (모든 안정적인 SemVer 게시에 필요함):** `docker-publish` 작업 흐름은 태그를 지정해야 합니다.** 둘 다** `X.Y.Z` 그리고 `should-promote-latest.sh` 동의하면 이것이 가장 안정적인 SemVer 이며 `:latest` 는** 동일한 다이제스트** . 작업 후: Hub `latest` 다이제스트는 새로운 SemVer 다이제스트와 동일하며 `last_updated` 이동되었습니다. 릴리스 노트에서 git에만 존재하는 수정 사항에 대해 설명하는 동안 `:latest` 이전 빌드에 두지 마십시오. Compose 빠른 시작에서는 `:latest` 사용합니다. GitOps `X.Y.Z` 계속 고정해야 합니다. [Docker 릴리스 채널](../guides/DOCKER_GUIDE.md#release-channels) 및 #10317 를 참조하세요.
 
-**Docker Hub 조직 저장소(`cheaperinference/omniroute`):** Docker Hub는
-저장소를 네임스페이스 간에 이동할 수 없으므로 `diegosouzapw/omniroute`는 pull 기록과
-모든 릴리스를 유지합니다. `docker-publish`의 `mirror-org-dockerhub` 작업은
-릴리스된 각 버전(및 승격된 경우 `:latest`)을 `ghcr.io/cheaper-inference/omniroute`에서
-조직 저장소로 복사합니다. 이 작업에는 `DOCKERHUB_ORG_USERNAME` /
-`DOCKERHUB_ORG_TOKEN` 시크릿이 필요합니다. 시크릿이 없으면 작업은
-"Docker Hub org mirror skipped" 경고와 함께 green 상태를 유지하며 다른 레지스트리는
-정상적으로 게시됩니다. 이후 릴리스된 버전을 그곳에 게시하려면 **Actions → Mirror Docker image to the Docker Hub org → Run
-workflow**를 `version=X.Y.Z`와 함께 실행하세요(가장 높은 안정 버전인 경우
-`promote_latest`도 지정). 기존 이미지를 복사할 뿐 다시 빌드하지 않습니다.
+**Docker 허브 조직 저장소(`cheaperinference/omniroute`):** Docker Hub는 네임스페이스 간에 저장소를 이동할 수 없으므로 `diegosouzapw/omniroute` 풀 기록과 모든 릴리스를 유지하며 `docker-publish` 의 `mirror-org-dockerhub` 작업은 릴리스된 각 버전(및 승격된 경우 `:latest` )을 `ghcr.io/cheaper-inference/omniroute` 에서 조직 저장소로 복사합니다. `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` 비밀이 필요합니다. 그것들이 없으면 작업은 "Docker Hub org 미러 건너뛰기" 경고와 함께 녹색으로 유지되고 다른 레지스트리는 정상적으로 게시됩니다. 나중에 릴리스된 버전을 게시하려면 다음을 실행하세요.** 작업 → Docker 이미지를 Docker Hub 조직으로 미러링 → 워크플로우 실행** `version=X.Y.Z` 사용(그리고 가장 안정적인 버전의 경우 `promote_latest` ): 재구축 없이 기존 이미지를 복사합니다. 해당 저장소의 Docker Hub 개요는 수동으로 설정됩니다. 이를 편집하는 API 는 조직 액세스 토큰을 거부합니다.
+
+또한 동일한 워크플로는 2027년 6월 30일까지 모든 릴리스를 레거시 GHCR 패키지 `ghcr.io/diegosouzapw/omniroute` 에 복사하므로 고정된 설치는 계속 업데이트됩니다. 해당 인덱스에는 " `ghcr.io/cheaper-inference/omniroute` 로 이동됨" 설명이 포함되어 있습니다. `GHCR_LEGACY_TOKEN` 비밀( `write:packages` 가 포함된 `diegosouzapw` 의 고전적인 개인 액세스 토큰)이 필요합니다. 이것이 없으면 해당 작업은 "레거시 GHCR 미러 건너뛰기" 경고와 함께 건너뜁니다.
 
 ## 핫픽스 패스트 레인 (레이블 `hotfix`)
 

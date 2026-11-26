@@ -331,7 +331,7 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ## Шаблон Void Linux (xbps-src).
 
-За потребителите на Void Linux можете да създадете собствен пакет с помощта `xbps-src`. Запазете този блок като `srcpkgs/omniroute/template`:
+For Void Linux users, you can build a native package using `xbps-src`. Запазете този блок като `srcpkgs/omniroute/template`:
 
 ```bash
 # Template file for 'omniroute'
@@ -343,10 +343,10 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 # Regenerate the checksum for each release with:
-#   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
+#   curl -L -o /tmp/omniroute.tar.gz "https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"

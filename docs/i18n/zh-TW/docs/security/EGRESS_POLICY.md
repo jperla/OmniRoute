@@ -67,37 +67,37 @@ export function parseProxyFamily(value: unknown): ProxyFamily {
 
 ---
 
-## 三種值
+## 三個價值觀
 
-| 值     | UI 標籤              | 行為                                                                                                                             |
-| ------ | -------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `auto` | `自動（雙協定堆疊）` | 由作業系統選擇位址家族。若代理主機為 IP 位址字面值，其位址家族由該字面值決定；若為主機名稱，則兩種位址家族皆可使用。此為預設值。 |
-| `ipv4` | `僅限 IPv4`          | 將連線固定為 IPv4。若代理主機沒有 IPv4 (A) 記錄，則以關閉方式失敗。                                                              |
-| `ipv6` | `僅限 IPv6`          | 將連線固定為 IPv6。若代理主機沒有 IPv6 (AAAA) 記錄，則以關閉方式失敗。                                                           |
+| 價值   | UI標籤              | 行為                                                                                               |
+| ------ | ------------------- | -------------------------------------------------------------------------------------------------- |
+| `auto` | `Auto (dual-stack)` | OS挑選家庭。對於 IP 字面量代理主機，族是字面量所固有的；對於主機名，兩個系列都有資格。這是預設值。 |
+| `ipv4` | `IPv4 only`         | 將連接固定到IPv4。如果代理主機沒有IPv4 (A) 記錄，則關閉失敗。                                      |
+| `ipv6` | `IPv6 only`         | 將連接固定到IPv6。如果代理主機沒有IPv6 (AAAA) 記錄，則關閉失敗。                                   |
 
-UI 字串位於 `src/i18n/messages/en.json`（`labelFamily`、`familyAuto`、`familyIpv4`、`familyIpv6`、`familyHint`）。
+UI字串存在於`src/i18n/messages/en.json` （`labelFamily`、 `familyAuto`、 `familyIpv4`、 `familyIpv6`、 `familyHint`）。
 
 ---
 
-## 如何設定
+## 如何配置
 
 ### 儀表板
 
-選擇器位於 **Proxy Pool** 分頁的代理表單中：
+選擇器是代理形式的**代理池**選項卡：
 
-1. 開啟 **Dashboard → Settings → Proxy → Proxy Pool**
+1. 打開**儀表板→設定→代理→代理池**
 2. 新增或編輯代理
-3. 將 **IP 位址家族** 下拉式選單設為 `自動（雙協定堆疊）`、`僅限 IPv4` 或 `僅限 IPv6`
-4. 儲存
+3. 設定**IP家族**下拉至`Auto (dual-stack)`、 `IPv4 only`或`IPv6 only`
+4. 節省
 
-此控制項由 `ProxyRegistryManager.tsx` 渲染（掛載於 `proxy/ProxyPoolTab.tsx`）。
+此控制由`ProxyRegistryManager.tsx`呈現（安裝在`proxy/ProxyPoolTab.tsx`）。
 
 ### API
 
-`family` 欄位是代理登錄建立／更新酬載的一部分，由 `createProxyRegistrySchema` / `updateProxyRegistrySchema`（`src/shared/validation/schemas.ts`）驗證，並由 `POST` / `PATCH /api/v1/management/proxies` 處理：
+`family`欄位是代理註冊表create/update有效負載的一部分，由`createProxyRegistrySchema` / `updateProxyRegistrySchema` (`src/shared/validation/schemas.ts`) 驗證並由`POST` / `PATCH /api/v1/management/proxies`處理：
 
 ```bash
-# 建立僅限 IPv6 的代理
+# Create an IPv6-only proxy
 curl -X POST http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{
@@ -108,15 +108,15 @@ curl -X POST http://localhost:20128/api/v1/management/proxies \
     "family": "ipv6"
   }'
 
-# 將現有代理變更為僅限 IPv4
+# Change an existing proxy to IPv4-only
 curl -X PATCH http://localhost:20128/api/v1/management/proxies \
   -H "Content-Type: application/json" \
   -d '{ "id": "proxy-uuid-here", "family": "ipv4" }'
 ```
 
-上游代理項目所使用的行內代理設定物件也接受相同欄位（`upstream_proxy_config.family`，請參閱[資料模型](#data-model)）。
+用於上游代理條目的內聯代理組態物件（`upstream_proxy_config.family`，請參閱[資料模型](#data-model)）也接受相同的欄位。
 
-如需代理 CRUD／指派 API 的其餘資訊，請參閱 [PROXY_GUIDE.md](../ops/PROXY_GUIDE.md)。
+關於代理CRUD/assignment API的其餘部分，請參閱[PROXY_GUIDE.md](../ops/PROXY_GUIDE.md) 。
 
 ---
 

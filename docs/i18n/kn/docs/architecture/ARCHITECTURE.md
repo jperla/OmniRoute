@@ -511,12 +511,13 @@ FSM ಪರಿವರ್ತನೆಗಳು ಆಟೋ ಕಾಂಬೊದ ಸ್ಕ�
 - WebSocket ಹ್ಯಾಂಡ್ಶೇಕ್ ದೃಢೀಕರಣ: `src/lib/ws/handshake.ts` — API ಕೀ ಅಥವಾ ಸೆಷನ್ ಕುಕೀ ಮೂಲಕ WS ಅಪ್ಗ್ರೇಡ್ ವಿನಂತಿಗಳನ್ನು ಮೌಲ್ಯೀಕರಿಸುತ್ತದೆ
 - ಲೈವ್ ಡ್ಯಾಶ್ಬೋರ್ಡ್ WebSocket ದೃಢೀಕರಣ: `src/server/ws/liveServer.ts` — ಸೈಡ್ಕಾರ್ (`LIVE_WS_PORT` ಪೋರ್ಟ್) ಡ್ಯಾಶ್ಬೋರ್ಡ್ ಸೆಷನ್ ಕುಕೀ ಅಥವಾ ನಿರ್ವಹಣಾ ಸ್ಕೋಪ್ (`manage`/`admin`) ಹೊಂದಿರುವ Bearer API ಕೀಯನ್ನು ಸ್ವೀಕರಿಸುತ್ತದೆ; ಕೇವಲ ಇನ್ಫರೆನ್ಸ್ಗಾಗಿ ಇರುವ ಕೀಗಳನ್ನು ನಿರಾಕರಿಸಲಾಗುತ್ತದೆ. ಇದರ ಆಂತರಿಕ `POST /__omniroute_event` ಪ್ರಕಾಶಕ ಎಂಡ್ಪಾಯಿಂಟ್ ಯಾವುದೇ ಪ್ರಾಕ್ಸಿ-ಹಾಪ್ ಹೆಡರ್ (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`) ಇಲ್ಲದಿದ್ದಾಗ ಮಾತ್ರ ಲೂಪ್ಬ್ಯಾಕ್ ಪೀರ್ಗಳನ್ನು ಸ್ವೀಕರಿಸುತ್ತದೆ
 
-## 5) ಕ್ಲೌಡ್ ಸಿಂಕ್
+## 5) ಮೇಘ ಸಿಂಕ್
 
-- ಶೆಡ್ಯೂಲರ್ ಆರಂಭೀಕರಣ: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- ಶೆಡ್ಯೂಲರ್ init: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
 - ಆವರ್ತಕ ಕಾರ್ಯ: `src/shared/services/cloudSyncScheduler.ts`
 - ಆವರ್ತಕ ಕಾರ್ಯ: `src/shared/services/modelSyncScheduler.ts`
-- ನಿಯಂತ್ರಣ ರೂಟ್: `src/app/api/sync/cloud/route.ts`
+- ಆವರ್ತಕ ಕಾರ್ಯ (ಪ್ರತಿ ಸಂಪರ್ಕಕ್ಕೆ ಆಯ್ಕೆಮಾಡುವುದು): `src/shared/services/modelHealthCheckScheduler.ts` — ಸಂಪರ್ಕದ ಮಾದರಿಗಳನ್ನು ಪರೀಕ್ಷಿಸುತ್ತದೆ, ವೈಫಲ್ಯಗಳನ್ನು ಸ್ವಯಂ-ಮರೆಮಾಡುತ್ತದೆ ಮತ್ತು ಅದು ಸ್ವತಃ ಮರೆಮಾಡಿದ್ದನ್ನು ಮಾತ್ರ ಮರುಸ್ಥಾಪಿಸುತ್ತದೆ (`src/lib/db/modelHealthAutoHidden.ts`)
+- ನಿಯಂತ್ರಣ ಮಾರ್ಗ: `src/app/api/sync/cloud/route.ts`
 
 ## ವಿನಂತಿಯ ಜೀವನಚಕ್ರ (`/v1/chat/completions`)
 

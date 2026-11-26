@@ -511,12 +511,13 @@ DB Steeti Ngalaba (SQLite):
 - Nyocha njirimara handshake WebSocket: `src/lib/ws/handshake.ts` — na-enyocha arịrịọ nkwalite WS site na igodo API ma ọ bụ kuki session
 - Nyocha njirimara WebSocket nke dashboard dị ndụ: `src/server/ws/liveServer.ts` — sidecar (port `LIVE_WS_PORT`) na-anabata kuki session dashboard ma ọ bụ igodo Bearer API nwere scope njikwa (`manage`/`admin`); a na-ajụ igodo inference-only. Endpoint publisher `POST /__omniroute_event` nke ime ya na-anabata naanị ndị ogbo loopback mgbe header proxy-hop (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`) adịghị
 
-## 5) Mmekọrịta Cloud
+## 5) Mmekọrịta igwe ojii
 
-- Mbido scheduler: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
-- Ọrụ oge niile: `src/shared/services/cloudSyncScheduler.ts`
-- Ọrụ oge niile: `src/shared/services/modelSyncScheduler.ts`
-- Route njikwa: `src/app/api/sync/cloud/route.ts`
+- Onye nhazi oge: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- Ọrụ oge: `src/shared/services/cloudSyncScheduler.ts`
+- Ọrụ oge: `src/shared/services/modelSyncScheduler.ts`
+- Ọrụ nke oge (ịbanye n'otu njikọ): `src/shared/services/modelHealthCheckScheduler.ts` — na-anwale ụdị njikọ, na-ezobe ọdịda na-akpaghị aka wee weghachi naanị ihe ọ zoro onwe ya (`src/lib/db/modelHealthAutoHidden.ts`)
+- Ụzọ njikwa: `src/app/api/sync/cloud/route.ts`
 
 ## Usoro Ndụ Arịrịọ (`/v1/chat/completions`)
 

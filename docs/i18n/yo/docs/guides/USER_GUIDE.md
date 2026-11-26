@@ -430,7 +430,7 @@ Nigbati o ko nilo OmniRoute mọ, a pese awọn iwe afọwọkọ iyara meji fun
 ### VPS Gbigbe
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -512,8 +512,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -600,7 +600,7 @@ post_install() {
 | Ayípadà                                 | Aiyipada                 | Apejuwe                                                                                                                                   |
 | --------------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------- |
 | `JWT_SECRET`                            | _(ti ipilẹṣẹ laifọwọyi)_ | JWT wíwọlé ìkọ̀kọ̀ — laifọwọyi ti ipilẹṣẹ lori ṣiṣe akọkọ ati tẹsiwaju si `server.env`; ṣeto ni kedere nigbati awọn data liana ni ephemeral |
-| `INITIAL_PASSWORD`                      | _(a ko ṣeto) _           | Ọrọ igbaniwọle akọkọ. awọn fifi sori npm/source bẹrẹ pẹlu `CHANGEME`: rọpo rẹ. Unset: onboarding oso                                      |
+| `INITIAL_PASSWORD`                      | _(a ko ṣeto)_            | Ọrọ igbaniwọle akọkọ. awọn fifi sori npm/source bẹrẹ pẹlu `CHANGEME`: rọpo rẹ. Unset: onboarding oso                                      |
 | `DATA_DIR`                              | `~/.omniroute`           | Itọsọna data (db, lilo, awọn akọọlẹ)                                                                                                      |
 | `PORT`                                  | aiyipada ilana           | Ibudo iṣẹ (`20128` ninu awọn apẹẹrẹ)                                                                                                      |
 | `HOSTNAME`                              | aiyipada ilana           | Di agbalejo (awọn aiyipada Docker si `0.0.0.0`)                                                                                           |
@@ -734,7 +734,7 @@ Yan ìpele kan pato (`mygw`, `acme-proxy`). Ti awọn ibeere si ipade aṣa ba k
 Awọn bọtini wọnyi lọ sinu `providerSpecificData` asopọ (fun apẹẹrẹ nipasẹ `PUT /api/providers/{id}`):
 
 - `toolNameMaxLength` (odidi, 1–1024) — fun awọn ọna asopọ ibaramu ọna kika iwiregbe OpenAI eyiti ẹnu-ọna kọ awọn orukọ irinṣẹ gigun. Awọn orukọ gigun ni a firanṣẹ bi awọn inagijẹ kukuru ati mu pada ni idahun. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go ati Muse Code tẹlẹ inagijẹ orukọ ju awọn ohun kikọ 64 lọ laisi eto. Iye asopọ kan rọpo Azure OpenAI / Azure AI Foundry aiyipada (asopọ Azure kan lẹhin ẹnu-ọna ti o muna) ati ṣeto opin fun ipade ibaramu aṣa; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go ati Muse Code pa opin iforukọsilẹ wọn mọ ki o foju rẹ.
-- `quotaEndpoint` — aaye ipari quota/credits ti ẹnu-ọna, ka fun rinhoho ipin ipin dasibodu ati afisona-kito. Ṣiṣẹ lori mejeeji OpenAI- ati Anthropic-ibaramu awọn isopọ; apẹrẹ ni kikun jẹ akọsilẹ ni `open-sse/services/usage/openaiCompatible.ts`.
+- `quotaEndpoint` — aaye ipari quota/credits ti ẹnu-ọna, ka fun rinhoho ipin ipin dasibodu ati afisona-kito. Ṣiṣẹ lori mejeeji OpenAI- ati Anthropic-ibaramu awọn isopọ; apẹrẹ kikun ti wa ni akọsilẹ ni `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
 {
@@ -751,7 +751,7 @@ Awọn bọtini wọnyi lọ sinu `providerSpecificData` asopọ (fun apẹẹr�
 
 ### Chaining OmniRoute ẹlẹgbẹ
 
-Ona-ọna OmniRoute miiran le ṣe afikun bi a** Aṣa OpenAI-ibaramu** olupese. Lo ipilẹ `/v1` ti ẹlẹgbẹ ati URL, bọtini API ti o kere ju ti a ṣejade nipasẹ ẹlẹgbẹ yẹn.
+Ona-ọna OmniRoute miiran le ṣe afikun bi a** Aṣa OpenAI-ibaramu** olupese. Lo `/v1` ipilẹ URL ẹlẹgbẹ ati igbẹhin, bọtini API ti o kere ju ti o ti gbejade nipasẹ ẹlẹgbẹ yẹn.
 
 Fun awọn ẹwọn ilọtun-pada tabi awọn ẹwọn hop-pupọ, jẹ ki ẹṣọ lupu ijade ṣiṣẹ ni gbogbo ẹnu-ọna:
 
@@ -824,7 +824,7 @@ Dapada awọn awoṣe akojọpọ nipasẹ olupese pẹlu awọn oriṣi (`chat`
 - Akọkọ jeki fifi `cloudflared` sori ẹrọ nikan nigbati o nilo; nigbamii tun bẹrẹ tun lo alakomeji iṣakoso kanna
 - Awọn Tunnels iyara kii ṣe atunṣe-laifọwọyi lẹhin OmniRoute tabi atunbere eiyan; tun mu wọn ṣiṣẹ lati dasibodu nigbati o nilo
 - Tunnel URLs jẹ ephemeral ati yi pada ni gbogbo igba ti o ba stop/start oju eefin naa
-- Aiyipada Awọn Tunnel Iyara ti iṣakoso si gbigbe HTTP/2 lati yago fun awọn ikilọ ifipamọ QUIC UDP ariwo ni awọn apoti ti o ni ihamọ
+- Aiyipada Awọn Tunnel Iyara ti iṣakoso si gbigbe HTTP/2 lati yago fun awọn ikilọ ifipamọ QUIC UDP alariwo ni awọn apoti ti o ni ihamọ
 - Ṣeto `CLOUDFLARED_PROTOCOL=quic` tabi `auto` ti o ba fẹ lati bori yiyan irinna ti iṣakoso
 - Ṣeto `CLOUDFLARED_BIN` ti o ba fẹran lilo alakomeji `cloudflared` ti a ti fi sii tẹlẹ dipo igbasilẹ iṣakoso
 - Cloudflare Eefin iyara, Tailscale Funnel, ati awọn panẹli eefin ngrok le ṣe afihan tabi farapamọ sinu** Eto → Irisi** . Ìbòmọ́lẹ̀ pánẹ́ẹ̀lì kan kò dá eefin tí ń ṣiṣẹ́ dúró.
@@ -881,8 +881,8 @@ Tunto nipasẹ** Dasibodu → Eto → afisona** . Dasibodu naa ṣafihan awọn 
 - `least-used` ati `cost-optimized`
 - `auto` — Dimegilio-ìṣó kọja gbogbo awọn oludije
 - `lkgp` (Olupese to dara ti a mọ kẹhin) — pin si olupese aṣeyọri ti o kẹhin, lẹhinna ṣubu pada si awọn ofin
-- `context-optimized` — mu awoṣe pẹlu ferese ọrọ-ọrọ ọfẹ ti o tobi julọ
-- awọn ẹwọn `context-relay` — awọn awoṣe ọrọ-gigun fun awọn titan-tẹle
+- `context-optimized` — gbiyanju awoṣe pẹlu ferese ọrọ ọrọ ti o tobi julọ ti a mọ ni akọkọ
+- `context-relay` — ibere ayo pẹlu akopọ imudani nigbati ibaraẹnisọrọ ba lọ si akọọlẹ miiran
 
 #### Akọsori Ikoni Alalepo Ita
 
@@ -902,7 +902,7 @@ underscores_in_headers on;
 
 #### Wildcard awoṣe Aliases
 
-Ṣẹda awọn awoṣe kaadi egan lati yi awọn orukọ awoṣe pada:
+Ṣẹda awọn awoṣe kaadi igbẹ lati yi awọn orukọ awoṣe pada:
 
 ```
 Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
@@ -1066,7 +1066,7 @@ Oju-iwe eto ti ṣeto sinu** 7 awọn taabu** fun irọrun lilọ kiri:
 | **Resilience**         | Beere isinyi, itutu asopọ asopọ, atunto fifọ olupese, ati ihuwasi iduro-fun-itutu                                                                         |
 | **To ti ni ilọsiwaju** | Iṣeto-aṣoju agbaye (HTTP/SOCKS5), aṣoju aṣoju-olupese dojukọ                                                                                              |
 
-Gbogboogbo ko tun ṣe pidánpidán kika-nikan gedu ati awọn akọsilẹ kaṣe. Idaduro aaye data ati awọn eto iṣapeye ti wa ni idaduro nipasẹ `/api/settings/database`; imukuro kaṣe afọwọṣe nlo `DELETE /api/cache`. Ibeere ati awọn bọtini awọn ila iwe aṣoju jẹ iṣakoso nipasẹ `CALL_LOGS_TABLE_MAX_ROWS` ati `PROXY_LOGS_TABLE_MAX_ROWS`.
+Gbogboogbo ko ṣe ẹda-iwe kika-nikan ati awọn akọsilẹ kaṣe mọ. Idaduro aaye data ati awọn eto iṣapeye ti wa ni idaduro nipasẹ `/api/settings/database`; imukuro kaṣe afọwọṣe nlo `DELETE /api/cache`. Ibeere ati awọn bọtini awọn ila iwe aṣoju jẹ iṣakoso nipasẹ `CALL_LOGS_TABLE_MAX_ROWS` ati `PROXY_LOGS_TABLE_MAX_ROWS`.
 
 ---
 
@@ -1153,9 +1153,9 @@ Awọn ọna kika ohun ti o ni atilẹyin fun kikọ silẹ: `mp3`, `wav`, `m4a`
 | **Laileto**           | Yiyan awoṣe laileto lati konbo fun ibeere kọọkan                          |
 | **Ti iwuwo**          | Awọn ipa-ọna ni iwọn ti o da lori awọn iwuwo ti a sọtọ fun awoṣe          |
 | **Ti o kere julọ-Lo** | Awọn ipa ọna si awoṣe pẹlu awọn ibeere aipẹ diẹ (nlo awọn metiriki konbo) |
-| **Iṣapeye idiyele**   | Awọn ipa ọna si awoṣe to wa lawin (nlo tabili idiyele)                    |
+| **Iṣapeye iye owo**   | Awọn ọna si awoṣe ti o wa lawin (nlo tabili idiyele)                      |
 
-Awọn aipe konbo agbaye le ṣeto sinu** Dasibodu → Eto → afisona → Konbo aiyipada** . Awọn akoko ibi-afẹde Konbo jogun akoko akoko ibeere lọwọlọwọ nipasẹ aiyipada. Lo** Akoko ibi-afẹde (awọn iṣẹju-aaya)** lori awọn aseku konbo tabi konbo ẹni kọọkan nikan nigbati opin ibi-afẹde kukuru kan yẹ ki o fa ipadasẹhin yiyara.
+Awọn aipe konbo agbaye le ṣeto sinu** Dasibodu → Eto → afisona → Konbo aiyipada** . Awọn akoko ibi-afẹde Konbo jogun akoko akoko ibeere lọwọlọwọ nipasẹ aiyipada. Lo** Akoko ibi-afẹde (awọn iṣẹju-aaya)** lori awọn aseku konbo tabi konbo kọọkan nikan nigbati opin ibi-afẹde kukuru kan yẹ ki o fa ipadabọ yiyara.
 
 Awọn iṣapeye konbo-aiduro odo jẹ ijade-inu. Fi silẹ** Awọn iṣapeye aipe-odo** alaabo lati ṣe idiwọ awọn ẹya airi wọnyi lati awọn ibi-afẹde ipadasẹhin ere-ije, fo awọn ibi-afẹde ti o da lori itan-akọọlẹ TTFT, tabi titẹkuro awọn ibeere isubu; muu gba ọ laaye lati tunto hedging, asọtẹlẹ TTFT foo, ati funmorawon fallback amojuto lati isowo routing/request iṣootọ fun kekere iru lairi.
 
@@ -1329,34 +1329,36 @@ Wo [API_REFERENCE.md](../reference/API_REFERENCE.md) fún àkójọ endpoint kí
 
 ---
 
-## 💻 CLI Abẹ́nú
+## 💻 Ti abẹnu CLI
 
-OmniRoute ní CLI abẹ́nú (`omniroute …`) fún ìṣètò, àyẹ̀wò ìṣòro, àti ìṣàkóso nígbà ìṣiṣẹ́. Èyí **yàtọ̀ sí ojú-ìwé "Àwọn Irinṣẹ́ CLI" nínú dashboard**, èyí tí ń ṣètò àwọn CLI láti ọ̀dọ̀ ẹlòmíràn (Claude Code, Cursor, Codex, Cline, …) kí wọ́n lè bá OmniRoute sọ̀rọ̀.
+OmniRoute gbejade CLI inu (`omniroute …`) fun iṣeto, awọn iwadii aisan, ati iṣakoso akoko asiko. Eyi ni** yato si oju-iwe "CLI Tools" ninu dasibodu naa** , eyiti o ṣe atunto CLIs ẹni-kẹta ( koodu Claude, Cursor, Codex, Cline, …) ki wọn le ba OmniRoute sọrọ.
 
 ```bash
-omniroute setup                    # Olùrànlọ́wọ́ ìbánisọ̀rọ̀ (ọ̀rọ̀ aṣínà, àwọn olùpèsè, àwọn àkójọpọ̀)
-omniroute setup --non-interactive  # Ó bá CI mu
-omniroute doctor                   # Àyẹ̀wò ìlera (àpò data, DB, àwọn olùpèsè, àwọn port)
-omniroute providers available      # Ṣàkójọ àwọn olùpèsè tí a ṣe àtìlẹ́yìn fún
-omniroute providers list           # Ṣàkójọ àwọn ìsopọ̀ tí a ti ṣètò
-omniroute providers test <id>      # Ṣe àyẹ̀wò ìsopọ̀ olùpèsè ní tààrà
-omniroute combos list              # Ṣàkójọ àwọn àkójọpọ̀
-omniroute combos switch <name>     # Ṣètò àkójọpọ̀ àiyipada
-omniroute models                   # Ṣàkójọ àwọn model tó wà (--json, --search)
-omniroute keys add | list | remove # Ṣàkóso àwọn kọ́kọ́rọ́ API láti terminal
-omniroute backup                   # Ya àwòrán ìpamọ́ ìṣètò + DB
-omniroute restore [<timestamp>]    # Mú padà láti inú àwòrán ìpamọ́
-omniroute health                   # Ìlera ní ẹ̀kúnrẹ́rẹ́ (breakers, cache, memory)
-omniroute quota                    # Lílo ìwọ̀n olùpèsè
-omniroute mcp status               # Ipò server MCP
-omniroute a2a status               # Ipò server A2A
-omniroute tunnel list|create|stop  # Àwọn tunnel Cloudflare/Tailscale/ngrok
-omniroute reset-password           # Tún ọ̀rọ̀ aṣínà alákóso ṣètò
-omniroute --mcp                    # Bẹ̀rẹ̀ server MCP lórí stdio
-omniroute --port 3000              # Bẹ̀rẹ̀ server lórí port àkànṣe
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-Ìmọ̀ràn: so `omniroute doctor --json` pọ̀ mọ́ irinṣẹ́ àbójútó rẹ láti fi ìkìlọ̀ ránṣẹ́ nípa àwọn ìsopọ̀ olùpèsè tí kò ní ìlera.
+Imọran: so `omniroute doctor --json` pọ pẹlu ohun elo ibojuwo rẹ lati titaniji lori fifi sori agbegbe ti bajẹ. `doctor` ko ṣe idanwo awọn asopọ olupese; lo `omniroute providers test <id>` fun eyi.
 
 ---
 

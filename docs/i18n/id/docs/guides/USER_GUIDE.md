@@ -423,7 +423,7 @@ Saat Anda tidak lagi memerlukan OmniRoute, kami menyediakan dua skrip cepat untu
 
 | Memerintah               | Tindakan                                                                                      |
 | ------------------------ | --------------------------------------------------------------------------------------------- |
-| `npm run uninstall`      | Menghapus aplikasi sistem tetapi** menyimpan DB dan konfigurasi Anda** di `~/.omniroute`.     |
+| `npm run uninstall`      | Menghapus aplikasi sistem tapi** menyimpan DB dan konfigurasi Anda** di `~/.omniroute`.       |
 | `npm run uninstall:full` | Menghapus aplikasi AND secara permanen** menghapus semua konfigurasi, kunci, dan database** . |
 
 > Catatan: Untuk menjalankan perintah ini, navigasikan ke folder proyek OmniRoute (jika Anda mengkloningnya) dan jalankan. Alternatifnya, jika diinstal secara global, Anda cukup menjalankan `npm uninstall -g omniroute`.
@@ -431,7 +431,7 @@ Saat Anda tidak lagi memerlukan OmniRoute, kami menyediakan dua skrip cepat untu
 ### Penerapan VPS
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -513,8 +513,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -752,7 +752,7 @@ Kunci-kunci ini masuk ke `providerSpecificData` koneksi (misalnya melalui `PUT /
 
 ### Merangkai OmniRoute Rekan
 
-Gerbang OmniRoute lain dapat ditambahkan sebagai a** Kompatibel dengan OpenAI khusus** penyedia. Gunakan `/v1` basis URL rekan dan kunci API khusus dengan hak istimewa paling rendah yang dikeluarkan oleh rekan tersebut.
+Gerbang OmniRoute lain dapat ditambahkan sebagai a** Kompatibel dengan OpenAI khusus** penyedia. Gunakan basis `/v1` URL rekan dan kunci API khusus dengan hak istimewa paling rendah yang dikeluarkan oleh rekan tersebut.
 
 Untuk rantai timbal balik atau multi-hop, aktifkan opt-in loop guard di setiap gateway:
 
@@ -828,11 +828,11 @@ Mengembalikan model yang dikelompokkan berdasarkan penyedia dengan tipe (`chat`,
 - Terkelola Quick Tunnels default ke HTTP/2 transport untuk menghindari peringatan buffer QUIC UDP yang berisik dalam wadah yang dibatasi
 - Tetapkan `CLOUDFLARED_PROTOCOL=quic` atau `auto` jika Anda ingin mengganti pilihan transportasi terkelola
 - Setel `CLOUDFLARED_BIN` jika Anda lebih suka menggunakan biner `cloudflared` yang sudah diinstal sebelumnya daripada unduhan terkelola
-- panel Cloudflare Quick Tunnel, Tailscale Funnel, dan ngrok Tunnel dapat ditampilkan atau disembunyikan** Pengaturan → Penampilan** . Menyembunyikan panel tidak menghentikan terowongan yang sedang berjalan.
+- Cloudflare Quick Tunnel, Tailscale Funnel, dan ngrok Tunnel panel dapat ditampilkan atau disembunyikan** Pengaturan → Penampilan** . Menyembunyikan panel tidak menghentikan terowongan yang sedang berjalan.
 
 ### LLM Gateway Intelligence (Fase 9)
 
-- **Cache Semantik** — Auto-cache non-streaming, suhu = 0 tanggapan (bypass dengan `X-OmniRoute-No-Cache: true`)
+- **Cache Semantik** — Cache otomatis non-streaming, suhu = 0 tanggapan (bypass dengan `X-OmniRoute-No-Cache: true`)
 - **Minta Idempotensi** — Menghapus duplikat permintaan dalam waktu 5 detik melalui header `Idempotency-Key` atau `X-Request-Id`
 - **Pelacakan Kemajuan** — Ikut serta acara SSE `event: progress` melalui header `X-OmniRoute-Progress: true`
 
@@ -867,7 +867,7 @@ Konfigurasikan melalui** Dasbor → Pengaturan → Perutean** . Dasbor memaparka
 | ------------------------------ | ------------------------------------------------------------------------------------------------------- |
 | **Isi Dulu**                   | Menggunakan akun dalam urutan prioritas akun utama — menangani semua permintaan hingga tidak tersedia   |
 | **Usul**                       | Menggilir semua akun dengan batas melekat yang dapat dikonfigurasi (default: 3 panggilan per akun)      |
-| **P2C (Kekuatan Dua Pilihan)** | Memilih 2 akun acak dan rute ke yang lebih sehat memuat saldo — dengan kesadaran akan kesehatan         |
+| **P2C (Kekuatan Dua Pilihan)** | Pilih 2 akun acak dan arahkan ke akun yang lebih sehat, isi saldo — dengan kesadaran akan kesehatan     |
 | **Acak**                       | Memilih akun secara acak untuk setiap permintaan menggunakan pengacakan Fisher-Yates                    |
 | **Paling Sedikit Digunakan**   | Merutekan ke akun dengan stempel waktu `lastUsedAt` terlama, mendistribusikan lalu lintas secara merata |
 | **Biaya Dioptimalkan**         | Merutekan ke akun dengan nilai prioritas terendah, mengoptimalkan penyedia berbiaya terendah            |
@@ -882,8 +882,8 @@ Konfigurasikan melalui** Dasbor → Pengaturan → Perutean** . Dasbor memaparka
 - `least-used` dan `cost-optimized`
 - `auto` — berbasis skor di semua kandidat
 - `lkgp` (Penyedia Baik yang Terakhir Diketahui) — menyematkan ke penyedia terakhir yang berhasil, lalu kembali ke aturan
-- `context-optimized` — memilih model dengan jendela konteks bebas terbesar
-- `context-relay` — merangkai model konteks panjang untuk putaran lanjutan
+- `context-optimized` — mencoba model dengan jendela konteks terbesar yang diketahui terlebih dahulu
+- `context-relay` — urutan prioritas ditambah ringkasan handoff ketika percakapan berpindah ke akun lain
 
 #### Header Sesi Lengket Eksternal
 
@@ -1330,34 +1330,36 @@ Lihat [API_REFERENCE.md](../reference/API_REFERENCE.md) untuk katalog endpoint l
 
 ---
 
-## 💻 CLI Internal
+## 💻 CLI internal
 
-OmniRoute menyediakan CLI internal (`omniroute …`) untuk penyiapan, diagnostik, dan kontrol runtime. Ini **terpisah dari halaman "CLI Tools" di dasbor**, yang mengonfigurasi CLI pihak ketiga (Claude Code, Cursor, Codex, Cline, …) agar dapat berkomunikasi dengan OmniRoute.
+OmniRoute mengirimkan CLI internal (`omniroute …`) untuk pengaturan, diagnostik, dan kontrol waktu proses. Ini** terpisah dari halaman "CLI Tools" di dasbor** , yang mengonfigurasi CLIs pihak ketiga ( Kode Claude, Cursor, Codex, Cline, …) sehingga mereka dapat berbicara dengan OmniRoute.
 
 ```bash
-omniroute setup                    # Wizard interaktif (kata sandi, penyedia, kombo)
-omniroute setup --non-interactive  # Cocok untuk CI
-omniroute doctor                   # Diagnostik kesehatan (direktori data, DB, penyedia, port)
-omniroute providers available      # Tampilkan penyedia yang didukung
-omniroute providers list           # Tampilkan koneksi yang dikonfigurasi
-omniroute providers test <id>      # Uji langsung koneksi penyedia
-omniroute combos list              # Tampilkan kombo
-omniroute combos switch <name>     # Tetapkan kombo default
-omniroute models                   # Tampilkan model yang tersedia (--json, --search)
-omniroute keys add | list | remove # Kelola kunci API dari terminal
-omniroute backup                   # Buat snapshot konfigurasi + DB
-omniroute restore [<timestamp>]    # Pulihkan dari snapshot
-omniroute health                   # Informasi kesehatan mendetail (pemutus, cache, memori)
-omniroute quota                    # Penggunaan kuota penyedia
-omniroute mcp status               # Status server MCP
-omniroute a2a status               # Status server A2A
-omniroute tunnel list|create|stop  # Tunnel Cloudflare/Tailscale/ngrok
-omniroute reset-password           # Atur ulang kata sandi admin
-omniroute --mcp                    # Mulai server MCP melalui stdio
-omniroute --port 3000              # Mulai server pada port khusus
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-Kiat: pasangkan `omniroute doctor --json` dengan alat pemantauan Anda untuk memberikan peringatan jika koneksi penyedia tidak sehat.
+Tip: pasangkan `omniroute doctor --json` dengan alat pemantauan Anda untuk memperingatkan instalasi lokal yang rusak. `doctor` tidak menguji koneksi penyedia; gunakan `omniroute providers test <id>` untuk itu.
 
 ---
 

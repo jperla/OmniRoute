@@ -424,7 +424,7 @@ Nuair nach bhfuil OmniRoute ag teastáil uait a thuilleadh, cuirimid dhá script
 ### VPS Imscaradh
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -506,8 +506,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -697,8 +697,8 @@ Nó bain úsáid as an Deais:** Soláthraithe → [Soláthraí] → Múnlaí Sai
 
 Nótaí:
 
-- déantar soláthraithe OpenRouter agus OpenAI/Anthropic-compatible a bhainistiú ó** Múnlaí ar Fáil** amháin. Cuir leis, iompórtáil agus sioncronú uathoibríoch an talamh go léir sa liosta samhlacha céanna atá ar fáil, mar sin níl aon roinn ar leith ar Mhúnlaí Custaim do na soláthraithe sin.
-- Tá an** Múnlaí Saincheaptha** Tá an rannán seo dírithe ar sholáthraithe nach nochtar allmhairí bainistithe de réir samhlacha atá ar fáil.
+- déantar soláthraithe OpenRouter agus OpenAI/Anthropic-compatible a bhainistiú ó** Múnlaí ar Fáil** amháin. Cuir leis, iompórtáil agus sioncronú uathoibríoch gach talamh sa liosta samhlacha céanna atá ar fáil, mar sin níl aon roinn ar leith ar Mhúnlaí Custaim do na soláthraithe sin.
+- Tá an** Múnlaí Saincheaptha** Tá an rannán seo dírithe ar sholáthróirí nach nochtar allmhairí bainistithe de réir samhlacha.
 
 ### Soláthraithe Comhoiriúnacha OpenAI Saincheaptha
 
@@ -763,9 +763,9 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Ní fhaigheann ach iarratais a sheoltar chuig piara URL atá liostaithe go sainráite an ceanntásc `X-OmniRoute-Peer-Trace`. Diúltaíonn geata do chás arís agus arís eile ID nó buiséad hop ídithe le HTTP `508 Loop Detected`; Ní fhaigheann gnáthsholáthraithe réamhtheachtacha aon mheiteashonraí piaraí.
+Ní fhaigheann ach iarratais a sheoltar chuig piara URL atá ceadaithe go sainráite an ceanntásc `X-OmniRoute-Peer-Trace`. Diúltaíonn geata do chás arís agus arís eile ID nó buiséad hop ídithe le HTTP `508 Loop Detected`; Ní fhaigheann gnáthsholáthraithe réamhtheachtacha aon mheiteashonraí piaraí.
 
-Ní macasamhlú bunachar sonraí nó teip óstach é slabhraiú piaraí. Coinníonn gach geata stát SQLite neamhspleách, caches, cuntair rátaí, agus seisiúin. Bain úsáid as seachvótálaí droim ar ais atá seiceáilte ag an tsláinte nó teip tharchuir cliant le haghaidh infhaighteacht active/passive nó active/active, agus ná cuir aon bhunachar sonraí SQLite amháin isteach in ilchúinsí reatha OmniRoute.
+Ní macasamhlú bunachar sonraí nó teip óstach é slabhraiú piaraí. Coinníonn gach geata stát SQLite neamhspleách, caches, cuntair rátaí, agus seisiúin. Bain úsáid as seachvótálaí droim ar ais atá seiceáilte ag an tsláinte nó teip tharchuir cliant le haghaidh infhaighteacht active/passive nó active/active, agus ná cuir aon bhunachar sonraí SQLite amháin isteach i gcásanna éagsúla OmniRoute reatha.
 
 ### Bealaí Soláthraí Tiomnaithe
 
@@ -875,8 +875,8 @@ Cumraigh via** Socruithe Painéal → → Ródú** . Nochtann an painéal na sé
 - `least-used` agus `cost-optimized`
 - `auto` — scór-tiomáinte ar fud na n-iarrthóirí go léir
 - `lkgp` (Soláthraí Dea-Aitheanta Deireanach) bioráin — chuig an soláthraí deireanach ar éirigh leis, agus ansin tagann sé ar ais chuig na rialacha
-- Roghnaíonn `context-optimized` — an tsamhail leis an bhfuinneog comhthéacs saor in aisce is mó
-- slabhraí `context-relay` — samhlacha comhthéacs fada le haghaidh casadh leantacha
+- Déanann `context-optimized` — iarracht an tsamhail leis an bhfuinneog comhthéacs is mó atá ar eolas ar dtús
+- ord tosaíochta `context-relay` — móide achoimre láimhe nuair a bhogann an comhrá go cuntas eile
 
 #### Ceanntásc Seachtrach Seisiún Greamaitheach
 
@@ -1060,7 +1060,7 @@ Eagraítear leathanach na socruithe isteach** 7 cluaisín** le haghaidh loingseo
 | **Athléimneacht** | Iarr scuaine, fuarú nasc, cumraíocht an tsoláthraí briste, agus iompar fanacht le haghaidh fuarú                                                                                                |
 | **Casta**         | Sáraíonn cumraíocht seachfhreastalaí dhomhanda (HTTP/SOCKS5), seachfhreastalaí in aghaidh an tsoláthraí                                                                                         |
 
-Ní dhúblaíonn Ginearálta logáil inléite amháin agus nótaí taisce a thuilleadh. Leantar le socruithe coinneála bunachar sonraí agus barrfheabhsú trí `/api/settings/database`; Úsáideann imréitigh taisce láimhe `DELETE /api/cache`. Is iad `CALL_LOGS_TABLE_MAX_ROWS` agus `PROXY_LOGS_TABLE_MAX_ROWS` a rialaíonn caipíní ró loga iarratais agus seachfhreastalaí.
+Ní dhúblaíonn Ginearálta logáil inléite amháin agus nótaí taisce a thuilleadh. Leantar le socruithe coinneála agus barrfheabhsú bunachar sonraí trí `/api/settings/database`; Úsáideann imréitigh taisce láimhe `DELETE /api/cache`. Is iad `CALL_LOGS_TABLE_MAX_ROWS` agus `PROXY_LOGS_TABLE_MAX_ROWS` a rialaíonn caipíní ró loga iarratais agus seachfhreastalaí.
 
 ---
 
@@ -1153,7 +1153,7 @@ Is féidir mainneachtainí teaglama domhanda a shocrú isteach** Socruithe Deais
 
 Is rogha an diúltaithe iad optamaithe teaglama nialais-latency. Fág** Optimizations nialais-latency** díchumasaithe chun na gnéithe latency seo a chosc ó spriocanna aisghabhála rásaíochta, gan bacadh le spriocanna bunaithe ar stair TTFT, nó iarratais chúltaca a chomhbhrú; ag cur ar a chumas fálaithe cumraithe, scipeanna tuarthacha TTFT, agus comhbhrú réamhghníomhach aisiompaithe chun dílseacht routing/request a thrádáil le haghaidh latency eireaball níos ísle.
 
-Díchumasaigh** Maolán comharthaí réasúnaíochta** nuair a éilíonn soláthraithe in aghaidh an tsrutha teorainneacha dochta `max_tokens` / `maxOutputTokens`. Nuair a bhíonn sé cumasaithe, ní chuireann ródú teaglama ach spás cúltaca réasúnaíochta do mhúnlaí a bhfuil caipín aschuir aitheanta acu agus fágann sé teorainn chomharthaí an chliaint gan athrú nuair a sháródh an luach maolánach sábháilte an teorainn sin. Má tá teorainn na gcliant os cionn caipín aithnid cheana féin, teannann OmniRoute síos go dtí an caipín sin é sula seoltar an t-iarratas in aghaidh an tsrutha.
+Díchumasaigh** Maolán comharthaí réasúnaíochta** nuair a éilíonn soláthraithe in aghaidh an tsrutha teorainneacha dochta `max_tokens` / `maxOutputTokens`. Nuair a bhíonn sé cumasaithe, ní chuireann ródú teaglama ach spás cúltaca réasúnaíochta do mhúnlaí a bhfuil caipín aschuir aitheanta acu agus fágann sé teorainn chomharthaí an chliaint gan athrú nuair a sháródh an luach maolánach sábháilte an teorainn sin. Má tá teorainn na gcliant os cionn na caidhpe atá ar eolas cheana féin, teannann OmniRoute síos go dtí an caipín sin é sula seoltar an t-iarratas in aghaidh an tsrutha.
 
 ---
 
@@ -1328,7 +1328,9 @@ Seoltar OmniRoute CLI inmheánach (`omniroute …`) le haghaidh socruithe, diagn
 ```bash
 omniroute setup                    # Interactive wizard (password, providers, combos)
 omniroute setup --non-interactive  # CI-friendly
-omniroute doctor                   # Health diagnostics (data dir, DB, providers, ports)
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
 omniroute providers available      # List supported providers
 omniroute providers list           # List configured connections
 omniroute providers test <id>      # Live test a provider connection
@@ -1348,7 +1350,7 @@ omniroute --mcp                    # Start MCP server over stdio
 omniroute --port 3000              # Start the server on a custom port
 ```
 
-Leid: péire `omniroute doctor --json` le d’uirlis monatóireachta chun foláireamh a thabhairt faoi naisc sholáthraí míshláintiúla.
+Leid: péire `omniroute doctor --json` le d’uirlis monatóireachta chun foláireamh a thabhairt faoi shuiteáil áitiúil briste. ní dhéanann `doctor` tástáil ar naisc soláthraithe; úsáid `omniroute providers test <id>` chuige sin.
 
 ---
 

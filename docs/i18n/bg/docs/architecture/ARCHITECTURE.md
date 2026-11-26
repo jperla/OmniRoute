@@ -512,12 +512,13 @@ Cloud Agents обгръща хоствани от трети страни пла
 - Удостоверяване при WebSocket handshake: `src/lib/ws/handshake.ts` — валидира заявките за надграждане до WS чрез API ключ или сесийна бисквитка
 - Удостоверяване за WebSocket връзката на таблото в реално време: `src/server/ws/liveServer.ts` — страничната услуга (порт `LIVE_WS_PORT`) приема сесийна бисквитка на таблото или Bearer API ключ с обхват за управление (`manage`/`admin`); ключове само за inference се отказват. Нейната вътрешна крайна точка за публикуване `POST /__omniroute_event` приема локални loopback клиенти само когато не присъства заглавка за преминаване през прокси (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`)
 
-## 5) Синхронизация с облака
+## 5) Синхронизиране в облак
 
 - Инициализация на планировчика: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
 - Периодична задача: `src/shared/services/cloudSyncScheduler.ts`
 - Периодична задача: `src/shared/services/modelSyncScheduler.ts`
-- Маршрут за управление: `src/app/api/sync/cloud/route.ts`
+- Периодична задача (включване на връзка): `src/shared/services/modelHealthCheckScheduler.ts` — тества моделите на връзката, автоматично скрива грешките и възстановява само това, което е скрило (`src/lib/db/modelHealthAutoHidden.ts`)
+- Контролен път: `src/app/api/sync/cloud/route.ts`
 
 ## Жизнен цикъл на заявка (`/v1/chat/completions`)
 

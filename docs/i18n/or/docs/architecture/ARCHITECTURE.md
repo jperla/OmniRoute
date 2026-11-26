@@ -502,12 +502,13 @@ FSM ଟ୍ରାନ୍ସମିସନ୍ ଅଟୋ କମ୍ବୋ ସ୍କୋ�
 - WebSocket ହ୍ୟାଣ୍ଡଶେକ୍ ପ୍ରମାଣୀକରଣ: `src/lib/ws/handshake.ts` — API କି କିମ୍ବା ସେସନ୍ କୁକି ମାଧ୍ୟମରେ WS ଅପ୍ଗ୍ରେଡ୍ ଅନୁରୋଧଗୁଡ଼ିକୁ ଯାଞ୍ଚ କରେ
 - ଲାଇଭ୍ ଡ୍ୟାସବୋର୍ଡ WebSocket ପ୍ରମାଣୀକରଣ: `src/server/ws/liveServer.ts` — ସାଇଡ୍କାର୍ (ପୋର୍ଟ `LIVE_WS_PORT`) ଏକ ଡ୍ୟାସବୋର୍ଡ ସେସନ୍ କୁକି କିମ୍ବା ପରିଚାଳନା ପରିସର (`manage`/`admin`) ଥିବା ଏକ Bearer API କି ଗ୍ରହଣ କରେ; କେବଳ ଇନ୍ଫରେନ୍ସ ପାଇଁ ଉଦ୍ଦିଷ୍ଟ କିଗୁଡ଼ିକୁ ପ୍ରତ୍ୟାଖ୍ୟାନ କରାଯାଏ। କୌଣସି ପ୍ରକ୍ସି-ହପ୍ ହେଡର୍ (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`) ଉପସ୍ଥିତ ନଥିଲେ ମାତ୍ର ଏହାର ଆଭ୍ୟନ୍ତରୀଣ `POST /__omniroute_event` ପ୍ରକାଶକ ଏଣ୍ଡପଏଣ୍ଟ ଲୁପ୍ବ୍ୟାକ୍ ପିଅର୍ଗୁଡ଼ିକୁ ଗ୍ରହଣ କରେ
 
-## ୫) କ୍ଲାଉଡ୍ ସିଙ୍କ୍
+## 5) କ୍ଲାଉଡ୍ ସିଙ୍କ୍।
 
-- ସମୟ-ସୂଚକ ଆରମ୍ଭ: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
-- ପର୍ଯ୍ୟାୟିକ କାର୍ଯ୍ୟ: `src/shared/services/cloudSyncScheduler.ts`
-- ପର୍ଯ୍ୟାୟିକ କାର୍ଯ୍ୟ: `src/shared/services/modelSyncScheduler.ts`
-- ନିୟନ୍ତ୍ରଣ ରୁଟ: `src/app/api/sync/cloud/route.ts`
+- ଅନୁସୂଚୀତକାରୀ init: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- ପର୍ଯ୍ୟାୟ କାର୍ଯ୍ୟ: `src/shared/services/cloudSyncScheduler.ts`
+- ପର୍ଯ୍ୟାୟ କାର୍ଯ୍ୟ: `src/shared/services/modelSyncScheduler.ts`
+- ପର୍ଯ୍ୟାୟ କାର୍ଯ୍ୟ (ସଂଯୋଗ ପ୍ରତି ଅପ୍ଟ-ଇନ୍): `src/shared/services/modelHealthCheckScheduler.ts` — ଏକ ସଂଯୋଗର ମଡେଲଗୁଡିକ ପରୀକ୍ଷା କରେ, ବିଫଳତାକୁ ଅଟୋ-ଲୁଚାଇଥାଏ ଏବଂ କେବଳ ଯାହା ଲୁଚାଇ ରଖିଥାଏ ତାହା ପୁନ ores ସ୍ଥାପନ କରେ (`src/lib/db/modelHealthAutoHidden.ts`)
+- ନିୟନ୍ତ୍ରଣ ମାର୍ଗ: `src/app/api/sync/cloud/route.ts`
 
 ## ଅନୁରୋଧ ଜୀବନଚକ୍ର (`/v1/chat/completions`)
 

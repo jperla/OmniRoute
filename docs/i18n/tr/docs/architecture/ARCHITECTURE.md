@@ -513,12 +513,13 @@ Etki Alanı Durum Veritabanı (SQLite):
 - WebSocket el sıkışması kimlik doğrulaması: `src/lib/ws/handshake.ts` — WS yükseltme isteklerini API anahtarı veya oturum çerezi aracılığıyla doğrular
 - Canlı dashboard WebSocket kimlik doğrulaması: `src/server/ws/liveServer.ts` — yardımcı işlem (`LIVE_WS_PORT` portu), bir dashboard oturum çerezini veya yönetim kapsamına (`manage`/`admin`) sahip bir Bearer API anahtarını kabul eder; yalnızca çıkarım amaçlı anahtarlar reddedilir. Dahili `POST /__omniroute_event` yayıncı uç noktası, yalnızca proxy geçişi üstbilgisi (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`) mevcut olmadığında geri döngü eşlerini kabul eder
 
-## 5) Bulut Eşzamanlama
+## 5) Bulut Senkronizasyonu
 
 - Zamanlayıcı başlatma: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
 - Periyodik görev: `src/shared/services/cloudSyncScheduler.ts`
 - Periyodik görev: `src/shared/services/modelSyncScheduler.ts`
-- Denetim rotası: `src/app/api/sync/cloud/route.ts`
+- Periyodik görev (bağlantı başına katılım): `src/shared/services/modelHealthCheckScheduler.ts` — bir bağlantının modellerini test eder, hataları otomatik olarak gizler ve yalnızca kendi sakladığını geri yükler (`src/lib/db/modelHealthAutoHidden.ts`)
+- Kontrol rotası: `src/app/api/sync/cloud/route.ts`
 
 ## İstek Yaşam Döngüsü (`/v1/chat/completions`)
 

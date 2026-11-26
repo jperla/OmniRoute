@@ -27,16 +27,17 @@ Sicherheitskontrolle verlassen.
 
 ## Eingebaute Leitplanken
 
-Die Registry lädt beim Import automatisch sechs Leitplanken in der Reihenfolge ihrer Priorität (siehe `registry.ts` → `registerDefaultGuardrails()`):
+Die Registry lädt diese Leitplanken beim Import automatisch in der Reihenfolge ihrer Priorität (siehe `registry.ts` → `registerDefaultGuardrails()`):
 
-| Priorität | Name                | Etappe(n)      | Datei                 |
-| --------- | ------------------- | -------------- | --------------------- |
-| `5`       | `vision-bridge`     | `preCall`      | `visionBridge.ts`     |
-| `6`       | `audio-bridge`      | `preCall`      | `audioBridge.ts`      |
-| `7`       | `video-bridge`      | `preCall`      | `videoBridge.ts`      |
-| `10`      | `pii-masker`        | `pre` + `post` | `piiMasker.ts`        |
-| `20`      | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
-| `95`      | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
+| Priorität | Name                | Etappe(n)      | Datei                     |
+| --------- | ------------------- | -------------- | ------------------------- |
+| `1`       | `agent-guard`       | `preCall`      | `agentGuard/guardrail.ts` |
+| `5`       | `vision-bridge`     | `preCall`      | `visionBridge.ts`         |
+| `6`       | `audio-bridge`      | `preCall`      | `audioBridge.ts`          |
+| `7`       | `video-bridge`      | `preCall`      | `videoBridge.ts`          |
+| `10`      | `pii-masker`        | `pre` + `post` | `piiMasker.ts`            |
+| `20`      | `prompt-injection`  | `preCall`      | `promptInjection.ts`      |
+| `95`      | `credential-masker` | `pre` + `post` | `credentialMasker.ts`     |
 
 Nummern mit niedrigerer Priorität werden ausgeführt** Erste** .
 
@@ -117,7 +118,7 @@ Die frühere Vision Bridge-Karte unter AI -Einstellungen ist ein Kompatibilität
 
 **Self-Loop-Zulassungsumgehung:** Wenn der Beschreibungsaufruf durch OmniRoute eigene `/v1` -Selbstschleife (nicht standardmäßiges Anbietermodell) geleitet wird, sendet die Unteranforderung `x-omniroute-admission-bypass: internal` und wird mit den aufgelösten Selbstschleifen-Anmeldeinformationen — dem lokalen `sk_omniroute` Sentinel im lokalen Modus oder dem vom Betreiber konfigurierten `OMNIROUTE_API_KEY` / `ROUTER_API_KEY` -Env-Schlüssel (#1350) authentifiziert, sodass `REQUIRE_API_KEY=true` Bereitstellungen den Beschreibungsaufruf weiterhin ausführen können. Die Umgehung wird nur für genau diese Anmeldeinformationen berücksichtigt, sodass externe Clients den Header nicht verwenden können, um den Zugang zu überspringen.
 
-Legacy-Standardeinstellungen sind in `src/shared/constants/visionBridgeDefaults.ts` verfügbar; Die neuen mode/task-aware/cache Standardeinstellungen und der Einstellungs-Resolver sind in `src/shared/constants/modalityBridgeDefaults.ts` verfügbar. Die Leitplanke stellt eine `deps` Konstruktoroption bereit, damit Tests gefälschte `getSettings` und `callVisionModel` -Implementierungen einfügen können.
+Legacy-Standardeinstellungen sind in `src/shared/constants/visionBridgeDefaults.ts` verfügbar; Die neuen mode/task-aware/cache Standardeinstellungen und der Einstellungs-Resolver sind in `src/shared/constants/modalityBridgeDefaults.ts` verfügbar. Die Leitplanke stellt eine `deps` Konstruktoroption bereit, sodass Tests gefälschte `getSettings` und `callVisionModel` Implementierungen einfügen können.
 
 ### Audio Bridge (`audioBridge.ts`) — Modality Bridge PR-3
 
@@ -206,7 +207,7 @@ Der Verbraucher leitet den Besitz vom authentifizierten Schlüssel ab und wendet
 
 Der gemeinsam genutzte Speicher ist prozesslokal: Handles verfallen beim Neustart und sind nicht zwischen unabhängigen OmniRoute Prozessen übertragbar. Verwaltungsstatistiken legen nur wirksame Aufbewahrungs-/Remote-Richtlinien und aggregierte zurückgehaltene entries/bytes offen, niemals Medien, Referenzen, Haupt- IDs oder Handles. Im Bereich „Videoeinstellungen“ werden diese Werte angezeigt und beide Zustimmungsschalter können beibehalten werden. Bei dieser Implementierungsdokumentation handelt es sich nicht um einen Live-Bereitstellungs- oder Promotion-Beweis; Die Akzeptanz des realen Modells wird separat erfasst.
 
-Frames werden nacheinander mit dem konfigurierten Videomodell beschriftet. Eine leere Videoüberschreibung erbt die Vision-Einstellung; Wenn beide leer sind, wählt der Vision-Auto-Router das tatsächliche Vision-fähige Modell aus. Erfolgreiche Untertitel ersetzen den Originalteil durch ein stabiles `[Video description:` Präfix, das den Text auch als nicht vertrauenswürdige, von Medien abgeleitete Beobachtung markiert und nachgeschaltete Modelle anweist, den Anweisungen in den Medien nicht zu folgen. Zu den Cache-Schlüsseln für Bildunterschriften gehören die JPEG Bytes, die Eingabeaufforderung, der Zeitstempel und das effektive Modell. Nur erfolgreiche Untertitel werden zwischengespeichert. Cache-Einträge behalten das tatsächlich erfolgreiche Produzentenmodell bei, einschließlich eines Fallback-Modells; Die Brücke meldet `mixed` wenn unterschiedliche Rahmen von verschiedenen Modellen hergestellt wurden. Bei einem Cache-Treffer wird diese Herstelleridentität wiederverwendet, anstatt sie als angeforderten Routing-Plan umzukennen. Der Gesamtvideo-Ergebniscache wird bei jeder Eingabe verschlüsselt, die die Ausgabe — -Eingabeaufforderung, das effektive Modell, die Sampling-Richtlinie, die Frame-Anzahl, den semantischen Analysemodus, den SHA-256 Fingerabdruck des normalisierten Fokushinweises, das Fokusfenster, `transcript`, `audioTranscript` und das Kontaktblatt-Flag — ändert. Daher ist das Ändern einer dieser Dimensionen ein Cache-Fehler und niemals eine veraltete Wiederverwendung. Die Version der visuellen Deduplizierungsrichtlinie, der Schwellenwert und die Anzahl der begrenzten Kandidaten-Frames sind auch explizit im Ergebnis-Cache-Schlüssel und in den Metadaten enthalten. Eine Richtlinienänderung kann daher keine veraltete Beschreibung des gesamten Videos wiederverwenden. Die Metadaten des Result-Cache v4 behalten den Modus und den Fingerabdruck bei, niemals die reine Benutzeraufgabe. Guardrail-Metadaten melden sowohl den angeforderten als auch den effektiven Analysemodus; Ein angeforderter `focused` Modus ohne verwendbaren Benutzertext wird effektiv als `full` gemeldet.
+Frames werden nacheinander mit dem konfigurierten Videomodell beschriftet. Eine leere Videoüberschreibung erbt die Vision-Einstellung; Wenn beide leer sind, wählt der Vision-Auto-Router das tatsächliche Vision-fähige Modell aus. Erfolgreiche Untertitel ersetzen den Originalteil durch ein stabiles `[Video description:` Präfix, das den Text auch als nicht vertrauenswürdige, von Medien abgeleitete Beobachtung markiert und nachgeschaltete Modelle anweist, den Anweisungen in den Medien nicht zu folgen. Zu den Cache-Schlüsseln für Bildunterschriften gehören die JPEG Bytes, die Eingabeaufforderung, der Zeitstempel und das effektive Modell. Nur erfolgreiche Untertitel werden zwischengespeichert. Cache-Einträge behalten das tatsächlich erfolgreiche Produzentenmodell bei, einschließlich eines Fallback-Modells; Die Brücke meldet `mixed` wenn unterschiedliche Rahmen von verschiedenen Modellen produziert wurden. Bei einem Cache-Treffer wird diese Herstelleridentität wiederverwendet, anstatt sie als angeforderten Routing-Plan umzukennen. Der Gesamtvideo-Ergebniscache wird bei jeder Eingabe verschlüsselt, die die Ausgabe- — -Eingabeaufforderung, das effektive Modell, die Sampling-Richtlinie, die Frame-Anzahl, den semantischen Analysemodus, den SHA-256 Fingerabdruck des normalisierten Fokushinweises, das Fokusfenster, `transcript`, `audioTranscript` und das Kontaktblatt-Flag — ändert. Daher ist das Ändern einer dieser Dimensionen ein Cache-Fehler und niemals eine veraltete Wiederverwendung. Die Version der visuellen Deduplizierungsrichtlinie, der Schwellenwert und die Anzahl der begrenzten Kandidaten-Frames sind auch explizit im Ergebnis-Cache-Schlüssel und in den Metadaten enthalten. Eine Richtlinienänderung kann daher keine veraltete Beschreibung des gesamten Videos wiederverwenden. Die Metadaten des Result-Cache v4 behalten den Modus und den Fingerabdruck bei, niemals die reine Benutzeraufgabe. Guardrail-Metadaten melden sowohl den angeforderten als auch den effektiven Analysemodus; Ein angeforderter `focused` Modus ohne verwendbaren Benutzertext wird effektiv als `full` gemeldet.
 
 Die Leitplanke extrahiert jeden unterstützten Videoteil, beschreibt jedoch nicht mehr als `modalityBridgeVideoMaxVideos`. Für ein Ziel, das nachweislich über `supportsVideo === false` verfügt, werden fehlgeschlagene und überbewertete Videos zu expliziten sicheren Textmarkierungen, sodass kein Rohvideo überlebt. Wenn die Leistungsfähigkeit unbekannt ist, behalten diese Teile ihren Videoträger; Jedes Fallback-Transkript folgt der oben beschriebenen begrenzten Textkonvertierung. Ziele mit `supportsVideo === true` umgehen die Brücke. Das Abbruchsignal der Clientanforderung breitet sich über Download, Brokerwarteschlange, Unterprozesse und Untertitelaufrufe aus; Abbrüche stoppen zwischen den Videos und versagen nie bei Rohmedien.
 
@@ -233,19 +234,19 @@ Läuft weiter** beide** Stufen.
 
 Die Leitplanke blockiert nie; es kommentiert nur (`meta.detections`, `meta.redacted`) oder schreibt neu.
 
-**Reversibler Tresor (`PII_REVERSIBLE_VAULT_ENABLED`, Standard `false`).** Wenn sowohl `PII_REDACTION_ENABLED` als `PII_REVERSIBLE_VAULT_ENABLED` aktiviert sind (DB überschreibt > env > standardmäßig, einmal pro Anfrage lesen), öffnet `handleChat` einen Tresor pro Client-Anfrage (`src/lib/pii/requestTokenVaultScope.ts`) und übergibt ihn als `GuardrailContext.tokenVault` an den Pre-Call-Pass. Der Maskierer schreibt dann Ersatztokens wie `<<PII_EMAIL_QWERTYUI_1>>` anstelle von `[EMAIL_REDACTED]` für integrierte, validierte (GDPR/POPIA) und benutzerdefinierte Regeln gleichermaßen. Die Nonce besteht aus 8 zufälligen Großbuchstaben pro Anfrage, und derselbe Wert erhält das gleiche Token innerhalb der Anfrage. Nur der Masker ist von Vorteil: Der Prompt-Injection Guard und `/api/guardrails/test` laufen ohne Tresor und behalten die Platzhalter.
+**Reversibler Tresor (`PII_REVERSIBLE_VAULT_ENABLED`, Standard `false`).** Wenn sowohl `PII_REDACTION_ENABLED` als `PII_REVERSIBLE_VAULT_ENABLED` aktiviert sind (DB überschreibt > env > standardmäßig, einmal pro Anfrage lesen), öffnet `handleChat` einen Tresor pro Client-Anfrage (`src/lib/pii/requestTokenVaultScope.ts`) und übergibt ihn als `GuardrailContext.tokenVault` an den Pre-Call-Pass. Der Masker schreibt dann Ersatztokens wie `<<PII_EMAIL_QWERTYUI_1>>` anstelle von `[EMAIL_REDACTED]`, sowohl für integrierte, validierte (GDPR/POPIA) als auch für benutzerdefinierte Regeln. Die Nonce besteht aus 8 zufälligen Großbuchstaben pro Anfrage, und derselbe Wert erhält das gleiche Token innerhalb der Anfrage. Nur der Masker ist von Vorteil: Der Prompt-Injection Guard und `/api/guardrails/test` laufen ohne Tresor und behalten die Platzhalter.
 
-- Der Anbieter, jedes Combo-Leg, jeder Wiederholungsversuch, jedes Mitglied des Fusionsgremiums und der Fusionsrichter sehen nur Token. Die Token werden einmal wiederhergestellt, bei der 2xx-Antwort, die `handleChat` hinterlässt: pro Feld im analysierten SSE (ein über Ereignisse aufgeteiltes Token wird weiterhin aufgelöst; Tool-Aufrufargumente sind JSON-escaped) oder pro Feld in einem JSON Körper mit einem neu berechneten `Content-Length`. Inhalt und Begründung des Texts sowie Argumente für Toolaufrufe werden wiederhergestellt. Fehlerkörper (4xx/5xx) behalten die Token.
-- Fehler bleiben privat: Wenn das Prägen fehlschlägt oder der Tresor einen Wert ablehnt (1000 Einträge, 256 Zeichen pro Wert, insgesamt 64 KB ), wird stattdessen der Platzhalter geschrieben; Ein Token, der vom Tresor nicht aufgelöst werden kann, oder eine Wiederherstellung, die fehlschlägt, bleibt literal und es wird nur eine Zählung protokolliert. Der Tresor enthält keine Timer und keinen globalen Status; Es wird gelöscht, wenn der Antwortstrom endet, abgebrochen wird oder Fehler auftreten.
+- Der Anbieter, jeder Combo-Teil, jeder Wiederholungsversuch, jedes Mitglied des Fusionsgremiums und der Fusionsrichter sehen nur Token. Die Token werden einmal wiederhergestellt, bei der 2xx-Antwort, die `handleChat` hinterlässt: pro Feld im analysierten SSE (ein über Ereignisse aufgeteiltes Token wird weiterhin aufgelöst; Tool-Aufrufargumente sind JSON-escaped) oder pro Feld in einem JSON Körper mit einem neu berechneten `Content-Length`. Inhalt und Begründung des Texts sowie Argumente für Toolaufrufe werden wiederhergestellt. Fehlerkörper (4xx/5xx) behalten die Token.
+- Fehler bleiben privat: Wenn das Prägen fehlschlägt oder der Tresor einen Wert ablehnt (1000 Einträge, 256 Zeichen pro Wert, insgesamt 64 KB ), wird stattdessen der Platzhalter geschrieben; Ein Token, der vom Tresor nicht aufgelöst werden kann, oder eine Wiederherstellung, die fehlschlägt, bleibt literal und es wird nur eine Anzahl protokolliert. Der Tresor enthält keine Timer und keinen globalen Status. Es wird gelöscht, wenn der Antwortstrom endet, abgebrochen wird oder Fehler auftreten.
 - Wenn eine Anfrage Token geprägt hat, werden die Speicherextraktion, die Idempotenz-Speicherung und beide semantischen Cache-Schreibvorgänge übersprungen, da keine spätere Anfrage diese Token auflösen konnte. In Anrufprotokollen tragen die Anfrage und Antwort des Anbieters Token; Der protokollierte Client-Anfragetext ist immer noch die rohe Client-Eingabe, wie bei der einfachen Schwärzung.
-- Token verwenden eine zufällige Nonce pro Anfrage, sodass sich das Eingabeaufforderungspräfix bei jeder Runde ändert: Das Prompt-Caching auf Anbieterseite trifft bei maskierten Runden nicht zu, und ein Token, das in einer späteren Runde zurückkommt (z. B. über `previous_response_id`), gehört zu einer alten Anfrage und bleibt wörtlich.
+- Token verwenden eine zufällige Nonce pro Anfrage, sodass sich das Prompt-Präfix bei jeder Runde ändert: Das Prompt-Caching auf Anbieterseite trifft bei maskierten Runden nicht zu, und ein Token, das in einer späteren Runde zurückkommt (z. B. über `previous_response_id`), gehört zu einer alten Anfrage und bleibt wörtlich.
 
 #### Auswahl pro Typ, benutzerdefinierte Muster und Erkennungszähler
 
 **Dashboard → Einstellungen → Sicherheit → PII Maskierung** wählt aus, was maskiert wird. Die Maskierung wird nicht aktiviert: Das sind immer noch `PII_REDACTION_ENABLED` (Anfrage) und `PII_RESPONSE_SANITIZATION` (Antwort + SSE), beide standardmäßig deaktiviert.
 
 - **Auswahl pro Typ** — Die integrierten IDs werden in `src/shared/constants/piiTypes.ts` (`PII_BUILTIN_TYPES`) aufgelistet. Nicht gesetzt bedeutet jeden Typ (das Verhalten, bevor diese Einstellung existierte). Das `ssn_us` Muster der Anforderungs-Engine wird `ssn` zugeordnet. Vorlagen (Minimal, Standard, Finanziell, Brasilianisch, USA, GDPR, POPIA, Vollständig) füllen nur die Kontrollkästchen im UI aus.
-- **GDPR und POPIA Kennungen** — zwölf integrierte IDs, die EU und südafrikanische persönliche Identifikatoren abdecken (Tabelle unten). Ihre regulären Ausdrücke, Validatoren und Gerichtsbarkeits-Tags befinden sich in einer Tabelle, `src/shared/utils/piiPatterns.ts`, die sowohl vom Response Sanitizer (`src/lib/piiSanitizer.ts`) als auch vom Request Masker (`src/shared/utils/inputSanitizer.ts`) genutzt wird. Eine Übereinstimmung wird nur dann geschwärzt, wenn ihr Validator sie akzeptiert; Eine bloße Ziffernfolge reicht nie aus. Ein Operator, der eine eingegrenzte Auswahl gespeichert hat, bevor diese IDs existierten, behält das Verhalten bei, bis die neuen IDs aktiviert werden.
+- **GDPR und POPIA Kennungen** — zwölf integrierte IDs, die EU und südafrikanische persönliche Identifikatoren abdecken (Tabelle unten). Ihre regulären Ausdrücke, Validatoren und Gerichtsbarkeits-Tags befinden sich in einer Tabelle, `src/shared/utils/piiPatterns.ts`, die sowohl vom Response Sanitizer (`src/lib/piiSanitizer.ts`) als auch vom Request Masker (`src/shared/utils/inputSanitizer.ts`) genutzt wird. Eine Übereinstimmung wird nur dann geschwärzt, wenn ihr Validator sie akzeptiert; Eine bloße Ziffernfolge reicht nie aus. Ein Operator, der eine eingeschränkte Auswahl gespeichert hat, bevor diese IDs existierten, behält das Verhalten bei, bis die neuen IDs aktiviert werden.
 - **Benutzerdefinierte Muster** — bis zu 20 Regex- oder Platzhaltermuster (`*` = bis zu 64 Nicht-Leerzeichen, `?` = eins). Übereinstimmungen werden zu `[CUSTOM_REDACTED]`. Jedes Muster durchläuft `compilePiiCustomPattern()` (`src/shared/utils/piiCustomPatterns.ts`): höchstens 500 Zeichen, Flags auf `g i m s u` beschränkt, muss kompiliert werden, muss `safe-regex` bestehen (katastrophales Backtracking) und darf nicht mit einer leeren Zeichenfolge oder einem Schwärzungsplatzhalter übereinstimmen. Ein Muster, das fehlschlägt, wird beim Speichern und Testen abgelehnt, und eine gespeicherte Zeile, die fehlschlägt, wird zur Laufzeit übersprungen, anstatt kompiliert zu werden. Benutzerdefinierte Muster werden nur ausgeführt, wenn die Maskierung aktiviert ist.
 - **Erkennungszähler** — -Zähler pro Typ (nie übereinstimmende Werte), werden im Speicher gehalten und beim Neustart zurückgesetzt (`src/lib/pii/piiDetectionStats.ts`). Sie nehmen nur zu, während die Maskierung aktiviert ist.
 
@@ -255,9 +256,9 @@ Die Einstellungen befinden sich in der `key_value` Tabelle (Namespace `pii_setti
 | --------- | ------------------------ | -------------------------------------------------------------------------------------------------------------- |
 | `GET`     | `/api/settings/pii`      | Flag-Status, `enabledTypes`, `customPatterns`, Erkennungszähler                                                |
 | `PUT`     | `/api/settings/pii`      | Ersetzen Sie `enabledTypes` (`null` = alle) and/or `customPatterns`                                            |
-| `POST`    | `/api/settings/pii/test` | Führen Sie einen Probelauf mit einem Muster gegen eine Probe von höchstens 8 KB durch. nichts wird gespeichert |
+| `POST`    | `/api/settings/pii/test` | Führen Sie einen Probelauf mit einem Muster gegen eine Probe von höchstens 8 KB durch; nichts wird gespeichert |
 
-Alle drei erfordern eine Verwaltungsauthentifizierung und validieren den Körper mit Zod (`src/shared/validation/schemas/piiSettings.ts`). Bei deaktivierter Anmeldung (`requireLogin=false`) sind `GET` und der Testendpunkt geöffnet, aber `PUT` benötigt weiterhin eine Dashboard-Sitzung, einen `manage` -scope API Schlüssel, ein `oma_` Zugriffstoken mit Schreibbereich oder höher oder das vom Loopback gesendete CLI Token oder interne Service-Token.
+Alle drei erfordern eine Verwaltungsauthentifizierung und validieren den Körper mit Zod (`src/shared/validation/schemas/piiSettings.ts`). Bei deaktivierter Anmeldung (`requireLogin=false`) sind `GET` und der Testendpunkt geöffnet, aber `PUT` benötigt weiterhin eine Dashboard-Sitzung, einen `manage` -scope API -Schlüssel, ein `oma_` Zugriffstoken mit Schreibbereich oder höher oder das vom Loopback gesendete CLI Token oder interne Service-Token.
 
 #### GDPR (EU) und POPIA (Südafrika) Kennungen
 
@@ -296,7 +297,7 @@ Erkennungsquellen:
 2. Integriertes `DEFAULT_GUARD_PATTERNS` (derzeit `system_override_inline` und `markdown_system_block`, beide `high` Schweregrad).
 3. Optionales `customPatterns` das über Konstruktoroptionen (Strings, Regex oder `{ name, pattern, severity }` Datensätze) übergeben wird.
 
-Wenn `mode === "block"`** Und** Wenn mindestens eine Erkennung den Schweregradschwellenwert erreicht, gibt `preCall` `{ block: true, message: "Request rejected: suspicious content detected" }` zurück. Im `warn`/`log` -Modus protokolliert die Leitplanke den Anruf, lässt den Anruf jedoch zu. Der gemeinsame Helfer `evaluatePromptInjection()` wird auch für Anrufer exportiert, die Eingabeaufforderungen auswerten müssen, ohne die Registrierung zu durchlaufen.
+Wenn `mode === "block"`** Und** Wenn mindestens eine Erkennung den Schweregradschwellenwert erreicht, gibt `preCall` `{ block: true, message: "Request rejected: suspicious content detected" }` zurück. Im `warn`/`log` -Modus protokolliert die Leitplanke den Anruf, lässt ihn jedoch zu. Der gemeinsame Helfer `evaluatePromptInjection()` wird auch für Anrufer exportiert, die Eingabeaufforderungen auswerten müssen, ohne die Registrierung zu durchlaufen.
 
 **Scan gebunden (v3.8.20):** Der Detektor prüft nur die** erste 16 KB** des zusammengefügten Eingabeaufforderungstextes — `MAX_INJECTION_SCAN_BYTES = 16 * 1024` (16.384 Bytes) in `src/shared/utils/inputSanitizer.ts`. Sowohl `detectInjection()` als auch `evaluatePromptInjection()` `slice(0, MAX_INJECTION_SCAN_BYTES)` bevor die Musterschleife ausgeführt wird. Injektionsdirektiven befinden sich am oberen Rand einer Eingabe, sodass der reguläre Ausdruck CPU/GC auf Nutzlasten mit mehreren hundert KB begrenzt wird, ohne die Erkennung zu beeinträchtigen (vgl. #3932, #4041).
 
@@ -307,9 +308,83 @@ Läuft weiter** beide** Stufen, letzte in der Standardkette (Priorität `95`). S
 - **Nur Opt-in** , gleiche Konvention wie PII Redaktion (harte Regel #20-adjacent): deaktiviert, sofern `settings.credentialRedactionEnabled === true`** oder** `CREDENTIAL_REDACTION_ENABLED=true`. Wenn es ausgeschaltet ist, ist die Leitplanke ein No-Op- — das niemals blockiert und niemals neu schreibt.
 - `redactCredentials()` durchläuft den gesamten payload/response Baum (`walkValue()`, Prototyp-Pollution-Safe, Cycle-Safe über `WeakSet`) und ersetzt Übereinstimmungen durch einen `[REDACTED:<type>]` Platzhalter, wobei nur die Zweige geklont werden, die sich tatsächlich geändert haben.
 - `CREDENTIAL_PATTERNS` umfasst LLM Anbieterschlüssel (OpenAI, OpenAI-proj, Anthropic, Google, Hugging Face, Replicate), VCS/SaaS Tokens (GitHub, Slack, Linear, Notion, npm, Postman, Discord), Zahlungsschlüssel (Stripe, Square), Cloud-Schlüssel (AWS Zugriffsschlüssel, Twilio, SendGrid, Mailgun), private Schlüssel/ JWTs, anmeldeinformationstragende Verbindung Zeichenfolgen (`mongodb://user:pass@...` usw.) und ein generisches `Authorization`/`x-api-key`/`api-key`/`apikey` -Header-Wert-Muster. Headerförmige Schlüssel (`authorization`, `x-api-key`, `api-key`, `apikey`) werden strukturell redigiert (nur Wert, Schema-Präfix wie `Bearer `/`Basic ` bleibt erhalten) und nicht über den generischen Text-Regex.
+- Ein Wert hinter einem Label wird auch dann maskiert, wenn er kein Anbieterpräfix hat: `DB_PASSWORD=…`, `AWS_SECRET_ACCESS_KEY=…`, `client_secret: …`, `?api_key=…` (Labels: `password`, `passwd`, `secret`, `secret_key`, `secret_access_key`, `api_key`, `access_token`, `refresh_token`, `auth_token`, mit einem beliebigen Präfix wie `DB_`). Die Bezeichnung und das Trennzeichen bleiben erhalten und der Wert wird zu `[REDACTED:secret]`. Der Wert benötigt 12 oder mehr Zeichen, damit Prosa wie `password: required` lesbar bleibt; Ein Wert, der mit `$` oder `%` (einer Variablenreferenz) beginnt, bleibt unberücksichtigt.
 - Die Leitplanke blockiert nie; es schreibt nur um (`modifiedPayload` / `modifiedResponse`) und kommentiert (`meta.credentialsRedacted`, `meta.count`).
 
 Regressionswächter: `tests/unit/credential-masker-guardrail.test.ts`.
+
+### Agent Guard (`agentGuard/`)
+
+Der Agent Guard klassifiziert den Client hinter einer Anfrage an den `claude` oder `anthropic` -Provider anhand seiner Header. `AGENT_GUARD_MODE` nimmt drei Werte an: `off` (Standard), `monitor` und `block`. Bei `off` wird kein Header gelesen und nichts protokolliert.
+
+Offizielle Agenten werden an diesen Headern erkannt (ohne Berücksichtigung der Groß-/Kleinschreibung):
+
+- Claude Code: ein `User-Agent` das mit `claude-cli/` oder `claude-code/` beginnt, oder `x-app: cli` zusammen mit einem `anthropic-beta` Header oder ein `User-Agent`, das `claude` enthält.
+- Anthropic SDKs: ein `User-Agent` der mit `Anthropic/`, `AsyncAnthropic/`, `anthropic-typescript/` oder `anthropic-python/` beginnt.
+
+Die Standardebene des Loggers in der Produktion (`info`) zeigt beide Arten von Zeilen. Bei `APP_LOG_LEVEL=warn` bleiben nur die bekannten Drittanbieterleitungen übrig.
+
+Protokollfelder: `agent`, `thirdParty`, `provider`, `model`, `apiKeyId`, `userAgent`, `xApp`, `anthropicBeta`, `xTitle`, `referer`, `stainless`. Header-Werte und die Modellzeichenfolge sind auf 200 Zeichen begrenzt. Der Referrer wird ohne Abfragezeichenfolge, Fragment und Benutzerinformationen protokolliert. Der API Schlüssel, `Authorization`, `x-api-key` und Cookies werden niemals gelesen.
+
+Dateien: `src/lib/guardrails/agentGuard/classifier.ts`, `src/lib/guardrails/agentGuard/policy.ts`, `src/lib/guardrails/agentGuard/guardrail.ts`, `src/lib/guardrails/agentGuard/settings.ts`, `src/lib/guardrails/agentGuard/logLine.ts`, `src/lib/guardrails/agentGuard/enforcement.ts`, `src/sse/handlers/chat/agentGuardGate.ts`.
+
+**Klassifizierungsgrenzen (beide Modi):**
+
+- Ein Agent, der auf einem offiziellen SDK basiert und kein `X-Title`, `HTTP-Referer` oder eigenes `User-Agent` sendet, sieht aus wie der SDK. `x-stainless-*` -Header allein machen einen Client noch nicht offiziell.
+- Drittanbieter-Agenten werden durch Ganzwort-Token in `User-Agent`, `X-Title` und `HTTP-Referer` (oder `Referer`) abgeglichen. Nicht gelistete Clients werden als `unknown` angezeigt.
+- Anfragen von browserbasierten Clients tragen das browsereigene `User-Agent` und werden als nicht identifiziert angezeigt, es sei denn `X-Title` oder der Referrer tragen ein bekanntes Drittanbieter-Token.
+- Eine Protokollzeile pro beobachteter Anfrage: Auf ausgelasteten Instanzen ist mit Volumen zu rechnen.
+
+#### Monitor
+
+Mit `AGENT_GUARD_MODE=monitor` werden Anfragen, deren Modellzeichenfolge den `claude` oder `anthropic` Anbieter benennt, anhand ihrer Client-Header klassifiziert. Wenn der Client kein offizieller Agent ist, wird eine Protokollzeile mit `tag: "AGENT_GUARD"` geschrieben. Es ist `warn` für einen bekannten Drittanbieter-Agenten und `info` für einen nicht identifizierten Client. Priorität `1`: Die Leitplanke liest nur Header und ändert nie die Nutzlast, sodass sie vor den Medienbrücken ausgeführt wird. `monitor` blockiert nie.
+
+**Grenzen von `monitor`:**
+
+- Jedes Signal ist ein vom Client gesteuerter Header. Dabei handelt es sich um Beobachtung, nicht um Zugangskontrolle.
+- Der Anbieter wird aus der Modellzeichenfolge gelesen, bevor das Modell aufgelöst wird: `provider/model`, ein Anbieteralias wie `cc/…` und Quota-Share-IDs (`qtSd/<group>/<provider>/<model>`). Bloße Modell-IDs, Modell-Aliase, Kombinationen und spätere Routing-Normalisierung werden nicht befolgt. Diesen Bitten wird nicht nachgekommen.
+- Ein Anrufer kann es pro Anfrage über die Registry-Deaktivierungskanäle überspringen (siehe [Deaktivieren von Guardrails pro Anfrage](#disabling-guardrails-per-request) ). Übersprungene Anfragen werden nicht berücksichtigt.
+- Es läuft nur dort, wo `runPreCallHooks` läuft (siehe [Abdeckung und Grenzen](#coverage-and-limits) ).
+
+#### Block
+
+Bei `AGENT_GUARD_MODE=block` bewirkt die Leitplanke vor dem Anruf nichts. Stattdessen trifft der Chat-Handler die Entscheidung:
+
+1. Die Entscheidung wird getroffen, wenn ein Ziel versandt werden soll, und zwar über den Anbieter, an den die Anfrage weitergeleitet wurde. Anbieter-Aliase, bloße Modell-IDs, Quota-Share-IDs und jedes Kombinationsziel werden abgedeckt.
+2. Es wird nicht in der Guardrail-Registrierung ausgeführt, daher gelten die Deaktivierungskanäle pro Anforderung nicht für es.
+3. Ein bekannter Drittagent wird abgelehnt. Ein nicht identifizierter Client wird wie in `monitor` protokolliert und nur mit `AGENT_GUARD_STRICT=true` abgelehnt. Claude Code und der offizielle Anthropic SDKs werden niemals abgelehnt.
+4. Die Ablehnung ist HTTP 403 mit `error.type` `permission_error` und `error.code` `client_agent_not_allowed`. Der Text ist ein Fehler im OpenAI-Stil. Bei Anfragen im Anthropic-Format wird auch `type: "error"` auf der obersten Ebene übertragen. Es gibt keinen `Retry-After` Header und die Ablehnung wird zurückgegeben, bevor ein Stream startet.
+5. Eine Ablehnung ist kein Versagen des Anbieters. Der Leistungsschalter des Anbieters, Verbindungsabklingzeiten oder Modellsperren bleiben davon unberührt.
+6. Bei einer Kombo wird ein abgelehntes Ziel übersprungen und die übrigen Ziele laufen davon. Die Anfrage schlägt mit dem Richtlinienfehler fehl, wenn mindestens ein Ziel abgelehnt wurde und kein Ziel die Wache passiert hat. Die Kombination behält ihren eigenen Fehler bei, wenn ein Eintrag der obersten Ebene einen anderen bekannten Anbieter benennt, anhand eines Präfixes oder anhand der Anbieter-ID des Schritts. Ein abgelehntes Prioritätsziel mit `fallbackOnlyOnQuotaExhaustion` wird auf die gleiche Weise übersprungen und stoppt die Combo nicht. Ein Schattenziel wird überprüft und protokolliert, zählt jedoch nie als Ziel, das an der Wache vorbeigekommen ist.
+7. Eine `fusion` Kombination schlägt fehl, bevor das Gremium läuft, wenn der Richter, den der Fusionsdienst einsetzen wird, abgelehnt würde. Dieser Richter ergibt sich aus der Konfiguration der Combo oder aus den globalen Combo-Standardwerten. Die gleiche Prüfung wird ausgeführt, wenn eine Fusionskombination über die Sicherheitsnetzumleitung erreicht wird.
+8. Eine Protokollzeile pro Anfrage und Anbieter, mit `tag: "AGENT_GUARD"`, `warn` für eine Ablehnung und denselben Feldern wie `monitor`.
+9. Bei einem internen Fehler öffnet sich der Schutz nicht. Die Anfrage wird fortgesetzt und eine `warn` Zeile `agent guard failed open` wird protokolliert.
+
+**Grenzen von `block`:**
+
+- Jedes Signal ist ein vom Client gesteuerter Header. Ein Client, der `User-Agent: claude-cli/…` sendet, wird als Claude Code behandelt. `block` schreckt unveränderte Agenten von Drittanbietern ab. Es handelt sich nicht um eine Zugangskontrolle.
+- Ein Proxy, der die identifizierenden Header entfernt, verwandelt jeden Client in einen nicht identifizierten Client. Ein solcher Kunde wird ohne `AGENT_GUARD_STRICT` bedient und damit abgewiesen. Führen Sie den Guard für die Instanz aus, die den Clients gegenüberliegt. Eine zweite OmniRoute Instanz hinter der ersten sieht die Header der ersten.
+- `AGENT_GUARD_STRICT` lehnt jeden Client bei Anbietern ab, der kein Claude Code oder offizieller SDK ist. Dazu gehören browserbasierte Clients und der Dashboard-Playground. Der Dashboard-Combo-Live-Test ist ausgenommen, auch durch die Safety-Net-Umleitung.
+- Einige Funktionen erstellen ihre eigene Chat-Anfrage, anstatt die Anfrage des Kunden weiterzuleiten. Vier von ihnen senden es über die `/v1/...` Routen von OmniRoute zurück:
+  - Batch-Jobs (`src/lib/batches/dispatch.ts`)
+  - die MCP -Inferenzwerkzeuge (`open-sse/mcp-server/tools/inferenceTools.ts`)
+  - A2A Smart Routing (`src/lib/a2a/skills/smartRouting.ts`)
+  - die Vision Bridge, wenn sie ein Bild durch OmniRoute (`src/lib/guardrails/visionBridgeHelpers.ts`) beschreibt
+- Der Telegram -Chat-Proxy (`src/lib/telegram/chatProxy.ts`) erstellt seine Anfrage im Prozess und ruft den Chat-Handler direkt auf.
+- Diese inneren Anfragen tragen die eigenen Header von OmniRoute, nicht die Header des Clients, der sie gestartet hat. Der Wachmann stuft sie als nicht identifizierte Kunden ein.
+- Ohne `AGENT_GUARD_STRICT` werden diese inneren Anfragen an die geschützten Anbieter weitergeleitet, wer auch immer der ursprüngliche Kunde war. Ein Drittagent, der über ihn Claude erreicht, wird nicht abgelehnt.
+- Mit `AGENT_GUARD_STRICT` werden diese inneren Anfragen bei den geschützten Anbietern, die sie gestartet haben, abgelehnt, einschließlich Claude Codes.
+- Nur Anfragen, die den Chat-Handler durchlaufen, werden blockiert. Die Modellvalidierung (`src/lib/modelValidation/runner.ts`) ruft den Anforderungskern direkt auf und ist nicht begrenzt.
+- Nur die Anbieter `claude` und `anthropic` sind abgedeckt. Claude Modelle, die von einem anderen Anbieter bereitgestellt werden, sind nicht abgedeckt, ebenso wenig wie der `claude-web` Anbieter.
+- Einige Combos benennen ihre verbleibenden Ziele ohne Anbieterpräfix, als bloße Modell-IDs oder verschachtelte Combos. Wenn diese Ziele aus einem anderen Grund (offener Schutzschalter, Abklingzeit, Sperrung) nicht verfügbar sind, schlägt die Anfrage mit dem Richtlinienfehler fehl.
+- Ein übersprungenes Combo-Ziel löscht wie jedes übersprungene Ziel die letzte als funktionierend bekannte Markierung des Ziels.
+- Ein Fusionsrichter mit einem geschützten Anbieterpräfix wird vor der Sitzung des Gremiums abgelehnt. Dazu gehören `anthropic/…`, `claude/…`, ein Alias wie `cc/…`, ein Kontextsuffix wie `[1m]` und Quotenfreigabenamen bei diesen Anbietern.
+- Ein Fusionsrichter, der als bloße Modell-ID oder als Modellalias geschrieben ist, der zu einem geschützten Anbieter aufgelöst wird, wird nur dann abgelehnt, wenn er versendet wird. Das Panel ist zu diesem Zeitpunkt bereits gelaufen. Durch die Benennung des Richters mit seinem Anbieterpräfix wird dies vermieden. Kein Richterspruch erreicht einen geschützten Anbieter ohne Ablehnung.
+- Die Vorprüfung lehnt einen konfigurierten Claude Richter ab, selbst wenn der Fusionsdienst diesen Richter zur Laufzeit fallen lassen würde. Der Dienst lässt einen Richter fallen, den der Betreiber versteckt hat, und einen Richter, der die Medien der Anfrage nicht annehmen kann. Der zweite Fall betrifft unbestätigte Sehhilfen und andere Medien, die der Richter nicht akzeptiert. Beide Combo-Pfade verhalten sich auf diese Weise.
+- Bei der Safety-Net-Umleitung erhält der Combo-Dienst leere Einstellungen. Ein nur in den globalen Combo-Standards festgelegter Richter wird dort nie verwendet.
+- Während `block` aktiviert ist, verwendet ein Client, den der Wächter bei einem geschützten Anbieter ablehnen würde, bei keinem Modell den Beiwagen-Schnellpfad. Unter `AGENT_GUARD_STRICT` ist das jeder nicht identifizierte Client. Nach der Überprüfung des Relay-Tokens beantwortet `POST /v1/relay/chat/completions/bifrost` diese Anfragen mit einer 503 und dem `X-Bifrost-Fallback` Header.
+- `POST /v1/messages/count_tokens` gibt die lokale Schätzung an einen Kunden weiter, den der Wächter des Anbieters, an den sich das Modell wendet, ablehnen würde.
+- Es gibt keine Ausnahme pro Schlüssel.
 
 ## Basiskontrakt (`base.ts`)
 
@@ -466,16 +541,18 @@ Auf dem Nicht-Streaming-Pfad lautet die Reihenfolge: Speicherextraktion → -Aus
 
 Von den integrierten Leitplanken gelesene Umgebungsvariablen:
 
-| Variable                              | Verwendet von               | Wirkung                                                                                                           |
-| ------------------------------------- | --------------------------- | ----------------------------------------------------------------------------------------------------------------- |
-| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`          | Stellen Sie `false` so ein, dass die Erkennung vollständig deaktiviert wird.                                      |
-| `INPUT_SANITIZER_MODE`                | `prompt-injection`          | Injektionsrichtlinie: `warn`, `block` oder `log`. Der alte Wert `redact` schreibt den Injektionstext nicht neu.   |
-| `INJECTION_GUARD_MODE`                | `prompt-injection`          | Modus für den Injektionsschutz; auch ein DB Feature-Flag, das** überschreibt** die Umgebungsvariablen (DB > ENV). |
-| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`          | Mindestschweregrad, den `MODE=block` ablehnt: `high` (Standard), `medium` oder `low`.                             |
-| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`          | Legacy-Alias für `INPUT_SANITIZER_BLOCK_THRESHOLD`.                                                               |
-| `PII_REDACTION_ENABLED`               | `pii-masker`                | Bei `true` wird die Anforderung PII geschwärzt (unabhängig vom Injektionsmodus).                                  |
-| `PII_REVERSIBLE_VAULT_ENABLED`        | `pii-masker`, `handleChat`  | Prägen Sie mit `PII_REDACTION_ENABLED` reversible Token und stellen Sie sie in 2xx-Antworten wieder her.          |
-| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` (stromabwärts) | Steuert das Maskierungsverhalten auf der Antwortseite.                                                            |
+| Variable                              | Verwendet von               | Wirkung                                                                                                                               |
+| ------------------------------------- | --------------------------- | ------------------------------------------------------------------------------------------------------------------------------------- |
+| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`          | Stellen Sie `false` so ein, dass die Erkennung vollständig deaktiviert wird.                                                          |
+| `INPUT_SANITIZER_MODE`                | `prompt-injection`          | Injektionsrichtlinie: `warn`, `block` oder `log`. Der alte Wert `redact` schreibt den Injektionstext nicht neu.                       |
+| `INJECTION_GUARD_MODE`                | `prompt-injection`          | Modus für den Injektionsschutz; auch ein DB Feature-Flag, das** überschreibt** die Umgebungsvariablen (DB > ENV).                     |
+| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`          | Mindestschweregrad, den `MODE=block` ablehnt: `high` (Standard), `medium` oder `low`.                                                 |
+| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`          | Legacy-Alias für `INPUT_SANITIZER_BLOCK_THRESHOLD`.                                                                                   |
+| `PII_REDACTION_ENABLED`               | `pii-masker`                | Bei `true` wird die Anforderung PII geschwärzt (unabhängig vom Injektionsmodus).                                                      |
+| `PII_REVERSIBLE_VAULT_ENABLED`        | `pii-masker`, `handleChat`  | Prägen Sie mit `PII_REDACTION_ENABLED` reversible Token und stellen Sie sie in 2xx-Antworten wieder her.                              |
+| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` (stromabwärts) | Steuert das Maskierungsverhalten auf der Antwortseite.                                                                                |
+| `AGENT_GUARD_MODE`                    | `agent-guard`               | `off` (Standard), `monitor` oder `block`. Auch ein DB -Feature-Flag (DB > ENV).                                                       |
+| `AGENT_GUARD_STRICT`                  | `agent-guard`               | `false` (Standard) oder `true`. Mit `block` werden auch nicht identifizierte Clients abgelehnt. Auch ein DB -Feature-Flag (DB > ENV). |
 
 Die Modality Bridge-Leitschienen lesen die Laufzeitkonfiguration aus dem DB-gestützten Einstellungsspeicher (`getSettings()`), nicht aus Umgebungsvariablen. Die Primärschlüssel von Vision sind `modalityBridgeVisionEnabled`, `modalityBridgeVisionMode`, `modalityBridgeVisionModel`, `modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`, `modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`, `modalityBridgeVisionMaxChars`, `modalityBridgeCacheEnabled`, `modalityBridgeCacheTtlMinutes` und `modalityBridgeCacheMaxEntries`. Die alten `visionBridge*` Schlüssel werden nur als dokumentierter Ein-Zyklus-Lese-Fallback akzeptiert; Dashboard-Schreibvorgänge verwenden die Primärschlüssel. Standardeinstellungen und der Fallback-Resolver sind in `src/shared/constants/modalityBridgeDefaults.ts` verfügbar, wobei Legacy-Konstanten in `src/shared/constants/visionBridgeDefaults.ts` beibehalten werden.
 

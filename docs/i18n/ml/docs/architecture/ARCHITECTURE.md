@@ -510,11 +510,12 @@ FSM സംക്രമണങ്ങൾ ഓട്ടോ കോംബോയുട�
 - WebSocket handshake auth: `src/lib/ws/handshake.ts` — API key അല്ലെങ്കിൽ session cookie ഉപയോഗിച്ച് WS upgrade requests സാധൂകരിക്കുന്നു
 - Live dashboard WebSocket auth: `src/server/ws/liveServer.ts` — sidecar (`LIVE_WS_PORT` port) ഒരു dashboard session cookie അല്ലെങ്കിൽ management scope (`manage`/`admin`) ഉള്ള Bearer API key സ്വീകരിക്കുന്നു; inference-മാത്രമുള്ള keys നിരസിക്കപ്പെടും. അതിന്റെ ആന്തരിക `POST /__omniroute_event` publisher endpoint-ൽ proxy-hop header (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`) ഇല്ലെങ്കിൽ മാത്രമേ loopback peers സ്വീകരിക്കൂ
 
-## 5) ക്ലൗഡ് സിങ്ക്
+## 5) ക്ലൗഡ് സമന്വയം
 
-- ഷെഡ്യൂളർ ഇനിഷ്യലൈസേഷൻ: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
-- ആവർത്തന ടാസ്ക്: `src/shared/services/cloudSyncScheduler.ts`
-- ആവർത്തന ടാസ്ക്: `src/shared/services/modelSyncScheduler.ts`
+- ഷെഡ്യൂളർ init: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- ആനുകാലിക ചുമതല: `src/shared/services/cloudSyncScheduler.ts`
+- ആനുകാലിക ചുമതല: `src/shared/services/modelSyncScheduler.ts`
+- ആനുകാലിക ചുമതല (ഓപ്റ്റ്-ഇൻ ഓരോ കണക്ഷനും): `src/shared/services/modelHealthCheckScheduler.ts` — ഒരു കണക്ഷൻ്റെ മോഡലുകൾ പരിശോധിക്കുന്നു, പരാജയങ്ങൾ സ്വയമേവ മറയ്ക്കുന്നു, അത് സ്വയം മറച്ചത് മാത്രം പുനഃസ്ഥാപിക്കുന്നു (`src/lib/db/modelHealthAutoHidden.ts`)
 - നിയന്ത്രണ റൂട്ട്: `src/app/api/sync/cloud/route.ts`
 
 ## അഭ്യർത്ഥനയുടെ ജീവിതചക്രം (`/v1/chat/completions`)

@@ -505,10 +505,11 @@ FSMトランジションはオート コンボのスコアリングに反映さ�
 
 ## 5) クラウド同期
 
-- スケジューラーの初期化: `src/lib/initCloudSync.ts`、`src/shared/services/initializeCloudSync.ts`、`src/shared/services/modelSyncScheduler.ts`
+- スケジューラの初期化: `src/lib/initCloudSync.ts`、 `src/shared/services/initializeCloudSync.ts`、 `src/shared/services/modelSyncScheduler.ts`
 - 定期タスク: `src/shared/services/cloudSyncScheduler.ts`
 - 定期タスク: `src/shared/services/modelSyncScheduler.ts`
-- 制御ルート: `src/app/api/sync/cloud/route.ts`
+- 定期的なタスク (接続ごとのオプトイン): `src/shared/services/modelHealthCheckScheduler.ts` —接続のモデルをテストし、障害を自動的に非表示にし、それ自体が非表示にしたもののみを復元します (`src/lib/db/modelHealthAutoHidden.ts`)
+- 制御ルート： `src/app/api/sync/cloud/route.ts`
 
 ## リクエストのライフサイクル（`/v1/chat/completions`）
 

@@ -517,10 +517,11 @@ FSM轉換納入 Auto Combo 的評分中，偏向於background/automation任務�
 
 ## 5) 雲端同步
 
-- 排程器初始化：`src/lib/initCloudSync.ts`、`src/shared/services/initializeCloudSync.ts`、`src/shared/services/modelSyncScheduler.ts`
-- 定期任務：`src/shared/services/cloudSyncScheduler.ts`
-- 定期任務：`src/shared/services/modelSyncScheduler.ts`
-- 控制路由：`src/app/api/sync/cloud/route.ts`
+- 調度程式初始化： `src/lib/initCloudSync.ts`、 `src/shared/services/initializeCloudSync.ts`、 `src/shared/services/modelSyncScheduler.ts`
+- 週期性任務： `src/shared/services/cloudSyncScheduler.ts`
+- 週期性任務： `src/shared/services/modelSyncScheduler.ts`
+- 定期任務（每個連接選擇加入）： `src/shared/services/modelHealthCheckScheduler.ts` —測試連接的模型，自動隱藏故障並僅恢復它隱藏的內容（`src/lib/db/modelHealthAutoHidden.ts`）
+- 控制途徑： `src/app/api/sync/cloud/route.ts`
 
 ## 請求生命週期（`/v1/chat/completions`）
 

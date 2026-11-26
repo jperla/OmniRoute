@@ -519,12 +519,13 @@ FSM转换纳入 Auto Combo 的评分中，偏向于background/automation任务�
 - WebSocket 握手身份验证：`src/lib/ws/handshake.ts` — 通过 API 密钥或会话 Cookie 验证 WS 升级请求
 - 实时仪表板 WebSocket 身份验证：`src/server/ws/liveServer.ts` — Sidecar（端口 `LIVE_WS_PORT`）接受仪表板会话 Cookie，或持有管理作用域（`manage`/`admin`）的 Bearer API 密钥；仅限推理的密钥将被拒绝。其内部 `POST /__omniroute_event` 发布端点仅在不存在代理跳转标头（`x-forwarded-*`、`x-real-ip`、`forwarded`、`via`）时接受来自环回地址的对等端请求
 
-## 5) 云端同步
+## 5) 云同步
 
-- 调度器初始化：`src/lib/initCloudSync.ts`、`src/shared/services/initializeCloudSync.ts`、`src/shared/services/modelSyncScheduler.ts`
-- 周期任务：`src/shared/services/cloudSyncScheduler.ts`
-- 周期任务：`src/shared/services/modelSyncScheduler.ts`
-- 控制路由：`src/app/api/sync/cloud/route.ts`
+- 调度程序初始化： `src/lib/initCloudSync.ts`、 `src/shared/services/initializeCloudSync.ts`、 `src/shared/services/modelSyncScheduler.ts`
+- 周期性任务： `src/shared/services/cloudSyncScheduler.ts`
+- 周期性任务： `src/shared/services/modelSyncScheduler.ts`
+- 定期任务（每个连接选择加入）： `src/shared/services/modelHealthCheckScheduler.ts` —测试连接的模型，自动隐藏故障并仅恢复它隐藏的内容（`src/lib/db/modelHealthAutoHidden.ts`）
+- 控制途径： `src/app/api/sync/cloud/route.ts`
 
 ## 请求生命周期 (`/v1/chat/completions`)
 

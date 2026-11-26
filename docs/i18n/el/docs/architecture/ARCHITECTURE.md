@@ -512,11 +512,12 @@ flowchart LR
 - Έλεγχος ταυτότητας κατά τη χειραψία WebSocket: `src/lib/ws/handshake.ts` — επικυρώνει αιτήματα αναβάθμισης WS μέσω κλειδιού API ή cookie συνεδρίας
 - Έλεγχος ταυτότητας WebSocket του dashboard σε πραγματικό χρόνο: `src/server/ws/liveServer.ts` — το sidecar (θύρα `LIVE_WS_PORT`) αποδέχεται cookie συνεδρίας του dashboard ή κλειδί Bearer API που διαθέτει πεδίο διαχείρισης (`manage`/`admin`)· τα κλειδιά μόνο για inference απορρίπτονται. Το εσωτερικό τελικό σημείο δημοσίευσης `POST /__omniroute_event` αποδέχεται ομότιμους loopback μόνο όταν δεν υπάρχει κεφαλίδα διέλευσης μέσω proxy (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`)
 
-## 5) Συγχρονισμός Cloud
+## 5) Cloud Sync
 
-- Αρχικοποίηση χρονοπρογραμματιστή: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- Χρονοδιάγραμμα έναρξης: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
 - Περιοδική εργασία: `src/shared/services/cloudSyncScheduler.ts`
 - Περιοδική εργασία: `src/shared/services/modelSyncScheduler.ts`
+- Περιοδική εργασία (opt-in ανά σύνδεση): `src/shared/services/modelHealthCheckScheduler.ts` — ελέγχει τα μοντέλα μιας σύνδεσης, αποκρύπτει αυτόματα τις αποτυχίες και αποκαθιστά μόνο ό,τι έκρυψε η ίδια (`src/lib/db/modelHealthAutoHidden.ts`)
 - Διαδρομή ελέγχου: `src/app/api/sync/cloud/route.ts`
 
 ## Κύκλος Ζωής Αιτήματος (`/v1/chat/completions`)

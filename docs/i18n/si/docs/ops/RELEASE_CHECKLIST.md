@@ -34,65 +34,34 @@ npm run test:e2e           # විකල්පයකි, නමුත් නි
 /capture-release-evidences-cc
 ```
 
-## npm Trusted Publishing (v3.8.51 සිට පෙරනිමිය) — ඉල්ලීම මත staged, fallback ලෙස direct
+## npm විශ්වාසනීය ප්‍රකාශනය (v3.8.51 සිට පෙරනිමිය) — ඉල්ලීම මත වේදිකාගත කරන ලදී, ආපසු හැරීමක් ලෙස සෘජුව
 
-`npm-publish.yml` පෙරනිමියෙන් **npm Trusted Publishing (OIDC)** හරහා publish කරයි:
-`stage-npm` job එක (github-hosted) එම ධාවනය සඳහා GitHub හි id-token එක කෙටි කාලීන npm
-අක්තපත්රයකට හුවමාරු කරයි — repository secrets තුළ දිගුකාලීන npm token එකක් නොමැත, 2FA prompt එකක් නොමැත, provenance අමුණා ඇත.
-දැන් විශ්රාම ගන්වමින් පවතින 2FA මඟහරින tokens නිසා ඇති npm sanctions සඳහා මෙය bypass එක වේ;
-එමඟින් WS1.3 guarantee එක පවත්වා ගනිමින්, v3.8.48 දක්වා ව්යාපෘතිය සතුව තිබූ සම්පූර්ණයෙන්ම ස්වයංක්රීය ප්රවාහය නැවත ස්ථාපනය කරයි (කාන්දු වූ token එකකට තනිව publish කළ නොහැක — token එකක් නොමැත).
+`npm-publish.yml` මගින් ප්‍රකාශයට පත් කරයි** npm විශ්වාසනීය ප්‍රකාශනය (OIDC)** පෙරනිමියෙන්: `stage-npm` job (github-hosted) එම ධාවනය සඳහා කෙටි කාලීන npm අක්තපත්‍රයක් සඳහා GitHub හි id-ටෝකනය හුවමාරු කරයි — ගබඩා රහස් තුළ දිගුකාලීන npm ටෝකනයක් නොමැත, 2FA ප්‍රමාදයක් නැත, ප්‍රොවිනොන්ස් අමුණා ඇත. දැන් 2FA මඟහරින ටෝකන විශ්‍රාම යන නිසා බයිපාස් npm සම්බාධක එයයි; එය WS1.3 සහතිකය තබා ගනිමින් ව්‍යාපෘතියේ v3.8.48 දක්වා තිබූ සම්පූර්ණ ස්වයංක්‍රීය ප්‍රවාහය ප්‍රතිසාධනය කරයි (කාන්දු වූ ටෝකනයක් පමණක් ප්‍රකාශනය කළ නොහැක — ටෝකනයක් නොමැත).
 
-**එක් වරක් සිදු කරන setup එක (owner):** npmjs.com → package `omniroute` → Settings → _Trusted
-Publisher_ → GitHub: owner `diegosouzapw`, repo `OmniRoute`, workflow `npm-publish.yml`
-(environment: none). එය සකස් කර නොමැති තුරු ස්වයංක්රීය පියවර `ENEEDAUTH` සමඟ අසමත් වේ:
-`publish_mode=staged` (පහත) හෝ `direct` භාවිත කර නැවත dispatch කරන්න.
+**එක් වරක් පිහිටුවීම (හිමිකරු):** npmjs.com → පැකේජය `omniroute` → සැකසුම් → _Trusted Publisher_ → GitHub: හිමිකරු `diegosouzapw`, repo `OmniRoute`, වැඩ ප්‍රවාහ `npm-publish.yml` (පරිසරය: කිසිවක් නැත). එය පවතින තුරු, ස්වයංක්‍රීය පියවර `ENEEDAUTH` සමඟ අසාර්ථක වේ: `publish_mode=staged` (පහළ) හෝ `direct` සමඟ නැවත යැවීම.
 
-### Staged publishing (ඉල්ලීම මත — `publish_mode=staged`)
+### වේදිකාගත ප්‍රකාශනය (ඉල්ලීම මත — `publish_mode=staged`)
 
-npm-publish workflow එක තවදුරටත් සෘජුව publish නොකරයි: එය packed tarball එක
-(`check:pack-boot`) boot කර, පසුව `npm stage publish` ධාවනය කරයි — නිශ්චිත bytes registry එකෙහි
-තැන්පත් කරනු ලැබේ, **owner අනුමත කරන තුරු install කළ නොහැක**. මිනිස් 2FA gate එක
-proof එකට පෙර නොව, පසුවට මාරු කර ඇත.
+npm-publish කාර්ය ප්‍රවාහය තවදුරටත් සෘජුව ප්‍රකාශයට පත් නොකරයි: එය ඇසුරුම් කළ තාරබෝල (`check:pack-boot`) ආරම්භ කර පසුව `npm stage publish` — ධාවනය කරයි, රෙජිස්ට්‍රියේ නවතා ඇති නියම බයිට්,** ස්ථාපනය කළ නොහැක** අයිතිකරු අනුමත කරන තුරු. මානව 2FA ද්වාරය සාක්ෂිය AFTER වෙත මාරු විය, ඊට පෙර නොවේ.
 
-**Workflow එක green වූ පසු Owner ගේ ප්රවාහය:**
+**වැඩ ප්‍රවාහය කොළ පාටට ගිය පසු හිමිකරු ප්‍රවාහය:**
 
-1. `npm stage list omniroute` — stage id එක සොයා ගන්න (එය workflow summary එකෙහිද මුද්රණය වේ).
-2. Staged bytes සත්යාපනය කරන්න (නිර්දේශිතයි): `npm stage download <id>` ධාවනය කර, පසුව
-   බාගත කළ tarball එක තාවකාලික prefix එකකට install කර එය boot කරන්න (`npm run check:pack-boot` CI තුළ
-   එම pack→install→boot verdict එකම ස්වයංක්රීය කරයි).
-3. `npm stage approve <id>` — 2FA prompt එකම publish කිරීම වේ. `npm stage reject <id>` මඟින් එය ඉවත දමන්න.
-4. Publish කිරීමෙන් පසු net: post-publish verifier (v3.8.49 plan හි WS1.4) පිරිසිදු container එකක
-   public registry වෙතින් publish කළ අනුවාදය install කර එය boot කරයි.
+1. `npm stage list omniroute` — අදියර හැඳුනුම්පත සොයා ගන්න (වැඩ ප්‍රවාහ සාරාංශයේ ද මුද්‍රණය කර ඇත).
+2. වේදිකාගත බයිට් සත්‍යාපනය කරන්න (නිර්දේශිතයි): `npm stage download <id>`, ඉන්පසු බාගත කළ ටාබෝලය තාවකාලික උපසර්ගයකට ස්ථාපනය කර එය ආරම්භ කරන්න (`npm run check:pack-boot` එම ඇසුරුම ස්වයංක්‍රීය කරයි→ ස්ථාපනය → ඇරඹුම් තීන්දුව CI හි ).
+3. `npm stage approve <id>` — 2FA විමසුම IS ප්‍රකාශනය කරන්න. `npm stage reject <id>` ඉවත දමයි.
+4. Post-publish net: post-publish verifier (WS1.4 of the v3.8.49 plan) public registry වෙතින් ප්‍රකාශිත අනුවාදය පිරිසිදු භාජනයක ස්ථාපනය කර එය ආරම්භ කරයි.
 
-**හදිසි fallback:** `workflow_dispatch` සමඟ `publish_mode=direct` භාවිත කිරීමෙන්
-පැරණි ක්ෂණික `npm publish` නැවත සක්රීය වේ (staging එකම වැරදි ලෙස හැසිරෙන විට පමණක් භාවිත කරන්න; හේතුව සටහන් කරන්න).
+**හදිසි පසුබෑම:** `publish_mode=direct` සමඟ `workflow_dispatch` උරුමය ක්ෂණික `npm publish` ප්‍රතිසාධනය කරයි (වේදිකාගත කිරීම වැරදි ලෙස හැසිරෙන්නේ නම් පමණක් භාවිතා කරන්න; ඇයි වාර්තා කරන්න).
 
-**එක් වරක් සිදු කරන hardening එක (owner, npmjs.com):** `omniroute` සඳහා
-Trusted Publisher එක stage-only mode ලෙස configure කරන්න, එවිට කාන්දු වූ දිගුකාලීන token එකකට ඕනෑම තැනක සිට
-`npm publish` සෘජුව කළ නොහැක — CI හට කළ හැක්කේ stage කිරීම පමණි; publish කරන්නේ owner ගේ 2FA මඟින් පමණි.
+**එක් වරක් දැඩි කිරීම (හිමිකරු, npmjs.com):** `omniroute` සඳහා විශ්වාසදායි ප්‍රකාශකයා අදියර-පමණක් ආකාරයෙන් වින්‍යාස කරන්න, එවිට කාන්දු වූ දිගුකාලීන ටෝකනයකට ඕනෑම තැනක සිට කෙලින්ම `npm publish` කළ නොහැක — CI වේදිකාව පමණක් කළ හැකිය; හිමිකරුගේ 2FA නිකුතු පමණි.
 
-**Broken-artifact playbook (වෙනසක් නොමැත):** පෙරනිමි reflex එක ලෙස
-`npm deprecate omniroute@<bad> "<reason> — use <fixed>"` භාවිත කරන්න
-(මිනිත්තු කිහිපයකින්, ආපසු හැරවිය හැක); `npm unpublish` භාවිත කළ යුත්තේ 72h/no-dependents
-window එක තුළ පමණක් වන අතර කිසි විටෙකත් පළමු පියවර ලෙස නොවේ. Docker: version tag එකක් කිසි විටෙක නැවත ලියන්න එපා — rollback යනු
-`latest` අවසන් හොඳ digest එක වෙත නැවත point කිරීමයි.
+**කැඩුණු-කෞතුක භාණ්ඩ ක්රීඩා පොත (වෙනස් නොවී):** පෙරනිමි reflex ලෙස `npm deprecate omniroute@<bad> "<reason> — use <fixed>"` (විනාඩි, ආපසු හැරවිය හැකි); `npm unpublish` 72h/no-dependents කවුළුව තුළ පමණක් වන අතර කිසි විටෙකත් පළමු පියවර ලෙස නොවේ. Docker: කිසිවිටෙක අනුවාද ටැගය නැවත ලියන්න එපා — rollback යනු `latest` අවසාන හොඳ සාරාංශයට නැවත යොමු කරයි.
 
-**Docker Hub `latest` (සෑම stable SemVer publish එකකදීම අනිවාර්යයි):** `docker-publish`
-workflow එක **`X.Y.Z`** සහ, `should-promote-latest.sh` මෙය ඉහළම stable SemVer බවට එකඟ වූ විට,
-`:latest` යන දෙකම **එකම digest** සමඟ tag කළ යුතුය. Job එකෙන් පසු: Hub `latest` digest එක නව
-SemVer digest එකට සමාන විය යුතු අතර `last_updated` ද වෙනස් වී තිබිය යුතුය. Release notes මඟින් git හි පමණක් පවතින fixes ගැන සඳහන් කරන අතරතුර
-`:latest` පැරණි build එකක තබා නොගන්න. Compose quickstarts `:latest` භාවිත කරයි; GitOps විසින්
-`X.Y.Z` pin කිරීම දිගටම කළ යුතුය. [Docker release channels](../guides/DOCKER_GUIDE.md#release-channels) සහ #10317 බලන්න.
+**Docker Hub `latest` (සෑම ස්ථාවර SemVer ප්‍රකාශනයකම අවශ්‍ය වේ):** `docker-publish` කාර්ය ප්‍රවාහය ටැග් කළ යුතුය** දෙකම** `X.Y.Z` සහ, `should-promote-latest.sh` එකඟ වන විට මෙය ඉහළම ස්ථායී SemVer වේ , `:latest` සමඟ** එකම ජීර්ණය** . කාර්යයෙන් පසුව: Hub `latest` digest නව SemVer digest හා `last_updated` ගෙන යන ලද සමාන වේ. නිකුතු සටහන් git මත පමණක් පවතින නිවැරදි කිරීම් ගැන කතා කරන අතර `:latest` පැරණි ගොඩනැගීමක් මත තබන්න එපා. ඉක්මන් ආරම්භයන් `:latest` භාවිතා කරන්න; GitOps `X.Y.Z` pin කරමින් සිටිය යුතුය. [Docker නිකුතු නාලිකා](../guides/DOCKER_GUIDE.md#release-channels) සහ #10317 බලන්න.
 
-**Docker Hub organization repository (`cheaperinference/omniroute`):** Docker Hub හට
-repository එකක් namespaces අතර මාරු කළ නොහැකි බැවින්, `diegosouzapw/omniroute` එහි pull history
-සහ සෑම release එකක්ම තබා ගන්නා අතර, `docker-publish` හි `mirror-org-dockerhub` job එක
-නිකුත් කරන සෑම version එකක්ම (සහ promote කළ විට `:latest`) `ghcr.io/cheaper-inference/omniroute`
-වෙතින් organization repository එකට පිටපත් කරයි. එයට `DOCKERHUB_ORG_USERNAME` /
-`DOCKERHUB_ORG_TOKEN` secrets අවශ්ය වේ; ඒවා නොමැති විට job එක "Docker Hub org
-mirror skipped" warning එකක් සමඟ green තත්ත්වයේ පවතින අතර අනෙකුත් registries සාමාන්ය පරිදි publish වේ. පසුව නිකුත් කළ version එකක් එහි publish කිරීමට **Actions → Mirror Docker image to the Docker Hub org → Run
-workflow** ධාවනය කර `version=X.Y.Z` (සහ ඉහළම stable version සඳහා `promote_latest`) ලබා දෙන්න:
-එය existing images පිටපත් කරයි, නැවත build නොකරයි.
+**Docker Hub සංවිධාන ගබඩාව (`cheaperinference/omniroute`):** Docker Hub හට නාම අවකාශ අතර ගබඩාවක් ගෙන යා නොහැක, එබැවින් `diegosouzapw/omniroute` එහි ඇදීමේ ඉතිහාසය සහ සෑම නිකුතුවක්ම තබා ගනී, සහ `docker-publish` හි `mirror-org-dockerhub` කාර්යය නිකුත් කරන ලද සෑම අනුවාදයක්ම (සහ `:latest` උසස් කරන විට) `ghcr.io/cheaper-inference/omniroute` සිට ආයතන ගබඩාවට පිටපත් කරයි. එයට `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` රහස් අවශ්‍ය වේ; ඔවුන් නොමැතිව කාර්යය "Docker Hub org කණ්නාඩි මඟ හැරිය" අනතුරු ඇඟවීමක් සමඟ කොළ පැහැයෙන් පවතින අතර අනෙකුත් රෙජිස්ට්‍රි සාමාන්‍යයෙන් ප්‍රකාශයට පත් කරයි. පසුව නිකුත් කළ අනුවාදයක් එහි පළ කිරීමට, ධාවනය කරන්න** ක්‍රියා → දර්පණ Docker රූපය Docker Hub org → වෙත ක්‍රියා ප්‍රවාහය ධාවනය කරන්න** `version=X.Y.Z` සමඟ (සහ ඉහළම ස්ථායී අනුවාදය සඳහා `promote_latest` ): එය පවතින රූප පිටපත් කරයි, නැවත ගොඩනැගීමක් නැත. එම ගබඩාවේ Docker Hub දළ විශ්ලේෂණය අතින් සකසා ඇත: එය සංස්කරණය කරන API ආයතන ප්‍රවේශ ටෝකන ප්‍රතික්ෂේප කරයි.
+
+එම කාර්ය ප්‍රවාහය 2027-06-30 දක්වා සෑම නිකුතුවක්ම ලෙගසි GHCR පැකේජය `ghcr.io/diegosouzapw/omniroute` වෙත පිටපත් කරයි, එබැවින් තවමත් එයට අමුණා ඇති ස්ථාපනයන් යාවත්කාලීන වෙමින් පවතී; එහි දර්ශකය " `ghcr.io/cheaper-inference/omniroute` වෙත ගෙන ගිය" විස්තරයක් දරයි. එයට `GHCR_LEGACY_TOKEN` රහස අවශ්‍ය වේ ( `write:packages` සමඟ `diegosouzapw` හි සම්භාව්‍ය පුද්ගලික ප්‍රවේශ ටෝකනයක් ); එය නොමැතිව "Legacy GHCR කණ්නාඩි මඟ හැරිය" අනතුරු ඇඟවීමක් සමඟ රැකියාව මඟ හැරේ.
 
 ## Hotfix Fast-Lane (`hotfix` ලේබලය)
 

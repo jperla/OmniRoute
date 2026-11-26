@@ -512,12 +512,13 @@ CSDL trạng thái miền (SQLite):
 - Xác thực bắt tay WebSocket: `src/lib/ws/handshake.ts` — xác thực các yêu cầu nâng cấp WS bằng khóa API hoặc cookie phiên
 - Xác thực WebSocket trực tiếp của bảng điều khiển: `src/server/ws/liveServer.ts` — sidecar (cổng `LIVE_WS_PORT`) chấp nhận cookie phiên của bảng điều khiển hoặc khóa API Bearer có phạm vi quản lý (`manage`/`admin`); các khóa chỉ dành cho suy luận sẽ bị từ chối. Endpoint xuất bản nội bộ `POST /__omniroute_event` chỉ chấp nhận các peer loopback khi không có header qua proxy (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`)
 
-## 5) Đồng bộ đám mây
+## 5) Đồng bộ hóa đám mây
 
-- Khởi tạo bộ lập lịch: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
-- Tác vụ định kỳ: `src/shared/services/cloudSyncScheduler.ts`
-- Tác vụ định kỳ: `src/shared/services/modelSyncScheduler.ts`
-- Route điều khiển: `src/app/api/sync/cloud/route.ts`
+- Trình lập lịch trình khởi tạo: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- Nhiệm vụ định kỳ: `src/shared/services/cloudSyncScheduler.ts`
+- Nhiệm vụ định kỳ: `src/shared/services/modelSyncScheduler.ts`
+- Nhiệm vụ định kỳ (chọn tham gia trên mỗi kết nối): `src/shared/services/modelHealthCheckScheduler.ts` — kiểm tra các mô hình của kết nối, tự động ẩn các lỗi và chỉ khôi phục những gì nó đã ẩn (`src/lib/db/modelHealthAutoHidden.ts`)
+- Tuyến điều khiển: `src/app/api/sync/cloud/route.ts`
 
 ## Vòng đời yêu cầu (`/v1/chat/completions`)
 

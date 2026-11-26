@@ -512,12 +512,13 @@ Baza podataka stanja domena (SQLite):
 - Autentifikacija WebSocket rukovanja: `src/lib/ws/handshake.ts` — validira zahtjeve za WS nadogradnju putem API ključa ili sesijskog kolačića
 - WebSocket autentifikacija kontrolne ploče uživo: `src/server/ws/liveServer.ts` — prateća usluga (port `LIVE_WS_PORT`) prihvata sesijski kolačić kontrolne ploče ili Bearer API ključ s upravljačkim opsegom (`manage`/`admin`); ključevi namijenjeni samo za zaključivanje se odbijaju. Njena interna krajnja tačka za objavljivanje `POST /__omniroute_event` prihvata lokalne ravnopravne čvorove samo kada nije prisutno zaglavlje proxy skoka (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`)
 
-## 5) Sinhronizacija s oblakom
+## 5) Cloud Sync
 
-- Inicijalizacija planera: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- Pokretanje planera: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
 - Periodični zadatak: `src/shared/services/cloudSyncScheduler.ts`
 - Periodični zadatak: `src/shared/services/modelSyncScheduler.ts`
-- Kontrolna ruta: `src/app/api/sync/cloud/route.ts`
+- Periodični zadatak (opt-in po vezi): `src/shared/services/modelHealthCheckScheduler.ts` — testira modele veze, automatski sakriva kvarove i vraća samo ono što je sam sakrio (`src/lib/db/modelHealthAutoHidden.ts`)
+- Kontrolni put: `src/app/api/sync/cloud/route.ts`
 
 ## Životni ciklus zahtjeva (`/v1/chat/completions`)
 

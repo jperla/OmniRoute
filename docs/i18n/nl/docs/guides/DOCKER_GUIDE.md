@@ -8,21 +8,22 @@
 
 ## Inhoudsopgave
 
-- [Snel uitvoeren](#quick-run)
+- [Snel rennen](#quick-run)
 - [Met omgevingsbestand](#with-environment-file)
-- [Docker Compose](#docker-compose)
+- [Docker Componeren](#docker-compose)
 - [Beschikbare profielen](#available-profiles)
-- [CLI-tools op de host configureren wanneer OmniRoute in Docker draait](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
-- [Redis-sidecar](#redis-sidecar)
-- [Compose voor productie](#production-compose)
+- [Verharding van de container](#container-hardening)
+- [Host CLI tools configureren wanneer OmniRoute in Docker draait](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
+- [Redis Zijspan](#redis-sidecar)
+- [Productie Componeren](#production-compose)
 - [Dockerfile-fasen](#dockerfile-stages)
 - [Kritieke omgevingsvariabelen](#critical-environment-variables)
-- [Docker Compose met Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
-- [Cloudflare Quick Tunnel](#cloudflare-quick-tunnel)
-- [Imagetags](#image-tags)
-- [Dashboardupdates in Docker](#dashboard-updates-in-docker)
-- [Beschikbaarheid: standaard-SQLite ondersteunt één replica](#availability-default-sqlite-is-single-replica)
-- [Regionale Gemini-fouten binnen Docker](#gemini-regional-errors-inside-docker)
+- [Docker Componeren met Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
+- [Cloudflare Snelle tunnel](#cloudflare-quick-tunnel)
+- [Afbeeldingstags](#image-tags)
+- [Dashboard-updates in Docker](#dashboard-updates-in-docker)
+- [Beschikbaarheid: standaard SQLite is single-replica](#availability-default-sqlite-is-single-replica)
+- [Gemini regionale fouten binnen Docker](#gemini-regional-errors-inside-docker)
 - [Belangrijke opmerkingen](#important-notes)
 
 ---
@@ -89,6 +90,30 @@ OmniRoute levert Compose-profielen voor de belangrijkste implementatievormen. Ki
 | `web`              | `omniroute-web`  | Websessieproviders die een browser nodig hebben: `gemini-web`, `claude-web`, `claude-turnstile` (bouwt `runner-web`, inclusief Chromium)             | `docker compose --profile web up -d`         |
 
 > Meerdere profielen kunnen worden gecombineerd: `docker compose --profile cli --profile cliproxyapi up -d`.
+
+## Verharding van de container
+
+De `base`, `web`, `cli` en `host` appservices in `docker-compose.yml` gebruiken `cap_drop: [ALL]` en de `no-new-privileges:true` -beveiligingsoptie. De image draait als de niet-rootgebruiker `node` en luistert op hoge poorten, dus er zijn geen Linux mogelijkheden nodig. De beveiligingsoptie voorkomt dat processen privileges verkrijgen via setuid binaire bestanden.
+
+Alleen het `cli` profiel koppelt de Docker socket voor de auto-updater. Zie [Escape hatch: configureer de eigen CLIs van de container](#escape-hatch-configure-the-containers-own-clis-use-sparingly) voor de beveiligingsimplicaties.
+
+Het rootbestandssysteem blijft standaard beschrijfbaar. Het `cli` profiel schrijft CLI -configuratie en caches in de thuismap van de container, het `web` profiel slaat de Chromium-sessiestatus op, en de Next.js runtime kan caches buiten `/app/data` schrijven.
+
+Om een alleen-lezen rootbestandssysteem met het `base` profiel te proberen, slaat u dit op als `docker-compose.override.yml` naast `docker-compose.yml`. Compose leest de overschrijving automatisch.
+
+```yaml
+services:
+  omniroute-base:
+    read_only: true
+    tmpfs:
+      - /tmp
+```
+
+```bash
+docker compose --profile base up -d
+```
+
+De bestaande `/app/data` mount blijft beschrijfbaar. Test uw werkbelasting voordat u deze overschrijving in productie gebruikt, omdat deze mogelijk naar andere paden moet schrijven.
 
 ## Host-CLI-tools configureren wanneer OmniRoute in Docker draait
 
@@ -295,16 +320,16 @@ Geheugengedrag in Docker:
 
 ### Runtime RAM voor codeeragenten
 
-De standaardwaarde van 1 GiB Docker is een dashboard/light-chat vloer, geen productiegrootte. Lange `POST /v1/responses` teksten (honderden berichten, tientallen tools) behouden tijdens de compressie meerdere grafieken in het geheugen. Twee overlappende ~ 3 MiB / ~ 750k-tokenverzoeken hebben V8 afgebroken op een** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) en raakte ook een 16 GiB cgroup OOM. Zie [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+De standaardwaarde van 1 GiB Docker is een dashboard/light-chat vloer, geen productiegrootte. Lange `POST /v1/responses` teksten (honderden berichten, tientallen tools) behouden tijdens de compressie meerdere grafieken in het geheugen. Twee overlappende ~ 3 MiB / ~ 750k-tokenverzoeken hebben V8 afgebroken op een** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) en raakte ook een 16 GiB cgroup OOM. Zie [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
 
 Maat** cgroep `--memory` boven de hoop** — native buffers, SQLite en compressietussenproducten bevinden zich buiten V8.
 
-| Werklast                                 | `OMNIROUTE_MEMORY_MB`        | Container / cgroep      | Opmerkingen                                                                                                                  |
-| ---------------------------------------- | ---------------------------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
-| Dashboard, één licht praatje             | `1024` (standaardafbeelding) | ≥2 GiB                  |                                                                                                                              |
-| Eén codeermiddel (Claude/Codex/Grok)     | `8192`                       | ≥10 GiB                 | Typische `/v1/responses` met één sessie                                                                                      |
-| Twee gelijktijdige lange `/v1/responses` | `10240`–`12288`              | ≥12–16 GiB              | Gemeten V8-afbreking op ~ 12 GiB -heap                                                                                       |
-| Drie + gelijktijdige lange contexten     | niet op één proces           | serialiseren / meer RAM | De standaardtoelating voor zwaargewichten is 1 tijdens de vlucht; het verhogen ervan zonder RAM herintroduceert het afbreken |
+| Werklast                                 | `OMNIROUTE_MEMORY_MB`         | Container / cgroep      | Opmerkingen                                                                                                                  |
+| ---------------------------------------- | ----------------------------- | ----------------------- | ---------------------------------------------------------------------------------------------------------------------------- |
+| Dashboard, één licht praatje             | `1024` (standaard afbeelding) | ≥2 GiB                  |                                                                                                                              |
+| Eén codeermiddel (Claude/Codex/Grok)     | `8192`                        | ≥10 GiB                 | Typische `/v1/responses` met één sessie                                                                                      |
+| Twee gelijktijdige lange `/v1/responses` | `10240`–`12288`               | ≥12–16 GiB              | Gemeten V8-afbreking op ~ 12 GiB -heap                                                                                       |
+| Drie + gelijktijdige lange contexten     | niet op één proces            | serialiseren / meer RAM | De standaardtoelating voor zwaargewichten is 1 tijdens de vlucht; het verhogen ervan zonder RAM herintroduceert het afbreken |
 
 `omniroute serve` op blank metaal kalibreert ~ 35% van RAM (geklemd `[512, 4096]`) wanneer `OMNIROUTE_MEMORY_MB` is** uitgeschakeld** . Docker stelt altijd `1024` in, zodat de kalibratie nooit in de officiële afbeelding wordt uitgevoerd.
 
@@ -585,15 +610,15 @@ sudo systemctl enable --now omniroute-update.path
 De service verwijdert het verzoek vóór het ophalen, zodat een mislukte uitvoering niet in een lus terechtkomt. Zonder
 `DOCKER_UPDATE_TRIGGER_FILE` behoudt het dashboard de handmatige opdrachtprocedure.
 
-## Beschikbaarheid: standaard SQLite is een enkele replica
+## Beschikbaarheid: standaard SQLite is single-replica
 
 Voorraad Docker / Kubernetes OmniRoute is** één knooppuntproces + één SQLite -schrijver** . Hoge beschikbaarheid wel** niet ondersteund** op die topologie.
 
-| Beperking                                             | Gevolg                                                                                                                                                                                                                                                                                                                                       |
-| ----------------------------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Enkele schrijver                                      | Doen** niet** voer meerdere replica's uit tegen hetzelfde SQLite bestand. Dat corrumpeert de DB.                                                                                                                                                                                                                                             |
-| Opnieuw maken / opnieuw opstarten / HEALTHCHECK doden | **Volledige storing** van SSE tijdens de vlucht, dashboardsessies en status in het geheugen. Elke verbonden client valt weg. Nieuwe aanvragen tijdens het lege eindpuntvenster krijgen een omgekeerde proxy**`502 Bad Gateway: Unknown error`** , niet OmniRoute JSON — clients kunnen dit niet onderscheiden van een providerfout (#11015). |
-| Dezelfde gebeurtenislus als `/healthz`                | Een drukke catalogus of compressietik kan sondes vertragen; een korte time-out start vervolgens het programma opnieuw** alleen** replica.                                                                                                                                                                                                    |
+| Beperking                                             | Gevolg                                                                                                                                                                                                                                                                                                                                        |
+| ----------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Enkele schrijver                                      | Doen** niet** voer meerdere replica's uit tegen hetzelfde SQLite bestand. Dat corrumpeert de DB.                                                                                                                                                                                                                                              |
+| Opnieuw maken / opnieuw opstarten / HEALTHCHECK doden | **Volledige storing** van SSE tijdens de vlucht, dashboardsessies en status in het geheugen. Elke verbonden client valt weg. Nieuwe aanvragen tijdens het lege eindpuntvenster krijgen een omgekeerde proxy**`502 Bad Gateway: Unknown error`** , niet OmniRoute JSON — -clients kunnen dit niet onderscheiden van een providerfout (#11015). |
+| Dezelfde gebeurtenislus als `/healthz`                | Een drukke catalogus of compressietik kan sondes vertragen; een korte time-out start vervolgens het programma opnieuw** alleen** replica.                                                                                                                                                                                                     |
 
 **Sondematrix** (zie ook [Kubernetes-sondeaanbevelingen](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
@@ -603,9 +628,9 @@ Voorraad Docker / Kubernetes OmniRoute is** één knooppuntproces + één SQLite
 | Bereidheid    | HTTP `GET /healthz`                                          | Strakke time-outs die event-loop busy als dood beschouwen |
 | Diep / mensen | `/api/monitoring/health`                                     | Geautomatiseerde kubelet-levendigheid                     |
 
-**Upgrades:** verwacht dat elke sessie afneemt. Laat klanten leeglopen als je kunt; er is geen rollende update voor standaard SQLite. Samenstellen van `restart: unless-stopped` plus Docker `HEALTHCHECK` vervangt ook het enige proces wanneer de container ongezond is: dezelfde ontploffingsradius.
+**Upgrades:** verwacht dat elke sessie afneemt. Laat klanten leeglopen als je kunt; er is geen rollende update voor standaard SQLite. Componeer `restart: unless-stopped` plus Docker `HEALTHCHECK` zal ook het enige proces vervangen wanneer de container ongezond — is met dezelfde ontploffingsradius.
 
-Kant-en-klare manifesten en een Helm-diagram live in `deploy/kubernetes/` en `deploy/helm/omniroute/` : zie de [Kubernetes-implementatiehandleiding](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+Kant-en-klare manifesten en een Helm-diagram live in `deploy/kubernetes/` en `deploy/helm/omniroute/` — zie de [Kubernetes-implementatiehandleiding](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
 
 Kubernetes-fragment voor a** enkele replica** (Opnieuw maken is vereist; verhoog `replicas` niet tegen één SQLite bestand):
 
@@ -634,9 +659,9 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop` sleep kan Kube service-eindpunten laten vallen vóór SIGTERM so** nieuw** het verkeer stopt met het stervensproces. `/v1/responses` SSE tijdens de vlucht wordt leeggemaakt tot `SHUTDOWN_TIMEOUT_MS` (standaard 30s) via zwaargewicht toegangsleases (#11015). Nieuwe verzoeken die het proces nog steeds bereiken, krijgen `503` + `Retry-After: 5`. Het gat tussen het lege eindpunt opnieuw maken totdat de vervanging gereed is, blijft een harde storing: dat is de SQLite topologie, en niet een foutieve configuratie van de probe.
+`preStop` sleep kan Kube service-eindpunten laten vallen vóór SIGTERM so** nieuw** het verkeer stopt met het stervensproces. `/v1/responses` SSE tijdens de vlucht wordt leeggemaakt tot `SHUTDOWN_TIMEOUT_MS` (standaard 30s) via zwaargewicht toegangsleaseovereenkomsten (#11015). Nieuwe verzoeken die nog steeds het proces bereiken, krijgen `503` + `Retry-After: 5`. Het gat voor het opnieuw maken van een leeg eindpunt totdat de vervanging gereed is, blijft een — storing die de SQLite -topologie is, en geen foutieve configuratie van de probe.
 
-Externe Postgres / multi-writer HA is** niet** een gedocumenteerd voorraadpad. Als je HA nodig hebt, bewaar dan een enkele replica of voer een topologie uit die het project afzonderlijk heeft getest en gedocumenteerd. Het Postgres/MySQL werk staat in [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Totdat dit wordt verzonden, is dit de enige ondersteunde manier om te vermenigvuldigen** groot** `/v1/responses` capaciteit is N onafhankelijke processen (volgende sectie), niet `replicas > 1` op één volume.
+Externe Postgres / multi-writer HA is** niet** een gedocumenteerd voorraadpad. Als je HA nodig hebt, bewaar dan een enkele replica of voer een topologie uit die het project afzonderlijk heeft getest en gedocumenteerd. Het Postgres/MySQL werk leeft in [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Totdat dit wordt verzonden, is dit de enige ondersteunde manier om te vermenigvuldigen** groot** `/v1/responses` capaciteit is N onafhankelijke processen (volgende sectie), niet `replicas > 1` op één volume.
 
 ## Uitschalen: N onafhankelijke processen
 
@@ -646,25 +671,25 @@ Kopieën van één Codex -account mogen niet onafhankelijk het vernieuwingstoken
 
 De passieve instantie leest de verbinding opnieuw wanneer vernieuwing nodig is en gebruikt alleen een ander, niet-verlopen toegangstoken. Anders wordt vernieuwing uitgeschakeld zonder dat de verbinding verloopt of wordt gedeactiveerd, of zonder dat er een vernieuwingsonderbrekingsfout wordt geteld. Echte upstream-authenticatiefouten maken nog steeds gebruik van normale foutaccounting, exponentiële cooldown en de normale clientfout; accountdeactivering blijft permanent. Synchroniseer de geroteerde tokens van de eigenaar voordat de toegangstokens verlopen (de standaard proactieve vernieuwingstermijn is vijf minuten), of importeer het Codex authenticatiebestand opnieuw. Bij passieve import worden de geleverde tokens opgeslagen zonder deze te valideren op het tokeneindpunt. Handmatig dashboard/API vernieuwen retourneert `409 refresh_disabled`; nieuwe OAuth logins zijn ongewijzigd. Zie [omgevingsreferentie](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-Eén knooppuntproces is** één V8-hoop** . Twee overlappende ~ 3 MiB / ~ 750k-token coderingsagent `POST /v1/responses` (RTK + Caveman) breken die heap af op ~ 12 Gi (`FATAL ERROR: Reached heap limit`) en kunnen OOM een 16 Gi cgroup. Zie [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). Die meting is a** geheugenbudget** waarschuwing, geen product hard-max van twee gelijktijdige lange `/v1/responses`. Toegang tot zware chats wordt afgesloten door een automatisch afgeleid ingest-bytebudget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) met een grootte vanaf datzelfde V8/cgroup plafond. — overschrijft dit naar boven (of door het instellen van de oude `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` -limiet voor het aantal verzoeken) op een proces dat al zo groot is, wordt het afbreken opnieuw geïntroduceerd. Kleine chats, `/healthz`, `/v1/models` en MCP zijn dat wel** niet** in dat kapje.
+Eén knooppuntproces is** één V8-hoop** . Twee overlappende ~ 3 MiB / ~ 750k-token coderingsagent `POST /v1/responses` (RTK + Caveman) breken die heap af op ~ 12 Gi (`FATAL ERROR: Reached heap limit`) en kunnen OOM een 16 Gi cgroup. Zie [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). Die meting is a** geheugenbudget** waarschuwing, geen product hard-max van twee gelijktijdige lange `/v1/responses`. Toegang tot zware chats wordt afgesloten door een automatisch afgeleid ingest-bytebudget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) met een grootte vanaf datzelfde V8/cgroup plafond. — overschrijft dit naar boven (of door het instellen van de oude `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` -limiet voor het aantal verzoeken) op een proces dat al zo groot is, wordt het afbreken opnieuw geïntroduceerd. Kleine chats, `/healthz`, `/v1/models` en MCP zijn dat wel** niet** in dat kapje.
 
 ### Eén proces: meer dan twee lange `/v1/responses`
 
-A** gezond** proces (heap onder `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, standaard `0.75`)** kunnen** voer meer dan twee gelijktijdige lange `POST /v1/responses` uit wanneer het procesbrede inflight-bytebudget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) nog ruimte heeft. Lichamen op of boven `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (standaard 256 KiB) nemen dezelfde zwaargewicht-lease als structuurzware verzoeken en gebruiken dezelfde [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Tientallen gelijktijdige lange SSE clients (operators hebben er vaak 40-50 nodig) zijn a** geheugenbudget** vraag — size heap + primary/headroom slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — geen harde “max 2” productlimiet. Een onder druk staande heap verliest nog steeds met opnieuw te proberen `503`, dus #7849 keert niet terug.
+A** gezond** proces (heap onder `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, standaard `0.75`)** kunnen** meer dan twee gelijktijdige lange `POST /v1/responses` uitvoeren wanneer het procesbrede inflight-bytebudget (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) nog ruimte heeft. Lichamen op of boven `OMNIROUTE_CHAT_LARGE_BODY_BYTES` (standaard 256 KiB) nemen dezelfde zwaargewicht-lease als structuurzware verzoeken en gebruiken dezelfde [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Tientallen gelijktijdige lange SSE clients (operators hebben er vaak 40-50 nodig) zijn a** geheugenbudget** vraag — size heap + primary/headroom slots + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — geen harde “max 2” productlimiet. Een onder druk staande heap verliest nog steeds met opnieuw te proberen `503` zodat #7849 niet terugkeert.
 
 Naar** hoopjes vermenigvuldigen** (onafhankelijke V8 oude ruimtes)** Vandaag** :
 
 | Doen                                                                                                                                                    | Niet doen                                                       |
 | ------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------- |
 | Loop** N containers/pods** , elk met zijn** eigen** `DATA_DIR` /volume                                                                                  | Stel `replicas > 1` in tegen één SQLite bestand                 |
-| Grootte zwaar tijdens de vlucht + gezonde hoofdruimte vanaf heap / inflight-byte budget; 1–2 is de conservatieve #7849-standaard, geen hard product max | Geef één proces 8 × RAM en een onbegrensde tellimiet            |
+| Grootte zwaar tijdens de vlucht + gezonde hoofdruimte vanaf heap / inflight-byte budget; 1–2 is de conservatieve #7849 standaard, geen hard product max | Geef één proces 8 × RAM en een onbegrensde tellimiet            |
 | Optioneel: `QUOTA_STORE_DRIVER=redis` + `QUOTA_STORE_REDIS_URL` voor** gedeelde quotatellers**                                                          | Behandel Redis als gedeelde SQLite — is dat niet                |
 | Dupliceer providergeheimen in elke instantie (of accepteer gepartitioneerde dashboards)                                                                 | Verwacht één dashboard / één oproeplogboek voor alle instanties |
 | Front met elke load balancer; sticky via API -sleutel of sessie is voldoende                                                                            | Vereist een leverancierspecifieke, groottebewuste middleware    |
 
 Affiniteit tussen sessie en account kan ook worden gedeeld via Redis: stel `OMNIROUTE_SESSION_AFFINITY_STORE=redis` en `REDIS_URL` in voor elk proces, met dezelfde `REDIS_KEY_PREFIX` en een positieve `sessionAffinityTtlMs` instelling. Pins zetten gehashte gebruiksaccountidentiteiten om naar de in aanmerking komende lokale verbinding van elk proces, dus OAuth accounts met overeenkomende identiteitsmetagegevens hoeven geen overeenkomende verbinding IDs te hebben. Bekende accountidentiteiten hebben voorrang op tegenstrijdige lokale IDs bij pinresolutie en bewaakte uitzetting; records zonder identiteit (of uitzettingsbellers zonder identiteit) behouden de oude ID bewaker. Accounts zonder een stabiele gebruiksidentiteit vereisen nog steeds het matchen van IDs. Redis fouten of oproepen die langer duren dan 100 ms vallen terug op de lokale SQLite. Elke Redis affiniteitsopslag beperkt uitstaande operaties tot 8, omzeilt Redis onmiddellijk wanneer deze vol is, en geeft slots alleen vrij wanneer het onderliggende werk is afgehandeld, niet op de deadline van de beller. Tijdens een Redis -storing is er geen gedeelde waarheid: elke instantie valt terug op zijn eigen lokale affiniteit, sessies kunnen één keer per instantie opnieuw worden vastgezet en instanties kunnen uiteenlopen. De plakkerigheid convergeert opnieuw via Redis wanneer het herstelt. De time-out beperkt zich tot wachten, niet tot een verzonden EVAL, die na een terugval kan landen. Routing writes vergelijken de exacte waarde die wordt waargenomen door de routeringsbeslissing, en niet een nieuwe mutatietijd-lezing; een waargenomen misser of een SQLite fallback-observatie wordt vergeleken als een afwezige Redis sleutel. Verouderde pinnen worden in één CAS vervangen, dus een laat commando kan een nieuwere, andere pin niet vervangen of verwijderen. Redis leest atomisch de waarde en resterende server TTL terug; positieve PTTL (of geen vervaldatum) bepaalt de levendigheid, niet de JSON tijdstempel van de schrijver of de klok van de lezer. Lokale snapshots brengen de resterende TTL in kaart met een lokale deadline; bestaande JSON sleutels blijven leesbaar en hun onbewerkte bytes blijven behouden voor CAS. Redis is de enige bron van waarheid terwijl het antwoord geeft. Bevestigde gedeelde ups, aanrakingen en verwijderingen verwijderen het lokale item, installeren of vernieuwen het nooit. SQLite op het Redis pad bevat alleen de eigen terugvalbeslissingen van deze instantie op basis van Redis fouten, time-outs of toelatingsverzadiging, net als voorheen TTL-begrensd. Een ontbrekende lokale pincode bij een latere storing kost één nieuwe keuze (één prompt-cache-misser), niet een verkeerd of verwijderd account. Afgewezen upserts retourneren de gedeelde winnaar en de resterende TTL atomair: gewone selectie controleert de in kaart gebrachte lokale deadline opnieuw en gebruikt een nog levende in aanmerking komende winnaar, waarbij gebruik en loggen voor dat account wordt aangeraakt zonder nog een gedeelde schrijfactie. Als deze niet beschikbaar is, behoudt selectie de lokale kandidaat, laat de gedeelde pincode ongewijzigd en verzendt één foutopsporingsbericht. Afgewezen CAS schrijft geen SQLite; Redis fouten, time-outs of toegangsverzadiging passen in plaats daarvan de bestaande lokale bewerking toe. Als het antwoord van een verzonden mutatie na een time-out arriveert (geaccepteerd, afgewezen of fout), verwijdert een synchrone, exacte geserialiseerde waarde vergelijken en verwijderen alleen de byte-identieke time-out-fallback-rij. Er is geen wachttijd tussen die vergelijking en verwijdering; een nieuwere schrijffout blijft behouden. Bewaakte uitzetting verwijdert de eigen lokale pincode van het mislukte account, zelfs als Redis uitgeschakeld is, en ruimt deze opnieuw op na bevestigde gedeelde uitzetting. In afwachting van eerdere gedeelde antwoorden kan een verwijderde lokale pincode niet worden hersteld, omdat gedeelde successen nooit SQLite schrijven. Een latere terugval bij een storing kan een account opnieuw pinnen; een later geaccepteerd gedeeld schrijven bestaat alleen in Redis. Redis missers raadplegen de lokale fallback-status niet. Als de driver uitgeschakeld is, behouden de nieuw geselecteerde pinnen de oude SQLite JSON vorm met vier velden; alleen Redis routering voegt de gehashte accountidentiteit toe. Vooraf opgehaalde pins worden opnieuw gecontroleerd op de vervaldatum. Redis niet-leaseselectie leest de winkel opnieuw, maar synchrone leaseplanning kan nog steeds een pin gebruiken die is verwijderd tussen prefetch en planning (een geaccepteerd best-effort-venster). Een lease-commit kan niet van account wisselen na een duurzame claim: bij afgewezen aanvragen behoudt het alleen de geclaimde kandidaat voor dat verzoek en laat de gedeelde winnaar onaangetast, dus de overeenstemming tussen instanties is op dat pad begrensd. De rest van de tabel is nog steeds van toepassing: dit deelt niet de plakkerigheid van combo-sessies, native Codex -turn-pins, account-semaforen, uitsluitingen, bestedingslimieten, configuratie- of oproeplogboeken.
 
-Hardware: gelijktijdige lange `/v1/responses` per exemplaar is a** geheugenbudget** vraag (heap + inflight-byte / #10110). `N` onafhankelijke `DATA_DIR`'s vermenigvuldigen nog steeds heaps: host RAM moet `N × cgroup` dekken, niet "één 16 Gi-pod met N = 8." Nooit `replicas > 1` op één SQLite bestand.
+Hardware: gelijktijdige lange `/v1/responses` per exemplaar is a** geheugenbudget** vraag (heap + inflight-byte / #10110). `N` onafhankelijke `DATA_DIR`'s vermenigvuldigen nog steeds heaps: host RAM moet `N × cgroup` bestrijken, niet "één 16 Gi-pod met N = 8." Nooit `replicas > 1` op één SQLite bestand.
 
 Stel een schets samen (twee stapels, twee delen — en niet `deploy.replicas: 2`):
 
@@ -693,55 +718,32 @@ volumes:
   omniroute-b-data:
 ```
 
-De dichtheid tijdens het proces (compressie van het HTTP isolaat) is [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Eén logisch cluster met een gedeelde duurzame status is [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
+De dichtheid tijdens het proces (compressie van het HTTP isolaat) is [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). Eén logisch cluster op een gedeelde duurzame staat is [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
 
-## Regionale Gemini-fouten in Docker
+## Gemini regionale fouten binnen Docker
 
-Google AI Studio / Gemini API kan HTTP 400 retourneren met FAILED_PRECONDITION en
-`User location is not supported for the API use.` Een geslaagd verzoek op de host
-bewijst niet dat de container dezelfde uitgaande route gebruikt. DNS-volgorde,
-IPv4/IPv6-connectiviteit, VPN-routering en geconfigureerde proxy's kunnen verschillen. Controleer
-[de door Google ondersteunde regio's](https://ai.google.dev/gemini-api/docs/available-regions)
-en de daadwerkelijk gebruikte verbindingsroute; deze fout alleen wijst niet op een ongeldige API-sleutel.
+Google AI Studio / Gemini API kan HTTP 400 retourneren met FAILED_PRECONDITION en `User location is not supported for the API use.` Een succesvol verzoek op de host bewijst niet dat de container dezelfde uitgaande route gebruikt. DNS -bestelling, IPv4/IPv6 connectiviteit, VPN routering en geconfigureerde proxy's kunnen verschillen. Controleer [de ondersteunde regio's van Google](https://ai.google.dev/gemini-api/docs/available-regions), evenals de daadwerkelijke verbindingsroute; deze fout alleen identificeert geen slechte API sleutel.
 
 ### Geef de voorkeur aan een verbindingsspecifieke proxy
 
-Gebruik OmniRoute's [proxyconfiguratie per verbinding](../ops/PROXY_GUIDE.md#4-level-proxy-system)
-voor de getroffen Gemini-verbinding en herhaal vervolgens **Verbinding testen** en een klein verzoek
-met hetzelfde model. Zo blijft de routeringswijziging beperkt tot die verbinding. Controleer
-of de proxy bereikbaar is vanuit de container en of de verbinding deze daadwerkelijk selecteert.
-Een wijziging van de route garandeert niet dat de upstreamdienst de regio accepteert.
+Gebruik OmniRoute's [proxyconfiguratie per verbinding](../ops/PROXY_GUIDE.md#4-level-proxy-system) voor de betreffende Gemini verbinding en herhaal dit vervolgens** Verbinding testen** en een klein verzoek met hetzelfde model. Hierdoor blijft de routeringswijziging beperkt tot die verbinding. Controleer of de proxy bereikbaar is vanuit de container en dat de verbinding deze daadwerkelijk selecteert. Het wijzigen van de route garandeert geen stroomopwaartse regionale geschiktheid.
 
-### Netwerken van host en container vergelijken
+### Vergelijk host- en containernetwerken
 
-Houd de sleutel, het model en het verzoek identiek wanneer u geauthenticeerde resultaten vergelijkt; plaats nooit
-inloggegevens, proxywachtwoorden of volledige autorisatieheaders in een issue.
-Controleer eerst welke adresfamilies door de resolver van het besturingssysteem worden aangeboden, met dezelfde opdracht
-op de host en in de container:
+Houd de sleutel, het model en het verzoek identiek bij het vergelijken van geauthenticeerde resultaten; plak nooit inloggegevens, proxywachtwoorden of volledige autorisatieheaders in een probleem. Inspecteer eerst welke adresfamilies de OS resolver aanbiedt, met behulp van dezelfde opdracht op de host en in de container:
 
 ```bash
 node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 docker compose exec omniroute node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 ```
 
-Vervang `omniroute` door de service die u uitvoert (bijvoorbeeld `omniroute-web`). Deze
-opdrachten tonen adresfamilies zonder inloggegevens of IP-adressen. Een geretourneerde `6`
-toont alleen een IPv6-DNS-resultaat: dit bewijst **niet** dat er een bruikbare IPv6-route of API-toegang is.
-Waar `curl` is geïnstalleerd, vergelijkt u `curl -4 -I https://generativelanguage.googleapis.com`
-met `curl -6 -I https://generativelanguage.googleapis.com` in beide omgevingen.
-Een HTTP-respons bewijst connectiviteit voor die controle, zelfs als het een niet-geauthenticeerde
-fout is; alleen het geauthenticeerde modelverzoek test of Gemini beschikbaar is.
+Vervang `omniroute` door de service die u uitvoert (bijvoorbeeld `omniroute-web`). Met deze opdrachten worden adresfamilies afgedrukt zonder inloggegevens of IP adressen. Een geretourneerde `6` toont alleen een IPv6 DNS -resultaat: dat is ook zo** niet** een bruikbare IPv6 route of API toegang bewijzen. Waar `curl` is geïnstalleerd, vergelijk `curl -4 -I https://generativelanguage.googleapis.com` met `curl -6 -I https://generativelanguage.googleapis.com` in beide omgevingen. Een HTTP antwoord bewijst de connectiviteit voor die sonde, zelfs als het een niet-geverifieerde fout is; alleen het geverifieerde modelverzoek test de geschiktheid Gemini.
 
-### Alternatief op hostniveau: werkend IPv6 en resolverbeleid
+### Alternatief op hostniveau: werkend IPv6 en oplosserbeleid
 
-De melder van [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) herstelde
-de toegang in diens omgeving door IPv6 voor containers in te schakelen en de adresselectie
-van glibc te wijzigen. Beschouw dit als een omgevingsspecifiek alternatief. Controleer of IPv6
-op de host werkt en verifieer de uitgaande connectiviteit/routering en firewallregels van de container voordat u
-resolvervoorkeuren aanpast. Een privé-ULA-adres op zichzelf bewijst geen publieke IPv6-connectiviteit.
+De verslaggever van [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) herstelde de toegang in hun omgeving door container IPv6 in te schakelen en de glibc-adresselectie te wijzigen. Beschouw dit als een omgevingsspecifiek alternatief. Bevestig de werkende host IPv6, container egress/routing en firewallregels voordat u de voorkeuren van de oplosser aanpast. Een privé ULA -adres brengt op zichzelf geen openbare IPv6 connectiviteit tot stand.
 
-Voor services die al zijn gekoppeld aan het standaardnetwerk van Compose, schakelt dit fragment
-IPv6 op dat netwerk in; behoud de rest van uw service, poorten, volumes en configuratie:
+Voor services die al aan het standaardnetwerk van Compose zijn gekoppeld, schakelt dit fragment IPv6 op dat netwerk in; behoud de rest van uw service, poorten, volumes en configuratie:
 
 ```yaml
 networks:
@@ -749,30 +751,13 @@ networks:
     enable_ipv6: true
 ```
 
-Voor een benoemd netwerk schakelt u dit in op het netwerk waarmee de service daadwerkelijk is verbonden. Docker kan
-een ULA-subnet toewijzen; selecteer alleen een expliciet, niet-overlappend subnet wanneer uw netwerk
-dit vereist. Zie [IPv6-netwerken in Docker](https://docs.docker.com/engine/daemon/ipv6/)
-en [Compose-netwerkopties](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
+Voor een benoemd netwerk schakelt u dit in op het netwerk waar de service daadwerkelijk verbinding mee maakt. Docker kan een ULA subnet toewijzen; selecteer alleen een expliciet, niet-overlappend subnet als uw netwerk dit vereist. Zie [Docker IPv6 netwerken](https://docs.docker.com/engine/daemon/ipv6/) en [Netwerkopties samenstellen](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
 
-Op een **op glibc gebaseerde image** kan `/etc/gai.conf` de adresselectie wijzigen. De huidige
-Dockerfile van de repository gebruikt Debian; aangepaste op musl gebaseerde images gebruiken dit mechanisme niet.
-De gemelde aanpassing verandert het ULA-label van `label fc00::/7 6` in
-`label fc00::/7 1`. Begin met de volledige beleidstabel van de image en behoud de overige
-vermeldingen: het toevoegen van een `label`- of `precedence`-vermelding vervangt die standaardtabel, dus een bestand
-dat alleen de gewijzigde regel bevat, is niet voldoende. De
-[glibc-configuratiereferentie](https://github.com/bminor/glibc/blob/master/posix/gai.conf)
-documenteert die semantiek. Koppel het gecontroleerde bestand als alleen-lezen-bindmount aan `/etc/gai.conf`
-en maak de service opnieuw aan om de wijziging toe te passen.
+Op een** glibc-gebaseerd beeld** , `/etc/gai.conf` kan de adresselectie wijzigen. De huidige repository Dockerfile gebruikt Debian; aangepaste op musl gebaseerde afbeeldingen delen dit mechanisme niet. Door de gerapporteerde aanpassing verandert het ULA label van `label fc00::/7 6` in `label fc00::/7 1`. Begin met de volledige beleidstabel van de afbeelding en behoud de andere items: het toevoegen van een `label` of `precedence` -item vervangt die standaardtabel, dus een bestand dat alleen de gewijzigde regel bevat, is onvoldoende. De [glibc-configuratiereferentie](https://github.com/bminor/glibc/blob/master/posix/gai.conf) documenteert deze semantiek. Bind het beoordeelde bestand alleen-lezen aan op `/etc/gai.conf` en maak de service opnieuw om deze toe te passen.
 
-Dit wijzigt de adresselectie van het besturingssysteem voor **al het uitgaande verkeer in die container**.
-Het dwingt niet elke applicatie om IPv6 te kiezen: de DNS-volgorde en verbindingsselectie
-van Node zijn ook van belang. Met name `--dns-result-order=ipv4first` geeft de voorkeur aan IPv4 en
-is geen oplossing voor een probleem dat alleen bij IPv4 optreedt. Zie [DNS-volgorde in Node](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
+Dit verandert OS adresselectie voor** al het uitgaande verkeer in die container** . Het dwingt niet elke applicatie om IPv6 te kiezen: DNS volgorde en verbindingsselectie van het knooppunt zijn ook van belang. In het bijzonder geeft `--dns-result-order=ipv4first` de voorkeur aan IPv4 en is het geen remedie voor een mislukking IPv4-only. Zie [Knooppunt DNS bestellen](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
 
-Test Gemini en uw andere providers opnieuw na elke wijziging op hostniveau. Om de wijziging terug te draaien,
-verwijdert u de aangepaste `gai.conf`-mount, herstelt u de vorige netwerkconfiguratie en
-maakt u de getroffen service/het getroffen netwerk opnieuw aan tijdens een onderhoudsvenster. Het opnieuw aanmaken van een netwerk
-kan andere daaraan gekoppelde containers onderbreken; verwijder het persistente datavolume niet.
+Test Gemini en uw andere providers opnieuw na elke wijziging op hostniveau. Om terug te draaien, verwijdert u de aangepaste `gai.conf` koppeling, herstelt u de vorige netwerkconfiguratie en maakt u de betreffende service/network opnieuw aan tijdens een onderhoudsperiode. Het opnieuw creëren van een netwerk kan andere daaraan gekoppelde containers onderbreken; verwijder het permanente gegevensvolume niet.
 
 ## Belangrijke opmerkingen
 

@@ -34,64 +34,34 @@ npm run test:e2e           # istəyə bağlıdır, lakin tövsiyə olunur
 /capture-release-evidences-cc
 ```
 
-## npm Trusted Publishing (v3.8.51-dən etibarən standart) — sorğu əsasında mərhələli, ehtiyat variant kimi birbaşa
+## npm Trusted Publishing (v3.8.51-dən bəri defolt) — sorğu əsasında hazırlanır, ehtiyat kimi birbaşa
 
-`npm-publish.yml` defolt olaraq **npm Trusted Publishing (OIDC)** vasitəsilə yayımlayır: `stage-npm` işi (GitHub tərəfindən yerləşdirilən) həmin icra üçün GitHub-ın id-token-ını qısaömürlü npm etimadnaməsinə çevirir — repozitoriyanın sirlərində uzunömürlü npm tokeni yoxdur, 2FA sorğusu yoxdur, provenance əlavə olunur.
-Bu, 2FA-nı keçən tokenlər artıq istifadədən çıxarıldığı üçün npm sanksiyalarından yan keçən üsuldur;
-o, layihənin v3.8.48-ə qədər malik olduğu tam avtomatik axını bərpa edir və WS1.3 zəmanətini qoruyur (sızdırılmış token təkbaşına yayımlaya bilməz — token yoxdur).
+`npm-publish.yml` vasitəsilə dərc edir** npm Etibarlı Nəşriyyat (OIDC)** defolt olaraq: `stage-npm` işi (github-host) GitHub-nin id-tokenini həmin iş üçün qısamüddətli npm etimadnaməsi ilə mübadilə edir — repozitor sirlərində uzunmüddətli npm nişanı yoxdur, 2FA sorğusu, mənbə əlavə edilmir. Bu, indi 2FA-nı atlayan tokenlərin ləğv edildiyi npm sanksiyalarıdır; WS1.3 zəmanətini saxlayarkən layihənin v3.8.48-ə qədər olan tam avtomatik axını bərpa edir (sızmış token tək dərc edilə bilməz — heç bir token yoxdur).
 
-**Birdəfəlik quraşdırma (sahib):** npmjs.com → `omniroute` paketi → Settings → _Trusted
-Publisher_ → GitHub: owner `diegosouzapw`, repo `OmniRoute`, workflow `npm-publish.yml`
-(environment: none). Bu quraşdırılana qədər avtomatik addım `ENEEDAUTH` xətası ilə uğursuz olur:
-`publish_mode=staged` (aşağıda) və ya `direct` ilə yenidən göndərin.
+**Birdəfəlik quraşdırma (sahibi):** npmjs.com → paketi `omniroute` → Parametrlər → _Trusted Publisher_ → GitHub: sahibi `diegosouzapw`, repo `OmniRoute`, iş axını `npm-publish.yml` (mühit: heç biri). Bu mövcud olana qədər avtomatik addım `ENEEDAUTH` ilə uğursuz olur: `publish_mode=staged` (aşağıda) və ya `direct` ilə yenidən göndərin.
 
-### Mərhələli yayımlama (sorğu əsasında — `publish_mode=staged`)
+### Mərhələli nəşr (istək əsasında — `publish_mode=staged`)
 
-npm-publish iş axını artıq birbaşa yayımlamır: o, paketlənmiş tarball-u
-(`check:pack-boot`) başladır və sonra `npm stage publish` icra edir — dəqiq baytlar reyestrdə
-saxlanılır, **sahib təsdiqləyənədək quraşdırıla bilməz**. İnsan tərəfindən həyata keçirilən 2FA qapısı
-sübutdan ƏVVƏL deyil, SONRA yerləşdirilib.
+npm-publish iş axını artıq birbaşa dərc etmir: o, paketlənmiş tarballu (`check:pack-boot`) yükləyir və sonra `npm stage publish` — işə salır, dəqiq baytlar reyestrdə saxlanılır,** quraşdırıla bilməz** sahibi razılaşana qədər. İnsan 2FA qapısı ondan əvvəl deyil, sübuta AFTER hərəkət etdi.
 
-**İş axını uğurla tamamlandıqdan sonra sahibin görəcəyi addımlar:**
+**İş axını yaşıllaşdıqdan sonra sahib axını:**
 
-1. `npm stage list omniroute` — mərhələ identifikatorunu tapın (o, iş axınının xülasəsində də çap olunur).
-2. Mərhələləndirilmiş baytları yoxlayın (tövsiyə olunur): `npm stage download <id>`, sonra yüklənmiş
-   tarball-u müvəqqəti prefiksə quraşdırın və başladın (`npm run check:pack-boot` CI-də eyni
-   paketlə→quraşdır→başlat hökmünü avtomatlaşdırır).
-3. `npm stage approve <id>` — 2FA sorğusu yayımlamanın ÖZÜDÜR. `npm stage reject <id>` mərhələni silir.
-4. Yayımdan sonrakı şəbəkə yoxlaması (v3.8.49 planının WS1.4-ü) yayımlanmış
-   versiyanı təmiz konteynerdə ictimai reyestrdən quraşdırır və başladır.
+1. `npm stage list omniroute` — mərhələ identifikatorunu tapın (həmçinin iş axınının xülasəsində çap olunur).
+2. Mərhələli baytları yoxlayın (tövsiyə olunur): `npm stage download <id>`, sonra yüklənmiş tarballu müvəqqəti prefiksə quraşdırın və onu yükləyin (`npm run check:pack-boot` eyni paketi avtomatlaşdırır →CI-də → yükləmə hökmünü quraşdırın).
+3. `npm stage approve <id>` — 2FA tez dərc IS. `npm stage reject <id>` rədd edir.
+4. Nəşrdən sonrakı şəbəkə: nəşrdən sonrakı doğrulayıcı (v3.8.49 planının WS1.4) nəşr edilmiş versiyanı ictimai reyestrdən təmiz konteynerə quraşdırır və onu işə salır.
 
-**Təcili ehtiyat variant:** `workflow_dispatch` ilə `publish_mode=direct` köhnə dərhal `npm publish`
-üsulunu bərpa edir (yalnız mərhələləndirmənin özündə problem yaranarsa istifadə edin; səbəbi qeyd edin).
+**Fövqəladə hal:** `publish_mode=direct` ilə `workflow_dispatch` mirası dərhal `npm publish` bərpa edir (yalnız səhnələşdirmənin özü səhv davrandıqda istifadə edin; səbəbini qeyd edin).
 
-**Birdəfəlik sərtləşdirmə (sahib, npmjs.com):** `omniroute` üçün Trusted Publisher-ı
-yalnız mərhələləndirmə rejimində konfiqurasiya edin ki, sızdırılmış uzunömürlü token
-istənilən yerdən birbaşa `npm publish` icra edə bilməsin — CI yalnız mərhələləndirə bilər;
-yalnız sahibin 2FA-sı buraxılış edir.
+**Birdəfəlik sərtləşmə (sahibi, npmjs.com):** Etibarlı Nəşriyyatı `omniroute` üçün yalnız mərhələ rejimində konfiqurasiya edin ki, sızan uzunömürlü token hər hansı bir yerdən birbaşa `npm publish` edə bilməyəcək — CI yalnız səhnələşdirə bilsin; yalnız sahibin 2FA buraxılışları.
 
-**Qüsurlu artefaktlar üzrə təlimat (dəyişməz):** defolt ilkin tədbir kimi
-`npm deprecate omniroute@<bad> "<reason> — use <fixed>"` istifadə edin
-(dəqiqələr ərzində, geri qaytarıla bilər); `npm unpublish` yalnız 72 saatlıq/asılılıqların olmadığı
-pəncərədə istifadə edilməli və heç vaxt ilk addım olmamalıdır. Docker: versiya teqini heç vaxt yenidən yazmayın —
-geri qaytarma `latest` teqinin sonuncu işlək digest-ə yönləndirilməsidir.
+**Sınıq-artifakt oyun kitabı (dəyişməmiş):** standart refleks kimi `npm deprecate omniroute@<bad> "<reason> — use <fixed>"` (dəqiqələr, geri dönən); `npm unpublish` yalnız 72h/no-dependents pəncərəsində və heç vaxt ilk hərəkət kimi deyil. Docker: versiya teqini heç vaxt yenidən yazmayın — rollback `latest` son yaxşı həzminə yönəldir.
 
-**Docker Hub `latest` (hər stabil SemVer yayımlamasında məcburidir):** `docker-publish` iş axını həm
-**`X.Y.Z`**, həm də `should-promote-latest.sh` bunun ən yüksək stabil SemVer olduğunu təsdiqlədikdə `:latest`
-teqini **eyni digest** ilə teqləməlidir. İşdən sonra: Hub-dakı `latest` digest-i yeni SemVer digest-inə bərabər olmalı və `last_updated` dəyişməlidir. Buraxılış qeydlərində yalnız git-də mövcud olan düzəlişlərdən bəhs edilərkən `:latest` teqini köhnə
-qurulmada saxlamayın. Compose sürətli başlanğıcları `:latest` istifadə edir; GitOps isə
-`X.Y.Z` teqini sabit saxlamalıdır. [Docker buraxılış kanalları](../guides/DOCKER_GUIDE.md#release-channels) bölməsinə və #10317-yə baxın.
+**Docker Hub `latest` (hər sabit SemVer nəşrində tələb olunur):** `docker-publish` iş axını etiketləməlidir** hər ikisi** `X.Y.Z` və `should-promote-latest.sh` razılaşdıqda bu ən yüksək sabit SemVer, `:latest` ilə** eyni həzm** . İşdən sonra: Hub `latest` digest yeni SemVer digestinə bərabərdir və `last_updated` köçürülüb. Buraxılış qeydləri yalnız git-də mövcud olan düzəlişlərdən bəhs edərkən `:latest` köhnə quruluşda buraxmayın. `:latest` istifadə edərək sürətli başlanğıcları yaradın; GitOps `X.Y.Z` sabitləməyə davam etməlidir. [Docker buraxılış kanallarına](../guides/DOCKER_GUIDE.md#release-channels) və #10317 baxın.
 
-**Docker Hub təşkilat repozitoriyası (`cheaperinference/omniroute`):** Docker Hub
-repozitoriyanı ad məkanları arasında köçürə bilmədiyi üçün `diegosouzapw/omniroute` öz yükləmə tarixçəsini
-və hər buraxılışı saxlayır, `docker-publish` iş axınının `mirror-org-dockerhub` işi isə
-hər buraxılmış versiyanı (və təşviq edildikdə `:latest` teqini)
-`ghcr.io/cheaper-inference/omniroute` ünvanından təşkilat repozitoriyasına köçürür. Bunun üçün
-`DOCKERHUB_ORG_USERNAME` /
-`DOCKERHUB_ORG_TOKEN` sirləri tələb olunur; onlar olmadıqda iş “Docker Hub org
-mirror skipped” xəbərdarlığı ilə uğurlu qalır və digər reyestrlər normal şəkildə yayımlayır. Buraxılmış versiyanı sonradan orada yayımlamaq üçün **Actions → Mirror Docker image to the Docker Hub org → Run
-workflow** bölməsində `version=X.Y.Z` (və ən yüksək stabil versiya üçün
-`promote_latest`) göstərin: bu, mövcud təsvirləri köçürür, yenidən qurmur.
+**Docker Hub təşkilat deposu (`cheaperinference/omniroute`):** Docker Hub repozitoriyanı ad boşluqları arasında köçürə bilməz, ona görə də `diegosouzapw/omniroute` çəkmə tarixçəsini və hər buraxılışı saxlayır və `docker-publish` -in `mirror-org-dockerhub` işi hər buraxılmış versiyanı (və irəli çəkildikdə `:latest` ) `ghcr.io/cheaper-inference/omniroute` -dan təşkilat deposuna köçürür. Bu `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` sirləri lazımdır; onlarsız iş "Docker Hub org güzgü atlandı" xəbərdarlığı ilə yaşıl qalır və digər reyestrlər normal şəkildə dərc edir. Buraxılmış versiyanı daha sonra orada dərc etmək üçün işə salın** Fəaliyyətlər → Docker şəklini Docker Hub org-a əks etdirin → Run iş axını** `version=X.Y.Z` ilə (və ən yüksək stabil versiya üçün `promote_latest` ): o, mövcud şəkilləri kopyalayır, yenidən qurulmur. Həmin deponun Docker Hub icmalı əl ilə qurulur: onu redaktə edən API Təşkilat Giriş Tokenlərini rədd edir.
+
+Eyni iş axını 2027-06-30 tarixinə qədər hər buraxılışı köhnə GHCR paketi `ghcr.io/diegosouzapw/omniroute` ə kopyalayır, ona görə də ona bərkidilmiş quraşdırmalar yenilənməyə davam edir; onun indeksi " `ghcr.io/cheaper-inference/omniroute` yə köçürüldü" təsvirini daşıyır. O `GHCR_LEGACY_TOKEN` sirrini tələb edir ( `write:packages` ilə `diegosouzapw` -nin klassik şəxsi giriş nişanı); onsuz bu iş "Legacy GHCR mirror atlandı" xəbərdarlığı ilə atlanır.
 
 ## Hotfix Fast-Lane (label `hotfix`)
 

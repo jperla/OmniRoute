@@ -382,7 +382,7 @@ Sāciet OmniRoute sistēmas teknē:
 omniroute serve --tray
 ```
 
-Komanda atgriežas pēc tam, kad serveris un tekne ir gatavi.
+Komanda atgriežas pēc tam, kad serveris un paplāte ir gatavi.
 
 Serveris turpinās bez termināļa.
 
@@ -421,7 +421,7 @@ omniroute autostart disable
 
 Kad jums vairs nav nepieciešams OmniRoute, mēs piedāvājam divus ātrus skriptus tīrai noņemšanai:
 
-| Komanda                  | Darbība                                                                                            |
+| Pavēli                   | Darbība                                                                                            |
 | ------------------------ | -------------------------------------------------------------------------------------------------- |
 | `npm run uninstall`      | Noņem sistēmas lietotni, bet** saglabā jūsu DB un konfigurācijas** `~/.omniroute`.                 |
 | `npm run uninstall:full` | Programma AND tiek neatgriezeniski noņemta** dzēš visas konfigurācijas, atslēgas un datu bāzes** . |
@@ -431,7 +431,7 @@ Kad jums vairs nav nepieciešams OmniRoute, mēs piedāvājam divus ātrus skrip
 ### VPS izvietošana
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -494,7 +494,7 @@ docker build -t omniroute:cli .
 docker run -d --name omniroute -p 20128:20128 --env-file ./.env -v omniroute-data:/app/data omniroute:cli
 ```
 
-Lai uzzinātu par resursdatora integrēto režīmu ar CLI binārajiem failiem, skatiet galveno dokumentu sadaļu Docker.
+Lai uzzinātu par resursdatora integrēto režīmu ar CLI binārajiem failiem, skatiet Docker sadaļu galvenajos dokumentos.
 
 ### Nederīgs Linux (xbps-src)
 
@@ -513,8 +513,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -882,8 +882,8 @@ Konfigurēt, izmantojot** Informācijas panelis → iestatījumi → maršrutē�
 - `least-used` un `cost-optimized`
 - `auto` —, pamatojoties uz visiem kandidātiem
 - `lkgp` (pēdējais zināmais labs pakalpojumu sniedzējs) — piesprauž pēdējam veiksmīgajam nodrošinātājam, pēc tam atgriežas pie noteikumiem
-- `context-optimized` — izvēlas modeli ar lielāko brīvā konteksta logu
-- `context-relay` — ķēdes gara konteksta modeļi sekošanas pagriezieniem
+- `context-optimized` — vispirms izmēģina modeli ar lielāko zināmo konteksta logu
+- `context-relay` — prioritātes secība, kā arī nodošanas kopsavilkums, kad saruna tiek pārvietota uz citu kontu
 
 #### Ārējā lipīgās sesijas galvene
 
@@ -1160,7 +1160,7 @@ Var iestatīt globālos kombinētos noklusējuma iestatījumus** Informācijas p
 
 Nulles latentuma kombinēto optimizāciju var izvēlēties. Aiziet** Nulles latentuma optimizācija** atspējoti, lai novērstu šo latentuma funkciju sacīkšu ar atkāpšanās mērķiem, mērķu izlaišanu, pamatojoties uz TTFT vēsturi, vai atkāpšanās pieprasījumu saspiešanu; Iespējojot to, tiek nodrošināta konfigurēta riska ierobežošana, paredzamās TTFT izlaišanas un proaktīva atkāpšanās saspiešana, lai routing/request precizitāti mainītu uz mazāku aizture latentumu.
 
-Atspējot** Pamatojuma pilnvaras buferis** kad augšupējie pakalpojumu sniedzēji pieprasa stingrus `max_tokens` / `maxOutputTokens` ierobežojumus. Ja tas ir iespējots, kombinētā maršrutēšana tikai palielina argumentācijas modeļa brīvību modeļiem ar zināmu izvades ierobežojumu un atstāj klienta pilnvaras ierobežojumu nemainīgu, ja drošā bufera vērtība pārsniegtu šo ierobežojumu. Ja klienta ierobežojums jau pārsniedz zināmo ierobežojumu, OmniRoute piespiež to līdz šim ierobežojumam pirms augšupējā pieprasījuma nosūtīšanas.
+Atspējot** Pamatojuma pilnvaras buferis** kad augšupējie pakalpojumu sniedzēji pieprasa stingrus `max_tokens` / `maxOutputTokens` ierobežojumus. Ja tas ir iespējots, kombinētā maršrutēšana tikai palielina argumentācijas modeļa brīvību modeļiem ar zināmu izvades ierobežojumu un atstāj klienta pilnvaras ierobežojumu nemainīgu, ja drošā bufera vērtība pārsniegtu šo ierobežojumu. Ja klienta ierobežojums jau pārsniedz zināmo maksimālo robežu, OmniRoute piespiež to līdz šim ierobežojumam pirms augšupējā pieprasījuma nosūtīšanas.
 
 ---
 
@@ -1332,32 +1332,34 @@ Skatiet [API_REFERENCE.md](../reference/API_REFERENCE.md) pilnam galapunktu kata
 
 ## 💻 Iekšējais CLI
 
-OmniRoute piedāvā iekšējo CLI (`omniroute …`) iestatīšanai, diagnostikai un darbības kontrolei. Šis ir **atsevišķs no "CLI rīki" lapas informācijas panelī**, kas konfigurē trešās puses CLI (Claude Code, Cursor, Codex, Cline, …), lai tie varētu sazināties ar OmniRoute.
+OmniRoute piegādā iekšējo CLI (`omniroute …`) iestatīšanai, diagnostikai un izpildlaika kontrolei. Tas ir** atsevišķi no informācijas paneļa lapas "CLI Tools".** , kas konfigurē trešās puses CLIs (Claude Code, Cursor, Codex, Cline, …), lai viņi varētu runāt ar OmniRoute.
 
 ```bash
-omniroute setup                    # Interaktīvais vednis (parole, pakalpojumu sniedzēji, kombinācijas)
-omniroute setup --non-interactive  # Piemērots CI/CD
-omniroute doctor                   # Veselības diagnostika (datu direktorija, DB, pakalpojumu sniedzēji, porti)
-omniroute providers available      # Uzskaitīt atbalstītos pakalpojumu sniedzējus
-omniroute providers list           # Uzskaitīt konfigurētos savienojumus
-omniroute providers test <id>      # Tiešsaistes testēšana pakalpojumu sniedzēja savienojumam
-omniroute combos list              # Uzskaitīt kombinācijas
-omniroute combos switch <name>     # Iestatīt noklusējuma kombināciju
-omniroute models                   # Uzskaitīt pieejamos modeļus (--json, --search)
-omniroute keys add | list | remove # Pārvaldīt API atslēgas no termināļa
-omniroute backup                   # Konfigurācijas + DB momentuzņēmums
-omniroute restore [<timestamp>]    # Atjaunot no momentuzņēmuma
-omniroute health                   # Detalizēta veselības informācija (pārtraucēji, kešatmiņa, atmiņa)
-omniroute quota                    # Pakalpojumu sniedzēja kvotas lietojums
-omniroute mcp status               # MCP servera statuss
-omniroute a2a status               # A2A servera statuss
-omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tuneļi
-omniroute reset-password           # Atiestatīt administratora paroli
-omniroute --mcp                    # Sākt MCP serveri pār stdio
-omniroute --port 3000              # Sākt serveri pielāgoto portu
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-Padoms: savienojiet `omniroute doctor --json` ar savu monitorēšanas rīku, lai brīdinātu par neveselīgiem pakalpojumu sniedzēja savienojumiem.
+Padoms: savienojiet pārī `omniroute doctor --json` ar savu uzraudzības rīku, lai brīdinātu par bojātu vietējo instalēšanu. `doctor` nepārbauda pakalpojumu sniedzēja savienojumus; šim nolūkam izmantojiet `omniroute providers test <id>`.
 
 ---
 

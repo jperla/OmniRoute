@@ -512,10 +512,11 @@ FSM ট্রানজিশনগুলি অটো কম্বোর স্�
 
 ## 5) ক্লাউড সিঙ্ক
 
-- শিডিউলার ইনিশিয়ালাইজেশন: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
-- পর্যায়ক্রমিক টাস্ক: `src/shared/services/cloudSyncScheduler.ts`
-- পর্যায়ক্রমিক টাস্ক: `src/shared/services/modelSyncScheduler.ts`
-- কন্ট্রোল রুট: `src/app/api/sync/cloud/route.ts`
+- সময়সূচী শুরু: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- পর্যায়ক্রমিক কাজ: `src/shared/services/cloudSyncScheduler.ts`
+- পর্যায়ক্রমিক কাজ: `src/shared/services/modelSyncScheduler.ts`
+- পর্যায়ক্রমিক কাজ (প্রতি সংযোগে অপ্ট-ইন): `src/shared/services/modelHealthCheckScheduler.ts` — একটি সংযোগের মডেল পরীক্ষা করে, ব্যর্থতাগুলি স্বয়ংক্রিয়ভাবে লুকিয়ে রাখে এবং শুধুমাত্র যা লুকিয়ে রাখে তা পুনরুদ্ধার করে (`src/lib/db/modelHealthAutoHidden.ts`)
+- নিয়ন্ত্রণ রুট: `src/app/api/sync/cloud/route.ts`
 
 ## অনুরোধের জীবনচক্র (`/v1/chat/completions`)
 

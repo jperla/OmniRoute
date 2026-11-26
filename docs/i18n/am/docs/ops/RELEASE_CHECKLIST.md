@@ -37,7 +37,7 @@ npm run test:e2e           # አማራጭ ቢሆንም ይመከራል
 
 ## npm የታመነ ሕትመት (ነባሪ ከv3.8.51) — በጥያቄ ተዘጋጅቷል፣ እንደ ውድቀት በቀጥታ
 
-`npm-publish.yml` ያትማል** npm የታመነ ህትመት (OIDC)** በነባሪ፡ የ `stage-npm` ስራ (github-hosted) GitHub's id-tokenን ለአጭር ጊዜ የሚቆይ npm ምስክር ወረቀት ይለውጣል — በማከማቻ ሚስጥሮች ውስጥ ለረጅም ጊዜ የሚቆይ npm የለም፣ የ2FA ጥያቄ የለም፣ የፕሮቬንሽኑ ተያይዟል። አሁን 2FA የሚዘልሉ ቶከኖች ጡረታ እየወጡ በመሆናቸው የማለፊያው npm ማዕቀብ ነው። የ WS1.3 ዋስትናን ሲይዝ ፕሮጀክቱ እስከ v3.8.48 የነበረውን ሙሉ በሙሉ አውቶማቲክ ፍሰት ይመልሳል (የፈሰሰ ማስመሰያ ብቻውን ማተም አይችልም — ምንም ምልክት የለም)።
+`npm-publish.yml` በኩል ያትማል** npm የታመነ ህትመት (OIDC)** በነባሪ፡ የ `stage-npm` ስራ (github-hosted) GitHub's id-tokenን ለአጭር ጊዜ የሚቆይ npm ምስክር ወረቀት ይለውጣል — በማከማቻ ሚስጥሮች ውስጥ ለረጅም ጊዜ የሚቆይ npm የለም፣ የ2FA ጥያቄ የለም፣ የፕሮቬንሽኑ ተያይዟል። አሁን 2FA የሚዘልሉ ቶከኖች ጡረታ እየወጡ በመሆናቸው የማለፊያው npm ማዕቀብ ነው። የ WS1.3 ዋስትናን ሲይዝ ፕሮጀክቱ እስከ v3.8.48 የነበረውን ሙሉ በሙሉ አውቶማቲክ ፍሰት ይመልሳል (የፈሰሰ ማስመሰያ ብቻውን ማተም አይችልም — ምንም ምልክት የለም)።
 
 **የአንድ ጊዜ ማዋቀር (ባለቤት)፦** npmjs.com → ጥቅል `omniroute` → ቅንጅቶች → _የታመነ አታሚ_ → GitHub ባለቤት `diegosouzapw`, repo `OmniRoute`, የስራ ፍሰት `npm-publish.yml` (አካባቢ: የለም)። ያ እስኪኖር ድረስ፣ አውቶማቲክ እርምጃው በ `ENEEDAUTH`: እንደገና መላክ በ `publish_mode=staged` (ከታች) ወይም `direct`.
 
@@ -58,9 +58,11 @@ npm run test:e2e           # አማራጭ ቢሆንም ይመከራል
 
 **የተሰበረ-የተሰራ የመጫወቻ መጽሐፍ (ያልተለወጠ)፦** `npm deprecate omniroute@<bad> "<reason> — use <fixed>"` እንደ ነባሪ ምላሽ (ደቂቃዎች ፣ ሊቀለበስ የሚችል); `npm unpublish` በ 72h/no-dependents መስኮት ውስጥ ብቻ እና እንደ መጀመሪያው እንቅስቃሴ በጭራሽ። Docker: ስሪቱን በጭራሽ አትፃፍ — rollback `latest` ወደ መጨረሻው ጥሩ መፍጨት እየጠቆመ ነው።
 
-**Docker Hub `latest` (በእያንዳንዱ የተረጋጋ SemVer ህትመት ያስፈልጋል)** የ `docker-publish` የስራ ፍሰት መለያ መስጠት አለበት።** ሁለቱም** `X.Y.Z` እና፣ `should-promote-latest.sh` ሲስማማ ይህ ከፍተኛው የተረጋጋ SemVer ነው፣ `:latest` ከ** ተመሳሳይ መፍጨት** . ከስራው በኋላ፡ Hub `latest` መፍጨት ከአዲሱ SemVer መፈጨት ጋር እኩል ነው እና `last_updated` ተንቀሳቅሷል። ማስታወሻዎች በሚለቀቁበት ጊዜ በgit ላይ ብቻ ስላሉ ጥገናዎች ሲናገሩ `:latest` በአሮጌው ግንባታ ላይ አይተዉት። ፈጣን አስጀማሪዎችን ያዘጋጁ `:latest`; GitOps መሰካት አለበት `X.Y.Z`. [Docker የሚለቀቁትን ቻናሎች](../guides/DOCKER_GUIDE.md#release-channels) እና #10317 ይመልከቱ።
+**Docker Hub `latest` (በእያንዳንዱ የተረጋጋ SemVer ህትመት ያስፈልጋል)** የ `docker-publish` የስራ ፍሰት መለያ መስጠት አለበት።** ሁለቱም** `X.Y.Z` እና፣ `should-promote-latest.sh` ሲስማማ ይህ ከፍተኛው የተረጋጋ SemVer ነው፣ `:latest` ከ** ተመሳሳይ መፍጨት** . ከስራው በኋላ፡ Hub `latest` መፍጨት ከአዲሱ SemVer መፍጨት ጋር እኩል ነው እና `last_updated` ተንቀሳቅሷል። ማስታወሻዎች በሚለቀቁበት ጊዜ በgit ላይ ብቻ ስላሉ ጥገናዎች ሲናገሩ `:latest` በአሮጌው ግንባታ ላይ አይተዉት። ፈጣን አስጀማሪዎችን ያዘጋጁ `:latest`; GitOps መሰካት አለበት `X.Y.Z`. [Docker የሚለቀቁትን ቻናሎች](../guides/DOCKER_GUIDE.md#release-channels) እና #10317 ይመልከቱ።
 
-**Docker Hub ድርጅት ማከማቻ (`cheaperinference/omniroute`):** Docker Hub ማከማቻን በስም ቦታዎች መካከል ማንቀሳቀስ አይችልም፣ስለዚህ `diegosouzapw/omniroute` የመጎተት ታሪኩን እና እያንዳንዱን ልቀት ይይዛል፣ እና `docker-publish` `mirror-org-dockerhub` ስራ እያንዳንዱን የተለቀቀ እትም (እና `:latest` ሲተዋወቅ) ከ `ghcr.io/cheaper-inference/omniroute` ወደ ድርጅቱ ማከማቻ ይቀዳል። የ `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ሚስጥሮችን ያስፈልገዋል; ያለ እነርሱ ስራው አረንጓዴ ሆኖ ይቆያል "Docker Hub org መስታወት ተዘለለ" ማስጠንቀቂያ እና ሌሎች መዝገቦች በመደበኛነት ያትማሉ። የተለቀቀውን ስሪት በኋላ እዚያ ለማተም ያሂዱ** ድርጊቶች → Docker ምስልን ወደ Docker Hub org → አሂድ የስራ ፍሰት** በ `version=X.Y.Z` (እና `promote_latest` ለከፍተኛው የተረጋጋ ስሪት): ያሉትን ምስሎች ይገለብጣል, እንደገና አይገነባም.
+**Docker Hub ድርጅት ማከማቻ (`cheaperinference/omniroute`):** Docker Hub ማከማቻን በስም ቦታዎች መካከል ማንቀሳቀስ አይችልም፣ስለዚህ `diegosouzapw/omniroute` የመጎተት ታሪኩን እና እያንዳንዱን ልቀት ይይዛል፣ እና `docker-publish` `mirror-org-dockerhub` ስራ እያንዳንዱን የተለቀቀ እትም (እና `:latest` ሲተዋወቅ) ከ `ghcr.io/cheaper-inference/omniroute` ወደ ድርጅቱ ማከማቻ ይቀዳል። የ `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` ሚስጥሮችን ያስፈልገዋል; ያለ እነርሱ ስራው አረንጓዴ ሆኖ ይቆያል "Docker Hub org መስታወት ተዘለለ" ማስጠንቀቂያ እና ሌሎች መዝገቦች በመደበኛነት ያትማሉ። የተለቀቀውን ስሪት በኋላ እዚያ ለማተም ያሂዱ** ድርጊቶች → Docker ምስልን ወደ Docker Hub org → አሂድ የስራ ፍሰት** በ `version=X.Y.Z` (እና `promote_latest` ለከፍተኛው የተረጋጋ ስሪት): ያሉትን ምስሎች ይገለብጣል, እንደገና አይገነባም. የዚያ ማከማቻ Docker Hub አጠቃላይ እይታ የተቀናበረው በእጅ ነው፡ ያርትዑት API የድርጅት መዳረሻ ቶከንን ውድቅ ያደርጋል።
+
+ያው የስራ ሂደት እያንዳንዱን ልቀትን እስከ 2027-06-30 ድረስ ወደ ውርስ GHCR ጥቅል `ghcr.io/diegosouzapw/omniroute` ይገለበጣል፣ ስለዚህ አሁንም በእሱ ላይ የተጫኑ ጭነቶች ማዘመንዎን ይቀጥሉ። የእሱ መረጃ ጠቋሚ "ወደ `ghcr.io/cheaper-inference/omniroute` ተንቀሳቅሷል" መግለጫ ይይዛል። የ `GHCR_LEGACY_TOKEN` ሚስጥር ያስፈልገዋል (የ `diegosouzapw` ከ `write:packages` ጋር የሚታወቅ የግል መዳረሻ ማስመሰያ)። ያለሱ ያ ስራ በ"Legacy GHCR መስታወት ተዘለለ" ማስጠንቀቂያ ይዘላል።
 
 ## የHotfix ፈጣን መስመር (መለያ `hotfix`)
 

@@ -512,12 +512,13 @@ DB na Yanayin Domain (SQLite):
 - Tabbatar da shaida yayin musayar farko ta WebSocket: `src/lib/ws/handshake.ts` — yana tabbatar da buƙatun haɓakawa zuwa WS ta amfani da maɓallin API ko kukin zaman aiki
 - Tabbatar da shaidar WebSocket na dashboard kai-tsaye: `src/server/ws/liveServer.ts` — sidecar ɗin (port `LIVE_WS_PORT`) yana karɓar kukin zaman dashboard ko maɓallin Bearer API mai izinin gudanarwa (`manage`/`admin`); ana ƙin maɓallan da aka keɓe ga inference kawai. Endpoint ɗinsa na ciki mai wallafa bayanai, `POST /__omniroute_event`, yana karɓar peers na loopback ne kawai idan babu header na tsallake proxy (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`)
 
-## 5) Daidaitawa da Cloud
+## 5) Cloud Sync
 
-- Fara scheduler: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
-- Aikin lokaci-lokaci: `src/shared/services/cloudSyncScheduler.ts`
-- Aikin lokaci-lokaci: `src/shared/services/modelSyncScheduler.ts`
-- Route na sarrafawa: `src/app/api/sync/cloud/route.ts`
+- Mai tsara jadawalin: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- Aiki na lokaci-lokaci: `src/shared/services/cloudSyncScheduler.ts`
+- Aiki na lokaci-lokaci: `src/shared/services/modelSyncScheduler.ts`
+- Aiki na lokaci-lokaci (ficewa kowane haɗin kai): `src/shared/services/modelHealthCheckScheduler.ts` — yana gwada ƙirar haɗin gwiwa, yana ɓoye gazawar kai tsaye kuma yana dawo da abin da ya ɓoye kansa kawai (`src/lib/db/modelHealthAutoHidden.ts`)
+- Hanyar sarrafawa: `src/app/api/sync/cloud/route.ts`
 
 ## Zagayen Rayuwar Buƙata (`/v1/chat/completions`)
 

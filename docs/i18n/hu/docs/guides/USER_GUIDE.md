@@ -431,7 +431,7 @@ Ha már nincs szüksége OmniRoute, két gyors szkriptet biztosítunk a tiszta e
 ### VPS telepítés
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -513,8 +513,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -770,7 +770,7 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Csak a kifejezetten engedélyezési listán szereplő URL társnak küldött kérések kapják meg a `X-OmniRoute-Peer-Trace` fejlécet. Az átjáró elutasítja az ismétlődő ID példányt vagy a kimerült ugráskeretet HTTP `508 Loop Detected` paraméterrel; a hagyományos upstream szolgáltatók nem kapnak peer metaadatokat.
+Csak azok a kérések kapják meg a `X-OmniRoute-Peer-Trace` fejlécet, amelyeket egy kifejezetten engedélyezési listán szereplő URL társnak küldtek. Az átjáró elutasítja az ismétlődő ID példányt vagy a kimerült ugrás költségvetést HTTP `508 Loop Detected` paraméterrel; a hagyományos upstream szolgáltatók nem kapnak peer metaadatokat.
 
 A peer láncolás nem adatbázis-replikáció vagy gazdagép feladatátvétel. Mindegyik átjáró független SQLite állapotot, gyorsítótárakat, sebességszámlálókat és munkameneteket tart fenn. Használjon állapotellenőrzött fordított proxyt vagy ügyfél feladatátvételt active/passive vagy active/active elérhetőségéhez, és soha ne csatlakoztasson egyetlen SQLite adatbázist több futó OmniRoute példányhoz.
 
@@ -823,7 +823,7 @@ A modelleket szolgáltató szerint csoportosítva adja vissza típusokkal (`chat
 - Elérhető:** Irányítópult → végpontok** Docker hez és más saját üzemeltetésű telepítésekhez
 - Létrehoz egy ideiglenes `https://*.trycloudflare.com` URL, amely továbbítja az aktuális OpenAI-kompatibilis `/v1` végponthoz
 - Az első engedélyezés csak szükség esetén telepíti `cloudflared` ; a későbbi újraindítások újra felhasználják ugyanazt a felügyelt bináris fájlt
-- A gyors alagutak nem állnak vissza automatikusan a OmniRoute vagy a tároló újraindítása után; szükség esetén újra engedélyezze őket az irányítópulton
+- A gyors alagutak nem állnak vissza automatikusan a OmniRoute vagy a tároló újraindítása után; szükség esetén újra engedélyezze őket a műszerfalról
 - Az alagút URLs múlékony, és minden alkalommal változik, amikor az alagutat stop/start
 - A felügyelt gyorsalagutak alapértelmezés szerint HTTP/2 szállítást használják, hogy elkerüljék a zajos QUIC UDP puffer figyelmeztetéseket a korlátozott tárolókban
 - Állítsa be `CLOUDFLARED_PROTOCOL=quic` vagy `auto`, ha felül szeretné bírálni a felügyelt szállítási lehetőséget
@@ -876,14 +876,14 @@ Konfigurálás ezen keresztül** Irányítópult → Beállítások → Útvála
 
 - `priority` — szigorú rend, soha nem körmérkőzés
 - `weighted` — arányos forgalom modellenkénti súlyokkal felosztva
-- `fill-first` — lemeríti az első modellt, amíg el nem érik a határok
+- `fill-first` — lemeríti az első modellt, amíg a határok el nem érik
 - `round-robin` / `strict-random` / `random`
 - `p2c` (Két választás ereje)
 - `least-used` és `cost-optimized`
 - `auto` — pontszám vezérelte az összes jelöltet
 - `lkgp` (Last Known Good Provider) — az utolsó sikeres szolgáltatóhoz rögzíti, majd visszatér a szabályokhoz
-- `context-optimized` — kiválasztja a legnagyobb szabad kontextus ablakkal rendelkező modellt
-- `context-relay` — hosszú kontextusú modelleket láncol a fordulatok követéséhez
+- `context-optimized` — először a legnagyobb ismert környezeti ablakkal rendelkező modellt próbálja ki
+- `context-relay` — prioritási sorrend plusz egy átadás-összegzés, amikor a beszélgetés egy másik fiókba kerül
 
 #### Külső ragadós munkamenet fejléc
 
@@ -903,7 +903,7 @@ underscores_in_headers on;
 
 #### Helyettesítő karakteres modellálnevek
 
-Hozzon létre helyettesítő karakteres mintákat a modellnevek újratervezéséhez:
+Hozzon létre helyettesítő karaktermintákat a modellnevek újratervezéséhez:
 
 ```
 Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
@@ -1017,7 +1017,7 @@ OmniRoute szolgáltatói szintű rugalmasságot valósít meg öt összetevőbő
 
 5. **Dóziskorlát automatikus észlelése** — Amikor az upstream szolgáltatók kifejezett várakozási ablakokat adnak vissza, ezek a tippek felülírják a helyi kapcsolat lehűlését, ha a beállítás engedélyezve van.
 
-**Pro tipp:** Használja a** Egészség** oldalon ellenőrizheti és visszaállíthatja az élő szolgáltatói megszakítókat egy kimaradás után. A Rugalmasság oldal csak a konfigurációt módosítja.
+**Profi tipp:** Használja a** Egészség** oldalon ellenőrizheti és visszaállíthatja az élő szolgáltatói megszakítókat egy kimaradás után. A Rugalmasság oldal csak a konfigurációt módosítja.
 
 ---
 
@@ -1073,7 +1073,7 @@ Az Általános többé nem duplikálja a csak olvasható naplózási és gyorsí
 
 ### Költségek és költségvetés kezelése
 
-Hozzáférés a következőn keresztül** Irányítópult → költségek** .
+Hozzáférés a következőn keresztül** Műszerfal → költségek** .
 
 | Tab              | Cél                                                                                                              |
 | ---------------- | ---------------------------------------------------------------------------------------------------------------- |
@@ -1090,7 +1090,7 @@ curl -X POST http://localhost:20128/api/usage/budget \
 curl http://localhost:20128/api/usage/budget
 ```
 
-**Költségkövetés:** Minden kérés naplózza a token használatát, és az ártáblázat segítségével kiszámítja a költségeket. Lebontások megtekintése itt** Műszerfal → Használat** szolgáltató, modell és API kulcs szerint.
+**Költségkövetés:** Minden kérés naplózza a token használatát, és az ártáblázat segítségével kiszámítja a költségeket. A bontások megtekintése itt** Műszerfal → Használat** szolgáltató, modell és API kulcs szerint.
 
 ---
 
@@ -1156,7 +1156,7 @@ Konfigurálja a kombinált kiegyensúlyozást** Irányítópult → Combos → C
 | **Legkevésbé használt** | Útvonalak a legutóbbi legkevesebb kéréssel rendelkező modellhez (kombinált mérőszámokat használ) |
 | **Költségoptimalizált** | Útvonalak a legolcsóbb elérhető modellhez (árazási táblázatot használ)                           |
 
-A globális kombinált alapértelmezések beállíthatók** Irányítópult → beállítások → Útválasztás → kombinált alapértékek** . A kombinált célidőtúllépések alapértelmezés szerint öröklik az aktuális kérés időtúllépését. Használat** Cél időtúllépés (másodperc)** kombinált alapértelmezéseken vagy egyéni kombináción csak akkor, ha a célonkénti rövidebb korlát gyorsabb visszaesést vált ki.
+A globális kombinált alapértelmezések beállíthatók** Irányítópult → Beállítások → Útválasztás → Combo Alapértelmezések** . A kombinált célidőtúllépések alapértelmezés szerint öröklik az aktuális kérés időtúllépését. Használat** Cél időtúllépés (másodperc)** kombinált alapértelmezéseken vagy egyéni kombináción csak akkor, ha a célonkénti rövidebb korlát gyorsabb visszaesést vált ki.
 
 A nulla késleltetésű kombinált optimalizálások választhatók. Szabadság** Nulla késleltetésű optimalizálás** letiltva, hogy megakadályozzák, hogy ezek a késleltetési funkciók versenyezhessenek tartalékcélokkal, TTFT -előzmények alapján kihagyják a célokat, vagy ne tömörítsék a tartalékkérelmeket; Az engedélyezése lehetővé teszi a konfigurált fedezést, a prediktív TTFT kihagyásokat és a proaktív tartalék tömörítést, hogy routing/request hűségét alacsonyabb késleltetésre cserélje.
 
@@ -1166,7 +1166,7 @@ Letiltás** Érvelési token puffer** amikor az upstream szolgáltatók szigorú
 
 ### Egészségügyi irányítópult
 
-Hozzáférés a következőn keresztül** Irányítópult → Health** . Valós idejű rendszerállapot-áttekintés 6 kártyával:
+Hozzáférés a következőn keresztül** Irányítópult → Health** . Valós idejű rendszerállapot áttekintése 6 kártyával:
 
 | Kártya                    | Mit mutat                                                              |
 | ------------------------- | ---------------------------------------------------------------------- |
@@ -1177,7 +1177,7 @@ Hozzáférés a következőn keresztül** Irányítópult → Health** . Valós 
 | **Aláírás gyorsítótár**   | Deduplikációs gyorsítótár statisztikái (aktív kulcsok, találati arány) |
 | **Latencia telemetria**   | p50/p95/p99 késleltetési összesítés szolgáltatónként                   |
 
-**Pro tipp:** Az Egészségügyi oldal 10 másodpercenként automatikusan frissül. Használja a megszakító kártyát annak azonosítására, hogy mely szolgáltatók tapasztaltak problémákat.
+**Profi tipp:** Az Egészség oldal 10 másodpercenként automatikusan frissül. Használja a megszakító kártyát annak azonosítására, hogy mely szolgáltatók tapasztaltak problémákat.
 
 ---
 
@@ -1332,32 +1332,34 @@ A végpontok teljes katalógusát és a kérés-/válaszsémákat lásd az [API_
 
 ## 💻 Belső CLI
 
-Az OmniRoute egy belső CLI-t (`omniroute …`) biztosít a beállításhoz, a diagnosztikához és a futásidejű vezérléshez. Ez **nem azonos az irányítópult „CLI-eszközök” oldalával**, amely külső fejlesztésű CLI-ket (Claude Code, Cursor, Codex, Cline, …) konfigurál, hogy kommunikálhassanak az OmniRoute-tal.
+OmniRoute belső CLI (`omniroute …`) szállít a beállításhoz, a diagnosztikához és a futásidejű vezérléshez. Ez van** külön a „CLI Tools” oldaltól az irányítópulton** , amely beállítja a harmadik féltől származó CLIs (Claude Code, Cursor, Codex, Cline, …), hogy beszélhessenek OmniRoute vel.
 
 ```bash
-omniroute setup                    # Interaktív varázsló (jelszó, szolgáltatók, kombinációk)
-omniroute setup --non-interactive  # CI-barát
-omniroute doctor                   # Állapotdiagnosztika (adatkönyvtár, adatbázis, szolgáltatók, portok)
-omniroute providers available      # Támogatott szolgáltatók listázása
-omniroute providers list           # Konfigurált kapcsolatok listázása
-omniroute providers test <id>      # Szolgáltatói kapcsolat élő tesztelése
-omniroute combos list              # Kombinációk listázása
-omniroute combos switch <name>     # Alapértelmezett kombináció beállítása
-omniroute models                   # Elérhető modellek listázása (--json, --search)
-omniroute keys add | list | remove # API-kulcsok kezelése a terminálból
-omniroute backup                   # Pillanatkép készítése a konfigurációról és az adatbázisról
-omniroute restore [<timestamp>]    # Visszaállítás pillanatképből
-omniroute health                   # Részletes állapot (megszakítók, gyorsítótár, memória)
-omniroute quota                    # Szolgáltatói kvóták felhasználása
-omniroute mcp status               # MCP-kiszolgáló állapota
-omniroute a2a status               # A2A-kiszolgáló állapota
-omniroute tunnel list|create|stop  # Cloudflare-/Tailscale-/ngrok-alagutak
-omniroute reset-password           # Rendszergazdai jelszó visszaállítása
-omniroute --mcp                    # MCP-kiszolgáló indítása szabványos I/O-n keresztül
-omniroute --port 3000              # Kiszolgáló indítása egyéni porton
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-Tipp: párosítsa az `omniroute doctor --json` parancsot a megfigyelőeszközével, hogy riasztást kapjon a nem megfelelő állapotú szolgáltatói kapcsolatokról.
+Tipp: párosítsa `omniroute doctor --json` a megfigyelő eszközzel, hogy figyelmeztesse a hibás helyi telepítést. `doctor` nem teszteli a szolgáltatói kapcsolatokat; erre használd `omniroute providers test <id>`.
 
 ---
 

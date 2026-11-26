@@ -507,7 +507,8 @@ Cloud Agents об’єднує сторонні платформи кодови�
 - Ініціалізація планувальника: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
 - Періодичне завдання: `src/shared/services/cloudSyncScheduler.ts`
 - Періодичне завдання: `src/shared/services/modelSyncScheduler.ts`
-- Маршрут керування: `src/app/api/sync/cloud/route.ts`
+- Періодичне завдання (згода для кожного з’єднання): `src/shared/services/modelHealthCheckScheduler.ts` — перевіряє моделі з’єднання, автоматично приховує помилки та відновлює лише те, що приховав сам (`src/lib/db/modelHealthAutoHidden.ts`)
+- Контрольний маршрут: `src/app/api/sync/cloud/route.ts`
 
 ## Життєвий цикл запиту (`/v1/chat/completions`)
 

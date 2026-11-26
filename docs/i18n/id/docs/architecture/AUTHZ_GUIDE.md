@@ -190,7 +190,7 @@ Setiap kelas rute memiliki kebijakan di `src/server/authz/policies/`:
 
 - **`publicPolicy`** (`policies/public.ts`) — selalu mengembalikan `allow({ kind: "anonymous", id: "anonymous" })`.
 - **`clientApiPolicy`** (`policies/clientApi.ts`) — mengekstrak Pembawa, memvalidasi melalui `validateApiKey()`. Masuk ke anonim hanya ketika tanda fitur `REQUIRE_API_KEY` yang efektif dinonaktifkan. Bendera yang efektif diselesaikan melalui `isRequireApiKeyEnabled()` (`DB feature flag override > process.env.REQUIRE_API_KEY > default`) sehingga Bendera Fitur Dasbor dan variabel lingkungan mengatur `/api/v1/*`, `/api/v1beta/*`, dan alias secara konsisten; kegagalan penyelesai gagal ditutup. Mengizinkan permintaan sesi dasbor pada rute API klien (termasuk `/api/v1/models`, yang digunakan oleh katalog model dasbor). Ketika Entra ID SSO diaktifkan, Pembawa yang secara struktural merupakan token Entra (tiga segmen base64url, `RS*` alg, `kid`) ditangani oleh cabang SSO** sebelum** `validateApiKey()` dan putusannya bersifat final — tidak pernah masuk ke jalur kunci API atau cabang degradasi ke anonim, sehingga penghentian penyedia identitas tidak dapat menjadi akses terbuka. Kunci API statis tidak terpengaruh. Lihat [Masuk ID SSO](../security/ENTRA_SSO.md).
-- **`managementPolicy`** (`policies/management.ts`) — menerima sesi dasbor, permintaan sinkronisasi model internal (cocok dengan `/api/providers/[name]/(sync-models|models)`), atau melompati seluruhnya jika `isAuthRequired()` mengembalikan false. Mengembalikan 403 (`AUTH_001`) ketika token Pembawa ada tetapi tidak valid, 401 sebaliknya. Juga menerapkan tingkatan penjaga rute (LOCAL_ONLY / ALWAYS_PROTECTED) sebelum cabang autentikasi mana pun — lihat [Tingkatan Penjaga Rute](../security/ROUTE_GUARD_TIERS.md). jalur LOCAL_ONLY di `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (hari ini: `/api/mcp/`) dapat diakses dari non-loopback ketika kunci Pembawa membawa cakupan `manage` ; semua jalur LOCAL_ONLY lainnya tetap loopback ketat terlepas dari cakupannya.
+- **`managementPolicy`** (`policies/management.ts`) — menerima sesi dasbor, permintaan sinkronisasi model internal (cocok dengan `/api/providers/[name]/(sync-models|models)`), atau melompati seluruhnya jika `isAuthRequired()` mengembalikan false. Mengembalikan 403 (`AUTH_001`) ketika token Pembawa ada tetapi tidak valid, 401 sebaliknya. Juga menerapkan tingkatan penjaga rute (LOCAL_ONLY / ALWAYS_PROTECTED) sebelum cabang autentikasi mana pun — lihat [Tingkatan Penjaga Rute](../security/ROUTE_GUARD_TIERS.md). jalur LOCAL_ONLY di `LOCAL_ONLY_MANAGE_SCOPE_BYPASS_PREFIXES` (hari ini: `/api/mcp/`) dapat diakses dari non-loopback ketika kunci Pembawa membawa cakupan `manage`/`admin` atau cakupan `mcp:connect` sempit (`hasMcpConnectOrManageScope`), atau dengan sesi dasbor yang diautentikasi; semua jalur LOCAL_ONLY lainnya tetap loopback ketat terlepas dari cakupannya.
 
 Kebijakan yang berhasil mengembalikan `AuthSubject` dengan `kind ∈ { client_api_key, dashboard_session, management_key, anonymous, sso_user }`. Penangan hilir dapat membacanya melalui `assertAuth(request, "CLIENT_API")` di `src/server/authz/assertAuth.ts` alih-alih menjalankan kembali logika autentikasi.
 
@@ -198,7 +198,7 @@ Kebijakan yang berhasil mengembalikan `AuthSubject` dengan `kind ∈ { client_ap
 
 `src/shared/constants/publicApiRoutes.ts` adalah daftar yang diizinkan secara eksplisit:
 
-Daftar ini dibagi berdasarkan** membentuk** , dan pemisahannya bersifat menahan beban (GHSA-74g9-q8f6-793h): awalan dicocokkan dengan `startsWith()`, sehingga juga cocok dengan setiap jalur berdekatan yang berbagi karakter utamanya. `/api/usage/om-usage` sebagai awalan bertanda `/api/usage/om-usage<anything>` PUBLIC, dan Next menyelesaikannya menjadi `/api/usage/[connectionId]` — penangan tanpa autentikasinya sendiri.
+Daftar ini dibagi berdasarkan** membentuk** , dan pemisahannya bersifat menahan beban (GHSA-74g9-q8f6-793h): awalan dicocokkan dengan `startsWith()`, sehingga ia juga cocok dengan setiap jalur berdekatan yang berbagi karakter utamanya. `/api/usage/om-usage` sebagai awalan bertanda `/api/usage/om-usage<anything>` PUBLIC, dan Next menyelesaikannya menjadi `/api/usage/[connectionId]` — penangan tanpa autentikasinya sendiri.
 
 ```ts
 // Genuine subtrees. Every entry MUST end in "/" (asserted by a unit test).
@@ -281,30 +281,24 @@ export async function POST(request: Request) {
 
 Pilih himpunan berdasarkan bentuk, bukan berdasarkan kemudahan. Satu rute dimasukkan ke `PUBLIC_API_ROUTES_EXACT` (atau `PUBLIC_READONLY_CORS_API_ROUTES` jika hanya untuk GET); hanya subtree yang sebenarnya yang dimasukkan ke `PUBLIC_API_ROUTE_PREFIXES`, dan entri tersebut **harus diakhiri dengan `/`**. Memasukkan satu rute ke daftar prefiks juga memublikasikan setiap path berdekatan yang memiliki karakter awal yang sama — termasuk sibling segmen dinamis yang ditambahkan kemudian (GHSA-74g9-q8f6-793h). Perbarui pengujian unit di `tests/unit/public-api-routes.test.ts`, `tests/unit/authz/public-route-exact-match.test.ts`, dan `tests/unit/authz/classify.test.ts`.
 
-## Cakupan
+## Lingkup
 
-Tiga namespace. Setiap pemeriksa hanya membaca stringnya sendiri. Perbandingan berdampingan, termasuk mengapa `manage` gagal `scopeMatches` untuk `read:compression` dan mengapa token akses `read` tidak dapat `PATCH /api/keys/{id}`, ada di [Tiga namespace cakupan](../frameworks/MCP-SERVER.md#three-scope-namespaces).
+Tiga namespace. Setiap pemeriksa hanya membaca stringnya sendiri. The side-by-side, including why `manage` fails `scopeMatches` for `read:compression` and why a `read` access token cannot `PATCH /api/keys/{id}`, is [Three scope namespaces](../frameworks/MCP-SERVER.md#three-scope-namespaces).
 
-Kunci API membawa array `scopes` (disimpan sebagai JSON di `api_keys.scopes`, lihat `src/lib/db/apiKeys.ts`).
+API keys carry a `scopes` array (stored as JSON in `api_keys.scopes`, see `src/lib/db/apiKeys.ts`).
 
-### Cakupan manajemen
+### Ruang lingkup manajemen
 
-- `manage` / `admin` — `hasManageScope`. Akses bearer ke rute API manajemen.
-- `mcp:connect`, `self:usage`, `self:account-quota`, dan
-  `policy:bypass-provider-quota` adalah cakupan pencocokan persis yang aditif. Mereka berada di luar `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` hanya membuka bagian non-loopback `/api/mcp/`.
+- `manage` / `admin` — `hasManageScope`. Akses pembawa ke rute manajemen API.
+- `mcp:connect`, `self:usage`, `self:account-quota`, and `policy:bypass-provider-quota` are additive exact-match scopes. Mereka duduk di luar `MANAGEMENT_API_KEY_SCOPES`. `mcp:connect` hanya membuka ukiran `/api/mcp/` non-loopback.
 
-### Cakupan alat MCP
+### cakupan alat MCP
 
-Katalog dan aturan pencocokan (string identik, atau cakupan yang diberikan diakhiri dengan `*`):
-[Cakupan alat MCP](../frameworks/MCP-SERVER.md#mcp-tool-scopes).
-`MCP_SCOPE_LIST` di `src/shared/constants/mcpScopes.ts` adalah subset yang diketik asli, bukan katalog lengkap itu. Penegakan berjalan di
-`open-sse/mcp-server/scopeEnforcement.ts` setelah `resolveCallerScopeContext()` menyelesaikan cakupan dari info otentikasi MCP, metadata permintaan, atau `OMNIROUTE_MCP_SCOPES`.
-Ini tetap mati kecuali `OMNIROUTE_MCP_ENFORCE_SCOPES=true`.
+Catalog and matching rules (identical string, or a granted scope ending in `*`): [MCP tool scopes](../frameworks/MCP-SERVER.md#mcp-tool-scopes). `MCP_SCOPE_LIST` in `src/shared/constants/mcpScopes.ts` is the original typed subset, not that full catalog. Enforcement runs in `open-sse/mcp-server/scopeEnforcement.ts` after `resolveCallerScopeContext()` resolves scopes from MCP auth info, request metadata, or `OMNIROUTE_MCP_SCOPES`. `OMNIROUTE_MCP_ENFORCE_SCOPES=true` mengaktifkannya secara global (default `false`), tetapi selalu diterapkan untuk pemanggil HTTP/SSE yang kunci API tidak memiliki `manage`/`admin` (lihat `shouldForceScopeEnforcement()` di `open-sse/mcp-server/scopeEnforcement.ts`), apa pun tandanya.
 
 ### Cakupan token akses
 
-`read` / `write` / `admin` pada token `oma_live_…`, diberi peringkat oleh `scopeSatisfies`
-(`src/lib/accessTokens/scopes.ts`). Peringkat ini hanya berlaku untuk kredensial token akses. Lihat [Otentikasi Manajemen](../guides/MANAGEMENT-AUTH.md).
+`read` / `write` / `admin` on `oma_live_…` tokens, ranked by `scopeSatisfies` (`src/lib/accessTokens/scopes.ts`). This rank applies to the access-token credential only. Lihat [Otentikasi Manajemen](../guides/MANAGEMENT-AUTH.md).
 
 ## Pengalih Diperlukan Otentikasi
 

@@ -515,10 +515,11 @@ FSM ट्रांज़िशन ऑटो कॉम्बो के स्क
 
 ## 5) क्लाउड सिंक
 
-- शेड्यूलर आरंभीकरण: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- शेड्यूलर init: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
 - आवधिक कार्य: `src/shared/services/cloudSyncScheduler.ts`
 - आवधिक कार्य: `src/shared/services/modelSyncScheduler.ts`
-- नियंत्रण रूट: `src/app/api/sync/cloud/route.ts`
+- आवधिक कार्य (प्रति कनेक्शन ऑप्ट-इन): `src/shared/services/modelHealthCheckScheduler.ts` — एक कनेक्शन के मॉडल का परीक्षण करता है, विफलताओं को स्वतः छुपाता है और केवल वही पुनर्स्थापित करता है जो उसने स्वयं छिपाया था (`src/lib/db/modelHealthAutoHidden.ts`)
+- नियंत्रण मार्ग: `src/app/api/sync/cloud/route.ts`
 
 ## अनुरोध जीवनचक्र (`/v1/chat/completions`)
 

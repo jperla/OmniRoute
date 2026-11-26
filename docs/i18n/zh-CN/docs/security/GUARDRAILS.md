@@ -17,16 +17,17 @@
 
 ## 内置护栏
 
-注册表在导入时按优先顺序自动加载六个护栏（请参阅`registry.ts` → `registerDefaultGuardrails()`）：
+注册表会在导入时按优先级顺序自动加载这些护栏（请参阅`registry.ts` → `registerDefaultGuardrails()`）：
 
-| 优先事项 | 姓名                | 阶段           | 文件                  |
-| -------- | ------------------- | -------------- | --------------------- |
-| `5`      | `vision-bridge`     | `preCall`      | `visionBridge.ts`     |
-| `6`      | `audio-bridge`      | `preCall`      | `audioBridge.ts`      |
-| `7`      | `video-bridge`      | `preCall`      | `videoBridge.ts`      |
-| `10`     | `pii-masker`        | `pre` + `post` | `piiMasker.ts`        |
-| `20`     | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
-| `95`     | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
+| 优先事项 | 姓名                | 阶段           | 文件                      |
+| -------- | ------------------- | -------------- | ------------------------- |
+| `1`      | `agent-guard`       | `preCall`      | `agentGuard/guardrail.ts` |
+| `5`      | `vision-bridge`     | `preCall`      | `visionBridge.ts`         |
+| `6`      | `audio-bridge`      | `preCall`      | `audioBridge.ts`          |
+| `7`      | `video-bridge`      | `preCall`      | `videoBridge.ts`          |
+| `10`     | `pii-masker`        | `pre` + `post` | `piiMasker.ts`            |
+| `20`     | `prompt-injection`  | `preCall`      | `promptInjection.ts`      |
+| `95`     | `credential-masker` | `pre` + `post` | `credentialMasker.ts`     |
 
 运行较低优先级的号码**第一的**。
 
@@ -77,7 +78,7 @@ GLM 5.3 基本模型和`glm-5.3-{low,high,max}`具有显式`supportsVision:false
 
 #### 描述缓存（`modalityBridge/bridgeCache.ts`）
 
-用于描述输出的内存中LRU + TTL缓存，在进程范围内共享。具有长度前缀帧的密钥= `sha256(imageRef + composedPrompt + configuredBridgeModel)` （无字段边界冲突）。模型组件是**配置的**桥接模型，而不是实际回答— `callVisionModel`模型可能会在内部回退，并且每次尝试键入都会使缓存碎片化。失败的描述永远不会被缓存。设置：
+用于描述输出的内存中LRU + TTL缓存，在进程范围内共享。具有长度前缀帧的密钥= `sha256(imageRef + composedPrompt + configuredBridgeModel)` （无字段边界冲突）。模型组件是**配置好的**桥接模型，而不是实际回答— `callVisionModel`模型可能会在内部回退，并且每次尝试键入都会使缓存碎片化。失败的描述永远不会被缓存。设置：
 
 | 钥匙                            | 默认   | 范围    |
 | ------------------------------- | ------ | ------- |
@@ -156,23 +157,23 @@ GLM 5.3 基本模型和`glm-5.3-{low,high,max}`具有显式`supportsVision:false
 
 `scripts/perf/video-bridge-fu07-eval.ts`生成确定性的真实FFmpeg固定装置，用于重复数据删除后的字幕调用节省、密集运动预算分配、 blur/exposure/SI-TI证据、长尾快速剪切和逐渐淡出误报。它记录预分析墙时间，以及`/usr/bin/time`可用的子CPU和峰值RSS。它的质量检查只是结构性的预言。真正的字幕模型质量仍然是`HOLD`因为该工具没有授权端点或冻结判断。除非`--caption-cost-per-call-usd`提供明确的每次调用正估计，否则货币节省也仍然是`HOLD` ；该脚本永远不会伪造任何结果。
 
-每个帧限制为 4 MiB，所有原始帧总共限制为 23 MiB，序列化代理响应限制为 32 MiB。 `finally`中的私有临时目录被删除。 OmniRoute不捆绑FFmpeg并且不接受自定义可执行路径。在添加字幕之前，桥接器会应用保守的视觉重复数据删除过程：每个JPEG都减少为 16 × 16 灰度缓冲区，并且仅与保留的最后一帧进行比较。对于超过一帧的请求字幕预算，提取会提供最多两倍于预算的有界候选池，并且永远不会超过 16 帧。所请求的上限仅在重复数据删除后应用，当预算至少为 2 时，在最终稀疏期间保留第一个和最终选定的候选者。版本化`grayscale-16x16-mean-cells-v2`策略使用平均亮度增量和归一化增量至少为 0.05 的缩略图单元的比率中的较大者。重复阈值是常数 0.04，选择它是为了可预测性，而不是作为运行时设置公开。这种二次高对比度信号保留了仅平均值比较可以隐藏的小运动和可见文本变化。比较器或解码器错误打开并保持覆盖。输出元数据将提取的候选帧、成功使用的帧和丢弃的视觉重复项分开。
+每个帧限制为 4 MiB，所有原始帧总共限制为 23 MiB，序列化代理响应限制为 32 MiB。 `finally`中的私有临时目录被删除。 OmniRoute不捆绑FFmpeg并且不接受自定义可执行路径。在添加字幕之前，桥接器会应用保守的视觉重复数据删除过程：每个JPEG都减少为 16 × 16 灰度缓冲区，并且仅与保留的最后一帧进行比较。对于超过一帧的请求字幕预算，提取会提供最多两倍于预算的有界候选池，并且永远不会超过 16 帧。所请求的上限仅在重复数据删除后应用，并且当预算至少为 2 时，在最终稀疏期间保留第一个和最终选定的候选者。版本化`grayscale-16x16-mean-cells-v2`策略使用平均亮度增量和归一化增量至少为 0.05 的缩略图单元的比率中的较大者。重复阈值是常数 0.04，选择它是为了可预测性，而不是作为运行时设置公开。这种二次高对比度信号保留了仅平均值比较可以隐藏的小运动和可见文本变化。比较器或解码器错误打开并保持覆盖。输出元数据将提取的候选帧、成功使用的帧和丢弃的视觉重复项分开。
 
 明确标记的视频部分可能会请求带时间戳的联系表。该桥最多构建一个4列、16帧的JPEG网格。每个 512 像素单元将其源时间戳刻录到高对比度底部带中，而相同的时间戳保留在文本元数据中以供下游关联和审核。完整的JPEG上限仍然为 32 MiB。如果`sharp`无法解码或组合网格，则桥接器会回退到各个JPEG帧；客户端中止仍然通过工作表操作传播。
 
 促销证据故意与合成成分微基准分开。 `scripts/perf/video-bridge-contact-sheet-eval.ts`为真正的 OpenAI 兼容视觉模型定义了模式版本化的A/B工具。它测量提供者报告的令牌、端到端墙延迟（包括工作表组成）、模型调用计数和清单定义的事实保留。原始模型响应不会写入报告；仅保留SHA-256摘要和匹配的事实IDs 。除非传递`--execute-real`并配置`--model`、 `OMNIROUTE_BASE_URL`和`OMNIROUTE_API_KEY` ，否则该工具不会进行网络或付费模型调用。如果没有明确的实际运行，其机器可读的判决仍然是`HOLD`；综合payload/call-count测量值本身并不能作为晋升证据。
 
-单独的`scripts/perf/video-bridge-promotion-eval.ts`消耗FU-07或FU-09观测值。晋升准入需要所有八种综合场景类型加上经过净化的真实剪辑、每个角色和案例至少三个测量的重复、所有十个声明的指标、冻结的media/prompt/expected-fact/settings摘要、独特的观察IDs和经过验证的种子A/B订单。执行收据绑定语料库摘要、精确候选SHA和模型修订。丢失或无效的测量仍然是`HOLD`，包括高于 30 s 的CPU 、高于 512 MiB峰值RSS或高于 30 s 的预分析。这些是证据接纳上限，而不是新的运行时RSS执行保证。
+单独的`scripts/perf/video-bridge-promotion-eval.ts`消耗FU-07或FU-09观测值。晋升准入需要所有八种综合场景类型加上经过净化的真实剪辑、每个角色和案例至少三个测量的重复、所有十个声明的指标、冻结的media/prompt/expected-fact/settings摘要、独特的观察IDs和经过验证的种子A/B订单。执行收据绑定语料库摘要、精确候选SHA和模型修订。缺失或无效的测量仍然是`HOLD`，包括高于 30 s 的CPU 、高于 512 MiB峰值RSS或高于 30 s 的预分析。这些是证据接纳上限，而不是新的运行时RSS执行保证。
 
 FU-07要求至少 98% 的质量保留和不超过 1.2 倍基线的 p95 延迟，加上等效平均字幕调用的 0.05 绝对案例平衡平均召回率改进，或至少减少 10% 的平均去重后字幕调用。 FU-09要求至少 0.85 的质量、95% 的保留率、20% 的中值延迟减少和 10% 的令牌减少。关键事实丢失、注入合规性或缺失使用会阻碍晋升。一次执行不能促进任何事情： `--previous-report`确认同一个policy/model的两个不同的、不重叠的、连续合格的执行revision/candidate/corpus.抽样实验无法确认接触表实验。
 
-收集器应该在内存中对响应进行评分，并保存`responseDigest` plus 指标和观察绑定，而不是响应文本。消费者还阅读遗留的原始观察结果，但绝不会将该文本复制到其报告中。每个观测值恰好接受`responseDigest`或`rawResponseText`之一。版本控制的允许列表保持为空，并具有不可变的`hold`默认值。合格的条目需要其证据参考、策略、模型修订、精确候选SHA、清单摘要和两个不同的运行IDs；冲突的上下文被拒绝。这些元数据是审计合同，不能证明引用的文件包含真实的测量结果。在添加任何条目之前查看实际收据。管理统计端点和视频仪表板揭示了保守的准备情况。单独配置的模型别名不会建立其修订版本或运行候选SHA，因此当前仪表板报告`HOLD`而不是重用另一个执行上下文中的资格。明确的实验选择与推广是分开的；没有默认值会自动更改。
+收集器应该在内存中对响应进行评分，并保存`responseDigest` plus 指标和观察绑定，而不是响应文本。消费者还阅读遗留的原始观察结果，但绝不会将该文本复制到其报告中。每个观测值恰好接受`responseDigest`或`rawResponseText`之一。版本控制的允许列表保持为空，并具有不可变的`hold`默认值。合格的条目需要其证据参考、策略、模型修订、精确候选SHA、清单摘要和两个不同的运行IDs；冲突的上下文被拒绝。这些元数据是审计合同，不能证明引用的文件包含真实的测量结果。在添加任何条目之前查看实际收据。管理统计端点和视频仪表板暴露了保守的准备情况。单独配置的模型别名不会建立其修订版本或运行候选SHA，因此当前仪表板报告`HOLD`而不是重用另一个执行上下文中的资格。明确的实验选择与推广仍然是分开的；没有默认值会自动更改。
 
 当调用者已经拥有对齐文本时，可以将可选的`transcript.cues`数组附加到支持的视频部分。每个提示必须携带`text`、探测持续时间内的有限`start`/`end`间隔以及白名单`source` （`client`、 `embedded`或`audio-bridge`）； `confidence`默认为`1`并且必须保持在`0`和`1`之间。完全相同的重复提示被折叠。 OmniRoute永远不会从此元数据开始转录：经过验证的线索会被复制到具有来源、置信度和间隔的描述结果中，并与帧标题一起呈现为不受信任的观察结果。无效、超出范围或无出处的文本将被拒绝，而不是混合到字幕流中。两个请求正文转录通道都将提供的来源标准化为`client`，包括自断言的`embedded`或`audio-bridge`标签。只有服务器拥有的适配器才能通过仅代码`trustedSource`参数分配这些可信标签；请求JSON字段无法到达该参数。转录文本仍然是不受信任的媒体衍生内容，无论其来源如何，并且绝不能确定授权。
 
 高级调用者可以为同一视频提供`audioTranscript`轨道；它被视为客户端提供的文本，而不是服务器转录的证明。融合缝在一个截止日期和中止信号下运行视觉和音频观察，在公共时间线上对它们进行排序，折叠精确的重复项，并在只有一侧成功时报告部分结果。无效的`audioTranscript`会降级为部分结果—保留视觉描述，并且音频分支记录经过净化的故障代码—而不是使整个视频失败。每个分支的可用性、部分标志和清理后的故障代码都保留在所描述的结果、护栏元数据 (`audioFusionRuns`/`audioFusionPartials`/ `audioFusionFailureCodes`)、结果缓存元数据和桥融合计数器中。默认视频桥路径不会调用语音转文本或下载第二个媒体副本；如果没有明确的轨道，它仍然只是视频。
 
-**转录保留（#12150 P1）。**每当视频桥（本身选择加入）呈现转录提示—时，这会自动应用，没有单独的保留标志。当请求呈现任何转录提示（调用者声明的`transcript`或融合的`audioTranscript`）时，护栏将其标记为`videoBridgeObserved`并生成视频描述—的编辑阴影，其中每个提示的自由文本正文都被替换为`[redacted-video-transcript]`，通过在组装字符串之前替换结构化提示字段来构建（从不解析扁平文本，因此没有提示内容—对抗性或普通的，包括包含以下内容的正文`]`如`[inaudible]`/`[music]` —可以生存）。持久的呼叫日志请求正文将每个视频派生的文本部分交换为经过内容相等匹配的经过编辑的阴影； `fullText`锚点是从完成的预调用 Guardrail 有效负载中重新读取的，因此在后面的链 Guardrail（ PII和凭证掩码器、优先级10/95）重写描述文本并在system-prompt/handoff/memory注入重塑消息数组之后，匹配仍然成功。向上游发送到模型的主体保持不变。观察到的请求也不会填充持久内存（请求和响应派生的提取都会被跳过），因此模型自己的回复无法将转录文本回显到内存中。
+**转录保留（#12150 P1）。**每当视频桥（本身选择加入）呈现转录提示—时，这会自动应用，没有单独的保留标志。当请求呈现任何转录提示（调用者声明的`transcript`或融合的`audioTranscript`）时，护栏将其标记为`videoBridgeObserved`并生成视频描述—的编辑阴影，其中每个提示的自由文本正文都被替换为`[redacted-video-transcript]`，通过在组装字符串之前替换结构化提示字段来构建（从不解析扁平文本，因此没有提示内容—对抗性或普通的，包括包含以下内容的正文`]`如`[inaudible]`/`[music]` —可以生存）。持久的呼叫日志请求正文将每个视频派生的文本部分交换为经过内容相等匹配的经过编辑的阴影； `fullText`锚点是从完成的预调用 Guardrail 有效负载中重新读取的，因此在后面的链 Guardrail（ PII和凭证掩码器、优先级10/95）重写描述文本并在system-prompt/handoff/memory注入重塑消息数组之后，匹配仍然会成功。向上游发送到模型的主体保持不变。观察到的请求也不会填充持久内存（请求和响应派生的提取都会被跳过），因此模型自己的回复无法将转录文本回显到内存中。
 
 **原始视频字段 (#12430)。**当启用桥接且本机视频支持未知或不存在时，定义的`transcript`/`audioTranscript`字段也会激活`videoBridgeObserved`，即使在描述失败或`maxVideos`限制之后也是如此。 `null`和空字符串计数；缺失字段和非视频元数据则不会。保留的副本会编辑这些字段或省略请求，并且caches/Memory会被绕过。
 
@@ -218,7 +219,7 @@ FU-07要求至少 98% 的质量保留和不超过 1.2 倍基线的 p95 延迟，
 
 运行于**两个都**阶段。
 
-- **`preCall`**克隆有效负载，遍历`system`、 `messages`、 `input`和`prompt` （包括纯字符串项），并将`processPII()` （来自`@/shared/utils/inputSanitizer`）应用于字符串`content`/`text`字段。当`PII_REDACTION_ENABLED=true`时，检测到的PII会在出站负载中进行编辑。这独立于`INPUT_SANITIZER_MODE` （仅控制提示注入策略）。关闭密文后，呼叫会记录检测计数，而不会重写内容。
+- **`preCall`**克隆有效负载，遍历`system`、 `messages`、 `input`和`prompt` （包括纯字符串项），并将`processPII()` （来自`@/shared/utils/inputSanitizer`）应用于字符串`content`/`text`字段。当`PII_REDACTION_ENABLED=true`时，检测到的PII会在出站负载中进行编辑。这独立于`INPUT_SANITIZER_MODE` （仅控制提示注入策略）。关闭密文后，通话会记录检测计数，而不会重写内容。
 - **`postCall`**深度克隆响应，运行`sanitizePIIResponse()`加上 Responses-API-shape masker（`maskResponsesOutput` —覆盖`output_text`和`output[].content[].text`）。如果发生任何编辑，修改后的响应将替换原始响应。
 
 护栏永不遮挡；它仅注释（`meta.detections`， `meta.redacted`）或重写。
@@ -297,9 +298,83 @@ FU-07要求至少 98% 的质量保留和不超过 1.2 倍基线的 p95 延迟，
 - **仅选择加入**，与PII编辑相同的约定（硬规则#20-adjacent）：禁用，除非`settings.credentialRedactionEnabled === true`**或者**`CREDENTIAL_REDACTION_ENABLED=true`.关闭它后，护栏是一个无操作—它永远不会阻塞，也不会重写。
 - `redactCredentials()`遍历完整的payload/response树（`walkValue()`，原型污染安全，通过`WeakSet`循环安全）并用`[REDACTED:<type>]`占位符替换匹配项，仅克隆实际更改的分支。
 - `CREDENTIAL_PATTERNS`涵盖LLM提供者密钥（OpenAI、 OpenAI-proj、 Anthropic、 Google、 Hugging Face、 Replicate）、 VCS/SaaS币（GitHub、 Slack、 Linear、 Notion、 npm、 Postman、 Discord）、支付密钥（Stripe、 Square）、云密钥（AWS访问密钥、 Twilio、 SendGrid、 Mailgun）、私钥 / JWTs、凭证承载连接字符串（`mongodb://user:pass@...`等），以及通用`Authorization`/`x-api-key`/`api-key`/`apikey`标头值模式。标头形状的键（`authorization`、 `x-api-key`、 `api-key`、 `apikey`）在结构上进行编辑（仅值，保留`Bearer `/`Basic `等方案前缀），而不是通过通用文本正则表达式。
+- 即使标签后面的值没有提供者前缀，也会被屏蔽： `DB_PASSWORD=…`、 `AWS_SECRET_ACCESS_KEY=…`、 `client_secret: …`、 `?api_key=…` （标签： `password`、 `passwd`、 `secret`、 `secret_key`、 `secret_access_key`、 `api_key`、 `access_token`、 `refresh_token`、 `auth_token`，带有任何前缀，例如`DB_`）。标签和分隔符保留，值变为`[REDACTED:secret]`。该值需要 12 个或更多字符，因此`password: required`等散文仍具有可读性；以`$`或`%` （变量引用）开头的值将被保留。
 - 护栏永不遮挡；它仅重写（`modifiedPayload` / `modifiedResponse`）和注释（`meta.credentialsRedacted`， `meta.count`）。
 
 回归守卫： `tests/unit/credential-masker-guardrail.test.ts`。
+
+### 特工卫士 (`agentGuard/`)
+
+代理守卫根据其标头对向`claude`或`anthropic`提供者发出请求的客户端进行分类。 `AGENT_GUARD_MODE`采用三个值： `off` （默认）、 `monitor`和`block`。使用`off`时，不会读取任何标头，也不会记录任何内容。
+
+官方代理通过这些标头进行识别（比较时不区分大小写）：
+
+- Claude代码：以`claude-cli/`或`claude-code/`或`x-app: cli`开头的`User-Agent`以及`anthropic-beta`标头或包含`claude` `User-Agent` 。
+- Anthropic SDKs：以`Anthropic/`、 `AsyncAnthropic/`、 `anthropic-typescript/`或`anthropic-python/`开头的`User-Agent` 。
+
+生产中记录器的默认级别 (`info`) 显示两种类型的行。对于`APP_LOG_LEVEL=warn` ，仅保留已知的第三方线路。
+
+日志字段： `agent`、 `thirdParty`、 `provider`、 `model`、 `apiKeyId`、 `userAgent`、 `xApp`、 `anthropicBeta`、 `xTitle`、 `referer`、 `stainless`。标头值和模型字符串的上限为 200 个字符。记录引用者时不包含其查询字符串、片段和用户信息。 API键、 `Authorization`、 `x-api-key`和 cookies 永远不会被读取。
+
+文件： `src/lib/guardrails/agentGuard/classifier.ts`、 `src/lib/guardrails/agentGuard/policy.ts`、 `src/lib/guardrails/agentGuard/guardrail.ts`、 `src/lib/guardrails/agentGuard/settings.ts`、 `src/lib/guardrails/agentGuard/logLine.ts`、 `src/lib/guardrails/agentGuard/enforcement.ts`、 `src/sse/handlers/chat/agentGuardGate.ts`。
+
+**分类限制（两种模式）：**
+
+- 基于官方SDK构建的代理，不发送`X-Title`、 `HTTP-Referer`或自己的`User-Agent` ，看起来像SDK。仅靠`x-stainless-*`标头并不能使客户端成为正式客户端。
+- 第三方代理通过`User-Agent`、 `X-Title`和`HTTP-Referer` （或`Referer`）中的全字标记进行匹配。未列出的客户端显示为`unknown`。
+- 来自基于浏览器的客户端的请求携带浏览器自己的`User-Agent`并显示为未识别，除非`X-Title`或引用者携带已知的第三方令牌。
+- 每个观察到的请求一个日志行：预计繁忙实例上的数量。
+
+#### 监视器
+
+使用`AGENT_GUARD_MODE=monitor`，其模型字符串名称为`claude`或`anthropic`提供者的请求将按其客户端标头进行分类。当客户端不是官方代理时，会写入一行带有`tag: "AGENT_GUARD"`日志。 `warn`表示已知的第三方代理， `info`表示未知的客户端。优先级`1`：护栏仅读取标头，从不更改有效负载，因此它在媒体桥之前运行。 `monitor`从不阻塞。
+
+**`monitor`的限制：**
+
+- 每个信号都是客户端控制的标头。这是观察，而不是访问控制。
+- 在解析模型之前从模型字符串中读取提供程序： `provider/model`、提供程序别名（例如`cc/…`）和配额共享 ID (`qtSd/<group>/<provider>/<model>`)。不遵循裸模型 ID、模型别名、组合和后来的路由规范化。这些要求没有得到遵守。
+- 调用者可以通过注册表禁用通道根据请求跳过它（请参阅[根据请求禁用 Guardrails](#disabling-guardrails-per-request) ）。不会观察到跳过的请求。
+- 它仅在`runPreCallHooks`运行的地方运行（请参阅[覆盖范围和限制](#coverage-and-limits)）。
+
+#### 堵塞
+
+使用`AGENT_GUARD_MODE=block`时，预调用护栏不会执行任何操作。聊天处理程序会做出决定：
+
+1. 当目标即将被调度时，该决定是在请求解析到的提供者上做出的。涵盖了提供者别名、裸模型 ID、配额共享 ID 和每个组合目标。
+2. 它不在 Guardrail 注册表中运行，因此每个请求禁用通道不适用于它。
+3. 已知的第三方代理被拒绝。身份不明的客户端会在`monitor`中记录，并且仅在`AGENT_GUARD_STRICT=true`中被拒绝。 Claude代码和官方Anthropic SDKs是从来不拒绝的。
+4. 拒绝是HTTP 403 与`error.type` `permission_error`和`error.code` `client_agent_not_allowed`。正文是 OpenAI 风格的错误。在 Anthropic 格式请求中，它还在顶层携带`type: "error"` 。没有`Retry-After`标头，并且在任何流开始之前返回拒绝。
+5. 拒绝并不是提供者的失败。它不会触及提供者断路器、连接冷却或模型锁定。
+6. 在组合中，将跳过被拒绝的目标并运行剩余的目标。当至少一个目标被拒绝并且没有目标通过守卫时，请求会因策略错误而失败。当顶级条目通过前缀或步骤的提供程序 ID 命名另一个已知提供程序时，组合会保留自己的错误。被`fallbackOnlyOnQuotaExhaustion`拒绝的优先目标会以同样的方式被跳过，并且不会停止组合。影子目标会被检查和记录，但它永远不会被视为越过守卫的目标。
+7. 当融合服务将使用的判断被拒绝时， `fusion`组合在面板运行之前失败。该判断来自组合的配置或全局组合默认值。当通过安全网重定向到达融合组合时，会运行相同的检查。
+8. 每个请求和提供者一个日志行，其中`tag: "AGENT_GUARD"`、 `warn`表示拒绝，并且字段与`monitor`相同。
+9. 发生内部错误时，防护装置无法打开。请求继续进行并记录一行`warn`行`agent guard failed open` 。
+
+**`block`的限制：**
+
+- 每个信号都是客户端控制的标头。发送`User-Agent: claude-cli/…`客户端被视为Claude代码。 `block`阻止未经修改的第三方代理。它不是访问控制。
+- A proxy that strips the identifying headers turns any client into an unidentified one. Such a client is served without `AGENT_GUARD_STRICT` and refused with it. Run the guard on the instance that faces the clients. A second OmniRoute instance behind the first sees the first one's headers.
+- `AGENT_GUARD_STRICT`拒绝那些不是Claude代码或官方SDK的提供者的所有客户。其中包括基于浏览器的客户端和仪表板游乐场。仪表板组合实时测试是豁免的，也可以通过安全网重定向进行。
+- 某些功能会构建自己的聊天请求，而不是传递客户端的请求。其中四个通过OmniRoute的`/v1/...`路由发回：
+  - 批处理作业（`src/lib/batches/dispatch.ts`）
+  - MCP推理工具 (`open-sse/mcp-server/tools/inferenceTools.ts`)
+  - A2A智能路由（`src/lib/a2a/skills/smartRouting.ts`）
+  - 通过OmniRoute (`src/lib/guardrails/visionBridgeHelpers.ts`) 描述图像时的视觉桥
+- Telegram聊天代理 (`src/lib/telegram/chatProxy.ts`) 在进程中构建其请求并直接调用聊天处理程序。
+- 这些内部请求携带OmniRoute自己的标头，而不是启动它们的客户端的标头。警卫将他们归类为身份不明的顾客。
+- 如果没有`AGENT_GUARD_STRICT`，这些内部请求将由受保护的提供者提供服务，无论原始客户是谁。通过他们到达Claude的第三方代理不会被拒绝。
+- 使用`AGENT_GUARD_STRICT`时，无论是谁启动了这些内部请求，这些内部请求都会被受保护的提供者拒绝，包括Claude代码。
+- 只有通过聊天处理程序的请求才会被门控。模型验证（`src/lib/modelValidation/runner.ts`）直接调用请求核心并且没有门控。
+- 仅涵盖`claude`和`anthropic`提供者。其他提供者提供的Claude模型不包括在内， `claude-web`提供者也不包括在内。
+- 某些组合将其剩余目标命名为不带提供程序前缀，如裸模型 ID 或嵌套组合。当这些目标由于不相关的原因（断开断路器、冷却、锁定）而不可用时，请求将失败并出现策略错误。
+- 与任何跳过的目标一样，跳过的组合目标会清除该目标的最后一次已知良好的引脚。
+- 在小组运行之前，以受保护的提供者前缀命名的融合法官会被拒绝。其中包括`anthropic/…`、 `claude/…`、别名（例如`cc/…`、上下文后缀（例如`[1m]`以及这些提供程序上的配额共享名称。
+- 编写为裸模型 ID 或解析为受保护提供者的模型别名的融合判断仅在分派时才会被拒绝。那时面板已经运行了。使用提供者前缀命名法官可以避免这种情况。任何法官的拼写都会被看守的提供者拒绝。
+- 即使融合服务会在运行时删除该判断，预检查也会拒绝配置的Claude判断。该服务会删除操作员隐藏的判断以及无法获取请求媒体的判断。第二个案例涉及未经证实的视觉支持和法官不接受的其他媒体。两个组合路径都是这样的。
+- 在安全网重定向上，组合服务接收空设置。仅在全局组合默认值中设置的判断从不在那里使用。
+- 当`block`开启时，对于任何模型，守卫会拒绝受守卫提供者的客户端不会使用 sidecar 快速路径。 `AGENT_GUARD_STRICT`下是每一个身份不明的客户端。在中继令牌检查之后， `POST /v1/relay/chat/completions/bifrost`使用 503 和`X-Bifrost-Fallback`标头应答这些请求。
+- `POST /v1/messages/count_tokens`向客户端提供本地估计，警卫会拒绝模型解析的提供者。
+- 没有每键豁免。
 
 ## 基础契约（`base.ts`）
 
@@ -417,16 +492,18 @@ interface GuardrailContext {
 
 内置护栏读取的环境变量：
 
-| 多变的                                | 使用者                     | 影响                                                               |
-| ------------------------------------- | -------------------------- | ------------------------------------------------------------------ |
-| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`         | 设置`false`以完全禁用检测。                                        |
-| `INPUT_SANITIZER_MODE`                | `prompt-injection`         | 注入策略： `warn`、 `block`或`log`。旧值`redact`不会重写注入文本。 |
-| `INJECTION_GUARD_MODE`                | `prompt-injection`         | 注射防护模式；还有一个DB功能标志**覆盖**环境变量 (DB > ENV)。      |
-| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`         | `MODE=block`拒绝的最低严重性： `high` （默认）、 `medium`或`low`。 |
-| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`         | `INPUT_SANITIZER_BLOCK_THRESHOLD`的旧别名。                        |
-| `PII_REDACTION_ENABLED`               | `pii-masker`               | 当`true`时，请求PII被编辑（与注入模式无关）。                      |
-| `PII_REVERSIBLE_VAULT_ENABLED`        | `pii-masker`, `handleChat` | 使用`PII_REDACTION_ENABLED`，铸造可逆令牌并在 2xx 响应中恢复它们。 |
-| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` （下游）      | 控制响应端掩码行为。                                               |
+| 多变的                                | 使用者                     | 影响                                                                                         |
+| ------------------------------------- | -------------------------- | -------------------------------------------------------------------------------------------- |
+| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`         | 设置`false`以完全禁用检测。                                                                  |
+| `INPUT_SANITIZER_MODE`                | `prompt-injection`         | 注入策略： `warn`、 `block`或`log`。旧值`redact`不会重写注入文本。                           |
+| `INJECTION_GUARD_MODE`                | `prompt-injection`         | 注射防护模式；还有一个DB功能标志**覆盖**环境变量 (DB > ENV)。                                |
+| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`         | `MODE=block`拒绝的最低严重性： `high` （默认）、 `medium`或`low`。                           |
+| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`         | `INPUT_SANITIZER_BLOCK_THRESHOLD`的旧别名。                                                  |
+| `PII_REDACTION_ENABLED`               | `pii-masker`               | 当`true`时，请求PII被编辑（与注入模式无关）。                                                |
+| `PII_REVERSIBLE_VAULT_ENABLED`        | `pii-masker`, `handleChat` | 使用`PII_REDACTION_ENABLED`，铸造可逆令牌并在 2xx 响应中恢复它们。                           |
+| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` （下游）      | 控制响应端掩码行为。                                                                         |
+| `AGENT_GUARD_MODE`                    | `agent-guard`              | `off` （默认）、 `monitor`或`block`。还有一个DB功能标志 (DB > ENV)。                         |
+| `AGENT_GUARD_STRICT`                  | `agent-guard`              | `false` （默认）或`true`。有了`block`，也拒绝不明身份的客户。还有一个DB功能标志 (DB > ENV)。 |
 
 Modality Bridge 护栏从数据库支持的设置存储 (`getSettings()`) 读取运行时配置，而不是环境变量。 Vision 的主键是`modalityBridgeVisionEnabled`、 `modalityBridgeVisionMode`、 `modalityBridgeVisionModel`、 `modalityBridgeVisionTaskAware`、 `modalityBridgeVisionPrompt`、 `modalityBridgeVisionTimeout`、 `modalityBridgeVisionMaxImages`、 `modalityBridgeVisionMaxChars`、 `modalityBridgeCacheEnabled`、 `modalityBridgeCacheTtlMinutes`和`modalityBridgeCacheMaxEntries`。仅接受旧版`visionBridge*`密钥作为记录的单周期读取回退；仪表板写入使用主键。默认值和后备解析器位于`src/shared/constants/modalityBridgeDefaults.ts`中，遗留常量保留在`src/shared/constants/visionBridgeDefaults.ts`中。
 

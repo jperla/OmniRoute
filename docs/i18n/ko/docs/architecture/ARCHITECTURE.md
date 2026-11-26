@@ -507,7 +507,8 @@ FSM 전환은 Auto Combo의 채점에 반영되어 background/automation 작업�
 - 스케줄러 초기화: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
 - 주기적 작업: `src/shared/services/cloudSyncScheduler.ts`
 - 주기적 작업: `src/shared/services/modelSyncScheduler.ts`
-- 제어 라우트: `src/app/api/sync/cloud/route.ts`
+- 주기적 작업(연결당 선택): `src/shared/services/modelHealthCheckScheduler.ts` — 는 연결 모델을 테스트하고 오류를 자동으로 숨기고 자체적으로 숨겨진 것만 복원합니다(`src/lib/db/modelHealthAutoHidden.ts`)
+- 제어 경로: `src/app/api/sync/cloud/route.ts`
 
 ## 요청 수명 주기 (`/v1/chat/completions`)
 

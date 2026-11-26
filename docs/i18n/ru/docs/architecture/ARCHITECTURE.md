@@ -507,7 +507,8 @@ Auto Combo динамически оценивает и выбирает цел�
 - Инициализация планировщика: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
 - Периодическая задача: `src/shared/services/cloudSyncScheduler.ts`
 - Периодическая задача: `src/shared/services/modelSyncScheduler.ts`
-- Управляющий маршрут: `src/app/api/sync/cloud/route.ts`
+- Периодическая задача (согласие для каждого соединения): `src/shared/services/modelHealthCheckScheduler.ts` — тестирует модели соединения, автоматически скрывает сбои и восстанавливает только то, что оно скрыло само (`src/lib/db/modelHealthAutoHidden.ts`).
+- Маршрут управления: `src/app/api/sync/cloud/route.ts`
 
 ## Жизненный цикл запроса (`/v1/chat/completions`)
 

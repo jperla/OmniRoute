@@ -435,7 +435,7 @@ OmniRoute በማይፈልጉበት ጊዜ፣ ለንፁህ ማስወገጃ ሁለ
 ### VPS ማሰማራት
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -517,8 +517,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -611,7 +611,7 @@ post_install() {
 | `HOSTNAME`                              | ማዕቀፍ ነባሪ                 | አስረው አስተናጋጅ (Docker ነባሪ ወደ `0.0.0.0`)                                                                 |
 | `NODE_ENV`                              | የሩጫ ጊዜ ነባሪ               | ለማሰማራት `production` አዘጋጅ                                                                              |
 | `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | የህዝብ መሰረት URL ወደ ዳሽቦርዱ ወጣ እና ለአገልጋዩ ተጋልጧል (የቆየ `BASE_URL` ይተካዋል)                                      |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | የክላውድ ማመሳሰል የመጨረሻ ነጥብ ቤዝ URL (የቆየ `CLOUD_URL` ን ይተካዋል)                                                |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | የክላውድ ማመሳሰል የመጨረሻ ነጥብ ቤዝ URL (የቆየ `CLOUD_URL` ይተካዋል)                                                  |
 | `API_KEY_SECRET`                        | _(በራስ-ሰር የተፈጠረ)_         | HMAC ሚስጥር ለተፈጠሩ API ቁልፎች — በራስ ሰር የተፈጠረ እና በ `server.env` ጸንቷል                                        |
 | `REQUIRE_API_KEY`                       | `false`                  | Bearer API ቁልፍን በ `/v1/*` ላይ ያስፈጽሙ                                                                    |
 | `ALLOW_API_KEY_REVEAL`                  | `false`                  | የተረጋገጡ የዳሽቦርድ ተጠቃሚዎች ሙሉ የተከማቹ API ቁልፍ እሴቶችን በፍላጎት እንዲያሳዩ ይፍቀዱላቸው                                      |
@@ -738,8 +738,8 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 እነዚህ ቁልፎች በግንኙነት `providerSpecificData` ውስጥ ይሄዳሉ (ለምሳሌ በ `PUT /api/providers/{id}`)፡-
 
-- `toolNameMaxLength` (ኢንቲጀር፣ 1–1024) — ለ OpenAI የውይይት-ቅርጸት ተኳሃኝ ግንኙነቶች መተላለፊያቸው ረጅም የመሳሪያ ስሞችን የማይቀበል። ረዣዥም ስሞች እንደ አጭር ተለዋጭ ስም ይላካሉ እና በምላሹ ወደነበሩበት ይመለሳሉ። OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go እና ሙሴ ኮድ አስቀድሞ ምንም ቅንብር የሌላቸው ከ64 ቁምፊዎች በላይ ስም ተሰጥቶታል። የግንኙነት እሴት የ Azure OpenAI / Azure AI Foundry ነባሪ (ከጠንካራ ፍኖት ጀርባ ያለው የ Azure ግንኙነት) ይተካዋል እና ለብጁ ተስማሚ የሆነ መስቀለኛ መንገድ ገደቡን ያዘጋጃል። OpenAI, Mistral, NVIDIA, OpenCode Zen/Go እና ሙሴ ኮድ የመመዝገቢያ ገደባቸውን ይጠብቃሉ እና ችላ ይበሉት።
-- `quotaEndpoint` — የጌትዌይው quota/credits መጨረሻ ነጥብ፣ ለዳሽቦርድ ኮታ ስትሪፕ አንብብ እና ኮታ የሚያውቅ ማዘዋወር። በሁለቱም በ OpenAI- እና Anthropic-ተኳሃኝ ግንኙነቶች ላይ ይሰራል; ሙሉው ቅርጽ በ `open-sse/services/usage/openaiCompatible.ts` ውስጥ ተመዝግቧል.
+- `toolNameMaxLength` (ኢንቲጀር፣ 1–1024) — ለ OpenAI የውይይት-ቅርጸት ተኳሃኝ ግንኙነቶች መተላለፊያቸው ረጅም የመሳሪያ ስሞችን የማይቀበል። ረዣዥም ስሞች እንደ አጭር ተለዋጭ ስም ይላካሉ እና በምላሹ ወደነበሩበት ይመለሳሉ። OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go እና ሙሴ ኮድ አስቀድሞ ምንም ቅንብር የሌላቸው ከ64 ቁምፊዎች በላይ ስም ተሰጥቶታል። የግንኙነት እሴት የ Azure OpenAI / Azure AI Foundry ነባሪ (ከጠንካራ መግቢያ በር ጀርባ ያለው የ Azure ግንኙነት) ይተካዋል እና ለብጁ ተስማሚ የሆነ መስቀለኛ መንገድ ገደቡን ያዘጋጃል። OpenAI, Mistral, NVIDIA, OpenCode Zen/Go እና ሙሴ ኮድ የመመዝገቢያ ገደባቸውን ይጠብቃሉ እና ችላ ይበሉት።
+- `quotaEndpoint` — የጌትዌይው quota/credits መጨረሻ ነጥብ፣ ለዳሽቦርድ ኮታ ስትሪፕ እና ኮታ-አዋቂ ማዘዋወር ያንብቡ። በሁለቱም በ OpenAI- እና Anthropic-ተኳሃኝ ግንኙነቶች ላይ ይሰራል; ሙሉው ቅርጽ በ `open-sse/services/usage/openaiCompatible.ts` ውስጥ ተመዝግቧል.
 
 ```json
 {
@@ -774,9 +774,9 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-በግልጽ ለተፈቀደ አቻ URL የተላኩ ጥያቄዎች ብቻ የ `X-OmniRoute-Peer-Trace` ራስጌ ይቀበላሉ። መግቢያ በር ተደጋጋሚ ምሳሌ ID ወይም የተዳከመ የሆፕ በጀት ከ HTTP `508 Loop Detected` ጋር ውድቅ ያደርጋል። ተራ ወደላይ አቅራቢዎች ምንም አቻ ሜታዳታ አይቀበሉም።
+በግልጽ ለተፈቀደ አቻ URL የተላኩ ጥያቄዎች ብቻ የ `X-OmniRoute-Peer-Trace` ራስጌ ይቀበላሉ። መግቢያ በር ተደጋጋሚ ምሳሌ ID ወይም የተዳከመ የሆፕ በጀት ከ HTTP `508 Loop Detected` ጋር ውድቅ ያደርጋል። ተራ ጅረት አቅራቢዎች ምንም አቻ ዲበዳታ አይቀበሉም።
 
-የአቻ ሰንሰለት ማድረግ የውሂብ ጎታ ማባዛት ወይም አስተናጋጅ አለመሳካት አይደለም። እያንዳንዱ መግቢያ በር ራሱን የቻለ SQLite ሁኔታን፣ መሸጎጫዎችን፣ የዋጋ ቆጣሪዎችን እና ክፍለ ጊዜዎችን ያቆያል። ለ active/passive ወይም active/active ተገኝነት በጤና የተረጋገጠ የተገላቢጦሽ ፕሮክሲ ወይም የደንበኛ ውድቀትን ተጠቀም እና መቼም አንድ SQLite ዳታቤዝ ወደ ብዙ አሂድ OmniRoute አብነቶች አትጫን።
+የአቻ ሰንሰለት ማባዛት ወይም አስተናጋጅ አለመሳካት የውሂብ ጎታ አይደለም። እያንዳንዱ መግቢያ በር ራሱን የቻለ SQLite ሁኔታን፣ መሸጎጫዎችን፣ የዋጋ ቆጣሪዎችን እና ክፍለ ጊዜዎችን ያቆያል። ለ active/passive ወይም active/active ተገኝነት በጤና የተረጋገጠ የተገላቢጦሽ ፕሮክሲ ወይም የደንበኛ ውድቀትን ተጠቀም እና መቼም አንድ SQLite ዳታቤዝ ወደ ብዙ አሂድ OmniRoute አብነቶች አትጫን።
 
 ### የወሰኑ አቅራቢ መንገዶች
 
@@ -844,7 +844,7 @@ curl http://localhost:20128/api/models/catalog
 
 ### ተርጓሚ የመጫወቻ ሜዳ
 
-በ በኩል መድረስ** ዳሽቦርድ → ተርጓሚ** . OmniRoute በአቅራቢዎች መካከል API ጥያቄዎችን እንዴት እንደሚተረጉም ያርሙ እና በዓይነ ሕሊናዎ ይመልከቱ።
+በ በኩል መድረስ** ዳሽቦርድ → ተርጓሚ** . OmniRoute በአቅራቢዎች መካከል API ጥያቄዎችን እንዴት እንደሚተረጉም ማረም እና በዓይነ ሕሊናህ ተመልከት።
 
 | ሁነታ           | ዓላማ                                                                 |
 | ------------- | ------------------------------------------------------------------- |
@@ -867,7 +867,7 @@ curl http://localhost:20128/api/models/catalog
 
 **ዳሽቦርድ-የሚታዩ ስልቶች (የመለያ ደረጃ ማዘዋወር)**
 
-| ስልት                      | መግለጫ                                                                      |
+| ስትራቴጂ                    | መግለጫ                                                                      |
 | ------------------------ | ------------------------------------------------------------------------- |
 | **መጀመሪያ ሙላ**             | — የመጀመሪያ ደረጃ መለያዎችን በቅደም ተከተል ይጠቀማል እስከማይገኝ ድረስ ሁሉንም ጥያቄዎች ያስተናግዳል።       |
 | **ክብ ሮቢን**               | ሊዋቀር በሚችል ተለጣፊ ገደብ በሁሉም መለያዎች ውስጥ ዑደቶች (በነባሪ፡ 3 ጥሪዎች በአንድ መለያ)            |
@@ -876,9 +876,9 @@ curl http://localhost:20128/api/models/catalog
 | **በትንሹ ጥቅም ላይ የዋለ**      | ትራፊክን በእኩል በማሰራጨት በጣም ጥንታዊ በሆነው `lastUsedAt` የጊዜ ማህተም ወደ መለያው የሚወስዱ መንገዶች |
 | **ወጪ ተመቻችቷል።**           | ዝቅተኛው የቅድሚያ ዋጋ ያለው ወደ መለያው የሚወስዱ መንገዶች፣ ለዝቅተኛ ወጪ አቅራቢዎች ማመቻቸት             |
 
-**የላቀ ጥምር እና ራስ-ሰር ስልቶች** (በአንድ ጥምር ሊዋቀር የሚችል ወይም በ `auto/*` ቅድመ ቅጥያዎች — [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ይመልከቱ):
+**የላቀ ጥምር እና ራስ-ሰር ስትራቴጂዎች** (በአንድ ጥምር ሊዋቀር የሚችል ወይም በ `auto/*` ቅድመ ቅጥያዎች — [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ይመልከቱ):
 
-- `priority` — ጥብቅ ትእዛዝ፣ በጭራሽ ክብ-ሮቢን የለም።
+- `priority` — ጥብቅ ትእዛዝ ፣ በጭራሽ ክብ-ሮቢኖች
 - `weighted` — የተመጣጣኝ ትራፊክ በእያንዳንዱ ሞዴል ክብደቶች የተከፈለ
 - `fill-first` — ገደቦች እስኪደርሱ ድረስ የመጀመሪያውን ሞዴል ያጥፉ
 - `round-robin` / `strict-random` / `random`
@@ -886,12 +886,12 @@ curl http://localhost:20128/api/models/catalog
 - `least-used` እና `cost-optimized`
 - `auto` — በሁሉም እጩዎች ላይ የሚመራ
 - `lkgp` (የመጨረሻው የታወቀው ጥሩ አቅራቢ) — ለመጨረሻው ስኬታማ አገልግሎት አቅራቢ ይሰካል፣ ከዚያ ወደ ደንቦች ይመለሳል።
-- `context-optimized` — ትልቁን ነፃ አውድ መስኮት ያለው ሞዴሉን ይመርጣል
-- `context-relay` — ሰንሰለቶች ረጅም አውድ ሞዴሎች ለቀጣይ ማዞሪያዎች
+- `context-optimized` — ሞዴሉን በመጀመሪያ ከሚታወቀው ትልቁ መስኮት ጋር ይሞክራል።
+- ውይይቱ ወደ ሌላ መለያ ሲዘዋወር `context-relay` — የቅድሚያ ትዕዛዝ እና የእጅ ማጥፋት ማጠቃለያ
 
 #### ውጫዊ ተለጣፊ ክፍለ ጊዜ ራስጌ
 
-ለውጫዊ ክፍለ ጊዜ ዝምድና (ለምሳሌ፡- Claude Code/Codex ወኪሎች በተገላቢጦሽ ፕሮክሲዎች ጀርባ)፣ ይላኩ፡-
+ለውጫዊ ክፍለ-ጊዜ ዝምድና (ለምሳሌ፣ Claude Code/Codex ወኪሎች በግልባጭ ፕሮክሲዎች)፣ ይላኩ፡-
 
 ```http
 X-Session-Id: your-session-key
@@ -963,7 +963,7 @@ curl -X POST http://localhost:20128/api/combos \
 
 ያለ API ወጪዎች የስራ ጊዜን ከፍ ለማድረግ ብዙ ነፃ-ደረጃ እና ቁልፍ የሌላቸው አቅራቢዎችን ያሰራል።
 
-- **ስልት** `Least Used` ወይም `Round Robin` (ጭነቱን በኮታዎች ላይ ያከፋፍላል)
+- **ስትራቴጂ** `Least Used` ወይም `Round Robin` (ጭነቱን በኮታዎች ላይ ያከፋፍላል)
 - **ሞዴሎች** :
   1. `groq/llama-3.3-70b-versatile`
   2. `gemini/gemini-2.5-flash`
@@ -1151,7 +1151,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 በየጥምር ማመጣጠን ያዋቅሩ** ዳሽቦርድ → Combos → Create/Edit →** .
 
-| ስልት                 | መግለጫ                                                  |
+| ስትራቴጂ               | መግለጫ                                                  |
 | ------------------- | ----------------------------------------------------- |
 | **ዙር-ሮቢን**          | በቅደም ተከተል ሞዴሎች ውስጥ ይሽከረከራል                            |
 | **ቅድሚያ**            | ሁልጊዜ የመጀመሪያውን ሞዴል ይሞክራል; የሚመለሰው በስህተት ላይ ብቻ ነው።       |
@@ -1336,32 +1336,34 @@ curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUT
 
 ## 💻 ውስጣዊ CLI
 
-OmniRoute ለማዋቀር፣ ለምርመራ እና ለሂደት ጊዜ ቁጥጥር የውስጥ CLI (`omniroute …`) ይዞ ይመጣል። ይህ የሶስተኛ ወገን CLIዎችን (Claude Code, Cursor, Codex, Cline, …) ከOmniRoute ጋር እንዲገናኙ ከሚያዋቅረው **በዳሽቦርዱ ውስጥ ካለው "CLI መሣሪያዎች" ገጽ የተለየ ነው**።
+OmniRoute ለማዋቀር፣ ለምርመራ እና ለአሂድ ጊዜ መቆጣጠሪያ ውስጣዊ CLI (`omniroute …`) ይልካል። ይህ ነው** በዳሽቦርዱ ውስጥ ካለው "CLI Tools" ገጽ ይለዩ** ከ OmniRoute ጋር መነጋገር እንዲችሉ የሶስተኛ ወገን CLIs (Claude ኮድ፣ Cursor፣ Codex፣ Cline፣ …) የሚያዋቅር ነው።
 
 ```bash
-omniroute setup                    # መስተጋብራዊ ማዋቀሪያ (የይለፍ ቃል፣ አቅራቢዎች፣ ጥምረቶች)
-omniroute setup --non-interactive  # ለCI ምቹ
-omniroute doctor                   # የጤና ምርመራዎች (የውሂብ ማውጫ፣ DB፣ አቅራቢዎች፣ ወደቦች)
-omniroute providers available      # የሚደገፉ አቅራቢዎችን ዘርዝር
-omniroute providers list           # የተዋቀሩ ግንኙነቶችን ዘርዝር
-omniroute providers test <id>      # የአቅራቢ ግንኙነትን በቀጥታ ፈትሽ
-omniroute combos list              # ጥምረቶችን ዘርዝር
-omniroute combos switch <name>     # ነባሪ ጥምረትን አዘጋጅ
-omniroute models                   # የሚገኙ ሞዴሎችን ዘርዝር (--json, --search)
-omniroute keys add | list | remove # የAPI ቁልፎችን ከተርሚናሉ አስተዳድር
-omniroute backup                   # የውቅር + DB ቅጽበታዊ ቅጂ
-omniroute restore [<timestamp>]    # ከቅጽበታዊ ቅጂ መልስ
-omniroute health                   # ዝርዝር የጤና ሁኔታ (ሰባሪዎች፣ መሸጎጫ፣ ማህደረ ትውስታ)
-omniroute quota                    # የአቅራቢ ኮታ አጠቃቀም
-omniroute mcp status               # የMCP አገልጋይ ሁኔታ
-omniroute a2a status               # የA2A አገልጋይ ሁኔታ
-omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok ዋሻዎች
-omniroute reset-password           # የአስተዳዳሪውን የይለፍ ቃል ዳግም አስጀምር
-omniroute --mcp                    # የMCP አገልጋይን በstdio ላይ አስጀምር
-omniroute --port 3000              # አገልጋዩን በብጁ ወደብ ላይ አስጀምር
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-ጠቃሚ ምክር፦ ጤናማ ያልሆኑ የአቅራቢ ግንኙነቶች ሲኖሩ ማንቂያ ለማግኘት `omniroute doctor --json`ን ከክትትል መሣሪያዎ ጋር ያጣምሩ።
+ጠቃሚ ምክር፡ በተሰበረ የሀገር ውስጥ ጭነት ላይ ለማስጠንቀቅ `omniroute doctor --json` ከመከታተያ መሳሪያዎ ጋር ያጣምሩ። `doctor` የአቅራቢዎችን ግንኙነቶች አይፈትሽም; ለዚያ `omniroute providers test <id>` ይጠቀሙ.
 
 ---
 

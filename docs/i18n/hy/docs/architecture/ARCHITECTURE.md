@@ -511,12 +511,13 @@ FSM անցումները սնվում են Auto Combo-ի միավորների մ
 - WebSocket-ի սկզբնական կապի նույնականացում՝ `src/lib/ws/handshake.ts` — վավերացնում է WS-ի արդիականացման հարցումները՝ API բանալու կամ աշխատաշրջանի cookie-ի միջոցով
 - Իրական ժամանակում գործող վահանակի WebSocket նույնականացում՝ `src/server/ws/liveServer.ts` — օժանդակ ծառայությունը (`LIVE_WS_PORT` պորտ) ընդունում է վահանակի աշխատաշրջանի cookie կամ կառավարման գործողության տիրույթ (`manage`/`admin`) ունեցող Bearer API բանալի․ միայն ինֆերենցիայի համար նախատեսված բանալիները մերժվում են։ Դրա ներքին `POST /__omniroute_event` հրապարակման վերջնակետն ընդունում է loopback հանգույցները միայն այն դեպքում, երբ բացակայում է պրոքսի անցման վերնագիրը (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`)
 
-## 5) Ամպային համաժամացում
+## 5) Cloud Sync
 
-- Պլանավորիչի սկզբնավորում՝ `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- Ժամանակացույցի սկիզբ՝ `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
 - Պարբերական առաջադրանք՝ `src/shared/services/cloudSyncScheduler.ts`
 - Պարբերական առաջադրանք՝ `src/shared/services/modelSyncScheduler.ts`
-- Կառավարման երթուղի՝ `src/app/api/sync/cloud/route.ts`
+- Պարբերական առաջադրանք (միացում մեկ կապի համար). `src/shared/services/modelHealthCheckScheduler.ts` — փորձարկում է կապի մոդելները, ինքնաբերաբար թաքցնում է ձախողումները և վերականգնում միայն այն, ինչ ինքն է թաքցրել (`src/lib/db/modelHealthAutoHidden.ts`)
+- Կառավարման երթուղին՝ `src/app/api/sync/cloud/route.ts`
 
 ## Հարցման կենսացիկլ (`/v1/chat/completions`)
 

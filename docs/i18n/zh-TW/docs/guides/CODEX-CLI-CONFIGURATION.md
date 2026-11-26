@@ -407,7 +407,7 @@ region  = "us-east-1"
 
 ---
 
-## 多個伺服器
+## 多台伺服器
 
 ```toml
 [model_providers.omniroute-main]
@@ -467,107 +467,107 @@ codex debug models --bundled       # 以 JSON 列出內建模型目錄
 
 ---
 
-## 長時間執行的任務
+## 長時間運行的任務
 
-OmniRoute 的兩項預設值可能會在不知不覺中破壞持續數小時的 Codex CLI 工作階段。兩者都不是 Codex CLI 設定，而是位於 OmniRoute 端。從會固定帳號並停用閒置中止機制的上游代理移轉設定時，使用者經常會同時遇到這兩個問題，並因此認為 OmniRoute「無法維持長時間工作階段」。
+兩個OmniRoute預設值可以悄悄破壞長達數小時的Codex CLI會話。 Codex CLI設定—都不是在OmniRoute端。從固定帳戶和停用空閒截止的上游代理遷移配置的使用者經常會同時遇到這兩個問題，並得出OmniRoute “無法維持長時間會話”的結論。
 
-| 症狀                                               | 可能原因                                         | 調整項目                 |
-| -------------------------------------------------- | ------------------------------------------------ | ------------------------ |
-| 工作階段持續切換帳號／各輪之間的提示快取連續性中斷 | 工作階段親和性 TTL 為 `0`（已停用）              | `sessionAffinityTtlMs`   |
-| 推理過程中連線中斷，且未向用戶端顯示任何提示       | 串流閒置監視器在上游 10 分鐘未傳送資料區塊後觸發 | `STREAM_IDLE_TIMEOUT_MS` |
+| 症狀                                         | 可能的原因                               | 旋鈕                     |
+| -------------------------------------------- | ---------------------------------------- | ------------------------ |
+| 會話不斷切換帳戶/提示-輪次之間快取連續性遺失 | 會話親和性TTL是`0` （已停用）            | `sessionAffinityTtlMs`   |
+| 連線在推理過程中中斷，沒有面向客戶端的提示   | 流空閒看門狗在 10 分鐘後觸發，沒有上游塊 | `STREAM_IDLE_TIMEOUT_MS` |
 
-相關討論：[#7126](https://github.com/diegosouzapw/OmniRoute/discussions/7126)（長時間任務中斷）、[#5718](https://github.com/diegosouzapw/OmniRoute/discussions/5718)（親和性預設停用的原因）。追蹤議題：[#7287](https://github.com/diegosouzapw/OmniRoute/issues/7287)。
+相關討論： [#7126](https://github.com/cheaper-inference/OmniRoute/discussions/7126) （長任務掉落）、 [#5718](https://github.com/cheaper-inference/OmniRoute/discussions/5718) （為什麼affinity預設為關閉）。追蹤： [#7287](https://github.com/cheaper-inference/OmniRoute/issues/7287).
 
-### 1. 工作階段親和性 — 將單一對話固定至單一帳號
+### 1. 會話親和性—將一個會話固定在一個帳戶
 
-**預設值：** `sessionAffinityTtlMs = 0`（已停用）。
+**預設:** `sessionAffinityTtlMs = 0` （已停用）。
 
-**設定位置**
+**在哪裡設置**
 
-- 儀表板 → **設定 → 路由** → **工作階段親和性** → **親和性 TTL（秒）**（`ComboDefaultsTab`）
-- 或透過 PATCH 設定中的 `sessionAffinityTtlMs`，單位為**毫秒**（Zod 範圍為 `0`–`86_400_000`，即最長 24 小時）
+- 儀表板→**設定→路由**→**會話關聯性**→**親和力TTL （秒）** (`ComboDefaultsTab`)
+- 或PATCH設定與`sessionAffinityTtlMs`中**毫秒**（Zod範圍`0`–`86_400_000`，即最長 24 小時）
 
-> 在 #7274 中由僅適用於 Codex 的 `codexSessionAffinityTtlMs` 重新命名而來。舊版鍵仍可作為唯讀別名使用；新設定應使用 `sessionAffinityTtlMs`。只要 TTL 大於 `0`，親和性現在就會套用至**任何**提供者，而不僅限於 Codex — 請參閱 [`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) → 工作階段親和性。
+> 在#7274中從 Codex-only `codexSessionAffinityTtlMs`重命名。舊金鑰仍被接受為唯讀別名；新配置應該使用`sessionAffinityTtlMs`。親和力現在適用於**任何**一旦TTL高於`0`，則不僅Codex —會看到[`docs/architecture/RESILIENCE_GUIDE.md`](../architecture/RESILIENCE_GUIDE.md) →會話關聯性。
 
-**維持為 0 時會發生什麼問題**
+**當它保持在 0 時會破壞什麼**
 
-多輪 Codex 對話中的每一輪都會由目前啟用的組合策略獨立路由，因此**每一輪都可能落到不同的帳號**。這會破壞上游工作階段／提示快取的連續性。只有當 TTL 大於 `0` 時，OmniRoute 才會查閱 Codex 工作階段標頭（`x-codex-session-id` / `x-session-id` / `x-omniroute-session`）以及 `prompt_cache_key` / `session_id` 等本文欄位（`src/sse/services/auth.ts` 中的 `extractSessionAffinityKey`）。
+多輪Codex對話的每一輪都由主動組合策略獨立路由，並且可以落在**每回合不同的帳戶**。這會破壞上游會話/提示快取的連續性。當TTL大於`0` （ `src/sse/services/auth.ts`中的`extractSessionAffinityKey` ）時， OmniRoute僅參考Codex會話標頭（`x-codex-session-id` / `x-session-id` / `x-omniroute-session`）和正文字段，例如`prompt_cache_key` / `session_id` 。
 
-**針對持續數小時的單一任務之建議**
+**建議用於多小時的單一任務**
 
-將 TTL 設為**高於任務預期的實際經過時間**（UI 上限為 **86400 秒** = 24 小時）：
+設定TTL**高於任務的預期掛鐘長度**(UI最大值為**86400秒**= 24 小時）：
 
-| 預期任務時間     | 親和性 TTL（UI，秒）     | `sessionAffinityTtlMs` |
-| ---------------- | ------------------------ | ---------------------- |
-| 數小時           | `14400`（4 小時）        | `14400000`             |
-| 整夜／約 12 小時 | `43200`（12 小時）       | `43200000`             |
-| 一整天           | `86400`（24 小時，上限） | `86400000`             |
+| 預計任務長度 | 親和力TTL （UI，秒）       | `sessionAffinityTtlMs` |
+| ------------ | -------------------------- | ---------------------- |
+| 幾個小時     | `14400` (4 小時)           | `14400000`             |
+| 過夜/ ~ 12h  | `43200` (12小時)           | `43200000`             |
+| 全天         | `86400` （24小時，最大值） | `86400000`             |
 
-選擇加入是刻意的設計：停用親和性有利於在多個帳號之間進行負載平衡；啟用親和性則有利於維持單一長時間代理工作階段的連續性。本指南**不會**變更預設值 — 執行長時間 Codex 任務的操作人員必須自行選擇啟用。
+選擇加入是經過深思熟慮的：停用關聯性有利於跨帳戶的負載平衡；啟用它有利於長時間代理會話的連續性。本指南確實**不是**更改運行長Codex任務的預設—操作員必須選擇加入。
 
-### 2. 串流閒置逾時 — 不要終止安靜的推理輪次
+### 2.流空閒超時—不殺安靜推理輪
 
-**預設值：** `STREAM_IDLE_TIMEOUT_MS = 600000`（10 分鐘）。未設定時會繼承 `REQUEST_TIMEOUT_MS`；共用基準值也是 600000。請參閱 [`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) → 逾時。
+**預設:** `STREAM_IDLE_TIMEOUT_MS = 600000` （10 分鐘）。未設定時繼承自`REQUEST_TIMEOUT_MS` ；共享基線也是 600000。請參閱[`docs/guides/SETUP_GUIDE.md`](SETUP_GUIDE.md) →超時。
 
-**使用預設值時會發生什麼問題**
+**預設會出現什麼問題**
 
-Codex 的推理／工具回合若超過 10 分鐘保持靜默，且**沒有真正的上游資料區塊**，就會被 SSE 閒置監控程式（`open-sse/utils/stream.ts`）強制關閉。用戶端通常只會看到連線直接中斷——這與「在沒有任何通知的情況下自動停止」的現象一致。
+一個Codex推理/工具轉動，保持沉默超過 10 分鐘**沒有真正的上游塊**由SSE空閒看門狗 (`open-sse/utils/stream.ts`) 強制關閉。客戶端經常會看到一個裸連線丟棄—匹配「自動停止，沒有任何通知」。
 
-關鍵細節：OmniRoute 合成的 SSE **心跳不會重設**閒置計時。只有真正的上游回應本文區塊才會更新 `lastChunkTime`。從監控程式的角度來看，仍在「思考」但保持安靜的模型，與停滯的上游沒有任何差別。
+關鍵細節： OmniRoute的合成SSE**心跳不重置**空閒時鐘。只有真正的上游主體區塊才會更新`lastChunkTime`。從監管機構的角度來看，仍在「思考」的安靜模型看起來與停滯的上游模型相同。
 
-相關的 Undici 回應本文閒置設定：`FETCH_BODY_TIMEOUT_MS`（預設值也是相同的 10 分鐘基準；設為 `0` 可停用）。對於串流，`FETCH_TIMEOUT_MS` 只涵蓋連線建立／首批標頭；串流啟用後，停滯狀況由 `STREAM_IDLE_TIMEOUT_MS` 與 `FETCH_BODY_TIMEOUT_MS` 控制。
+相關 Undici 身體不活動： `FETCH_BODY_TIMEOUT_MS` （也預設為相同的 10 分鐘基線； `0`停用它）。對於串流傳輸， `FETCH_TIMEOUT_MS`僅涵蓋連接設定/第一個標頭—一旦流處於活動狀態，停頓由`STREAM_IDLE_TIMEOUT_MS`和`FETCH_BODY_TIMEOUT_MS`控制。
 
-**針對持續數小時的單一任務之建議**
+**建議用於多小時的單一任務**
 
-在 OmniRoute 處理程序的環境中（`.env` / compose / systemd）：
+在OmniRoute進程環境（`.env` /compose/systemd）：
 
 ```bash
-# 停用串流閒置與回應本文閒置逾時，以支援長時間推理回合
+# Disable stream idle + body inactivity cutoffs for long reasoning turns
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-或者，將其提高至超過您預期的最長靜默間隔（值以毫秒為單位）：
+或將它們提高到您期望的最長安靜間隙以上（值以毫秒為單位）：
 
 ```bash
-# 範例：允許上游資料區塊之間最多靜默 2 小時
+# Example: allow up to 2 hours of silence between upstream chunks
 STREAM_IDLE_TIMEOUT_MS=7200000
 FETCH_BODY_TIMEOUT_MS=7200000
 ```
 
-變更這些環境變數後，請重新啟動 OmniRoute。
+更改這些環境變數後重新啟動OmniRoute 。
 
-### 具體做法——持續數小時的 Codex 任務
+### 具體配方—多小時Codex任務
 
-1. **固定帳戶：** Dashboard → Settings → Routing → Session affinity → Affinity TTL = `43200`（12 小時）或 `86400`（上限 24 小時）。
-2. **提高／停用閒置逾時**，請在 OmniRoute 的環境中設定：
+1. **固定帳戶：**儀表板→設定→路由→會話關聯性→關聯性TTL = `43200` （12 小時）或`86400` （最長 24 小時）。
+2. **提高/禁用空閒切斷**在OmniRoute的環境：
 
 ```bash
 STREAM_IDLE_TIMEOUT_MS=0
 FETCH_BODY_TIMEOUT_MS=0
 ```
 
-3. 保留一般的 Codex `config.toml` 設定（`wire_api = "responses"`、正確的 `base_url`、`OMNIROUTE_API_KEY`）——Codex 端不存在可控制這兩種行為的親和性／閒置設定。
-4. 重新啟動 OmniRoute，然後開始長時間執行的 Codex 任務。
+3. 保留通常的Codex `config.toml` （`wire_api = "responses"`，正確的`base_url`， `OMNIROUTE_API_KEY`） —對於這兩種行為，不存在 Codex 端affinity/idle旋鈕。
+4. 重新啟動OmniRoute，然後啟動長Codex任務。
 
-### 預設值決策（#7287）
+### 預設決策 (#7287)
 
-| 設定                     | 發布預設值          | 是否在本指南中變更？                                                          |
-| ------------------------ | ------------------- | ----------------------------------------------------------------------------- |
-| `sessionAffinityTtlMs`   | `0`（停用）         | **否**——維持選擇性啟用（負載平衡與連續性之間的取捨；請參閱 Discussion #5718） |
-| `STREAM_IDLE_TIMEOUT_MS` | `600000`（10 分鐘） | **否**——一般流量仍維持 10 分鐘；長時間執行 Codex 的維運人員可提高或停用此設定 |
+| 旋鈕                     | 出貨預設             | 本指南有何變化？                                         |
+| ------------------------ | -------------------- | -------------------------------------------------------- |
+| `sessionAffinityTtlMs`   | `0` （關閉）         | **不**—仍然選擇加入（負載平衡與連續性；請參閱討論#5718） |
+| `STREAM_IDLE_TIMEOUT_MS` | `600000` （10 分鐘） | **不**—一般交通仍維持10分鐘；長Codex運算子提高或禁用它   |
 
-全域變更其中任何一項預設值，都會改變執行個體中每個用戶端的行為，而不僅是 Codex。請記錄這些設定；在維運人員作出明確決策之前，維持預設值不變。
+全域翻轉任一預設值都會改變實例的每個客戶端的行為，而不僅僅是Codex。記錄旋鈕；保留預設值，直到運營商明確做出相反決定為止。
 
-### 診斷閒置中斷
+### 診斷怠速切斷
 
-當閒置監控程式觸發時，OmniRoute 會記錄格式如下的日誌：
+當空閒看門狗觸發時， OmniRoute會記錄一條形狀如下的行：
 
 ```text
 [STREAM] Idle timeout: no data from codex for 600000ms (model: cx/gpt-5.5)
 ```
 
-搜尋 `Idle timeout: no data from`（或代碼 `stream_idle_timeout`／錯誤名稱 `StreamIdleTimeoutError`）。提供者區段會顯示 OmniRoute 為該請求使用的值（`codex`、其他提供者 ID，或在未知時顯示 `provider`）——它不一定永遠是字面值 `codex`。
+Grep 尋找`Idle timeout: no data from` （或代碼`stream_idle_timeout` / 錯誤名稱`StreamIdleTimeoutError`）。提供者段是用於該請求的任何OmniRoute （`codex`，另一個提供者 ID，或`provider`如果未知） —它並不總是文字字串`codex`。
 
 ---
 

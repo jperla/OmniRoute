@@ -512,11 +512,12 @@ DB Status Domain (SQLite):
 - Autentikasi handshake WebSocket: `src/lib/ws/handshake.ts` — memvalidasi permintaan peningkatan WS melalui kunci API atau cookie sesi
 - Autentikasi WebSocket dasbor langsung: `src/server/ws/liveServer.ts` — sidecar (port `LIVE_WS_PORT`) menerima cookie sesi dasbor atau kunci API Bearer yang memiliki cakupan pengelolaan (`manage`/`admin`); kunci khusus inferensi ditolak. Endpoint penerbit internal `POST /__omniroute_event` hanya menerima peer loopback jika tidak terdapat header lompatan proksi (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`)
 
-## 5) Sinkronisasi Cloud
+## 5) Sinkronisasi Awan
 
-- Inisialisasi penjadwal: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- Penjadwal init: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
 - Tugas berkala: `src/shared/services/cloudSyncScheduler.ts`
 - Tugas berkala: `src/shared/services/modelSyncScheduler.ts`
+- Tugas berkala (ikut serta per koneksi): `src/shared/services/modelHealthCheckScheduler.ts` — menguji model koneksi, menyembunyikan kegagalan secara otomatis, dan hanya memulihkan apa yang disembunyikannya sendiri (`src/lib/db/modelHealthAutoHidden.ts`)
 - Rute kontrol: `src/app/api/sync/cloud/route.ts`
 
 ## Siklus Hidup Permintaan (`/v1/chat/completions`)

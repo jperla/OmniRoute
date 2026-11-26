@@ -4,86 +4,63 @@
 
 ---
 
-> **2026-11-19：Mergify 合併隊列退役**（所有者的決定）。 `.mergify.yml`不再定義佇列並拒絕合併或重寫拉取請求的 Mergify 指令。版本PRs在儲存庫規則集「活動版本上需要綠色閘門」(`Gate / CI` + `Gate / Quality`) 下手動合併，直到全佇列在即時模式下運行，然後透過全佇列 ( [OMNI_QUEUE.md](./OMNI_QUEUE.md) ) 進行合併。下面的合併部分按原樣描述了隊列。
+## 登陸發布分支
 
-從 v3.8.49（ quality/velocity計畫的WS3.2/WS3.4 ）開始，審核PRs到`release/vX.Y.Z`的預設合併路徑是**Mergify合併佇列**(`.mergify.yml`);這**手動合併列車**以下記錄的是在事件、發布凍結或 Mergify 開源計劃發生變化期間使用的FALLBACK — 。
+全隊列管理著`release/vX.Y.Z`的登陸。在登陸PR之前，請閱讀預設分支上`config/merge-queue/config.json`中的頂級`mode` 。請參閱[全方位隊列](OMNI_QUEUE.md)。
 
-## 預設路徑：Mergify 佇列
+- **`shadow`**運行驗證並將登陸留給手動合併。將`omni-queue`應用到核准的PR最後一個頭。使用`npm run queue -- why <PR>`檢查資格。等待`npm run queue -- history --base <branch>`那個頭的判決。繼續`would-land`。在`culprit-found`或`would-dequeue`上，保留合併並修復原因。
+- **陰影異常。**相對於當前基本提示具有綠色完整CI列車可以繼續行駛，而無需單獨的隊列判決。當PR頭已包含目前基尖時，同樣的例外情況也適用。
+- **`live`**使用`omni-queue`標籤觸發登陸。隊列單獨登陸PR。將合併命令和直接推送保留到隊列中。
 
-1. PR 已由活動審查並確認為綠燈，且已通過擁有者的合併前 ⭐
-   關卡（報告 + 逐項決策——請參閱 `/merge-prs` 的步驟 0.75）。
-2. 擁有者（或依據擁有者決策執行的工作階段）套用 **`queue`**
-   標籤。此標籤即代表合併核准；Mergify 僅負責執行。
-3. Mergify 會針對快速關卡**循序**驗證已排入佇列的 PR（一次一個），
-   並進行合併（squash）。批次處理 + 自動二分查找是 Mergify 的付費層級功能
-   （免費方案會顯示「Cannot use Merge Queue batch」，#7220），因此 `.mergify.yml` 不會設定
-   `batch_size`；批次處理仍由下方的手動合併列車負責。若 PR 的檢查在
-   `checks_timeout`（240 分鐘 = `quality.yml` 實測 p95 的 2 倍）後仍處於待處理狀態，
-   則會將其移出佇列，而不是讓佇列停滯。
-4. 合併後，持續 release-green 工作流程會在推送時驗證新的頂端提交，
-   並在該組合發生迴歸時建立歸因議題（絕不自動還原）。
+每次著陸都需要業主的授權和適用的必要檢查。僅在業主授權登陸後才可申請`omni-queue` 。接觸受保護路徑的排隊PRs也需要所有者對該PR進行`protected-approved`決策。
 
-防護規則（與 `CLAUDE.md` 的強制規則 #21/#22 一致）：
+「活動版本需要綠色大門」規則集需要頭部有綠色`Gate / CI`和`Gate / Quality` 。切勿使用`--admin`繞過紅色大門。發布凍結區塊合併到凍結分支。參見[硬性規則 21](HARD_RULES_DETAIL.md) 。切勿標記、合併或推送另一個會話正在執行的拉取請求。參見[硬性規則 22](HARD_RULES_DETAIL.md) 。
 
-- **版本凍結期間** → 請勿為以凍結分支為目標的 PR 加上標籤；應先將目標改為
-  作用中的 `release/vX+1`。
-- **另一個工作階段中正在處理的 PR** → 絕不可為其加上標籤；只有擁有該工作的工作階段
-  才能將自己的工作排入佇列。
-- 僅含測試的差異與帶有 `hotfix` 標籤的 PR 已會執行精簡版 CI（請參閱
-  `RELEASE_CHECKLIST.md` → Hotfix Fast-Lane）；佇列條件會接受實際執行的任何
-  檢查集合（`#check-failure=0` + `#check-pending=0`）。
+## 火車拉動請求
 
-## 備援方案：手動合併列車
+1. 在目前版本的基礎尖端啟動一個火車分支。使用合併提交來整合確切批准的成員頭。透過避免擠壓和變基來保留他們的提交歷史記錄。
+2. 為火車分支打開一個拉取請求。在當前基本提示上使用其自己的完整CI來驗證該PR 。著陸前重新檢查底座尖端和經批准的成員頭。當經過驗證的候選人發生變化時，刷新列車及其CI 。
+3. 在適用的佇列模式下使用合併提交來登陸PR 。在即時模式下，佇列的`merge-ff`登陸方法會保留合併提交。原始成員頭可以從發布分支存取。 GitHub將成員PRs標記為已合併，並提交保留其作者。
 
-在佇列無法使用時採用。這將 v3.8.47 週期期間一天內清空 33 個 PR 的
-實務做法正式化：
+一個公共範例是[PR #21071](https://github.com/cheaper-inference/OmniRoute/pull/21071) 。它合併了 18 位PRs成員，並於 2026 年 11 月 24 日進行了合併提交。
 
-1. **組成批次**（約 10–30 個已審查並核准的 PR）。檢查 `linked:` 衝突
-   （相同的 `tap.testFiles`、相同的 CHANGELOG 區塊），並將這些 PR 依序處理。
-2. **僅驗證一次**：在從發布 tip 建立的隔離 worktree 中，於本機合併所有批次
-   head，接著執行等同發布標準的測試套件
-   （`npm run check:release-green`；發布前加上 `--with-build`）。
-   `scripts/release/merge-train.sh <base> <PR#>…` 會自動執行步驟 1–2（發生衝突的
-   PR 會被移出，列車則繼續執行）。完整模式會執行 `npm run test:unit`——使用
-   針對該機器調校的執行器（`--test-concurrency=20`），**而不是**兩個依序執行的 4 核心 CI
-   shard；後者使主要階段僅使用約 16 核心機器的 25% 效能（已於
-   2026-07-18 修正）。`--fast`（用於當日內清空大型合併列車，已於 2026-07-18
-   由擁有者核准）會保留所有靜態關卡 + vitest，但只執行已登上列車之 PR 所變更的
-   node:test 檔案；每天仍必須對累積後的 tip 至少執行一次完整測試套件
-   （其中一班列車不使用 `--fast`）。
-3. **通過** → 依序合併 PR（每次合併前重新檢查 `state,headRefOid`——
-   head 已移動的 PR 必須重新進入審查）。確認每次合併的淨差異確實僅包含該
-   PR 自己的變更（不可透過自動解決衝突來進行 revert：稽核 `git diff --stat`，
-   確認沒有範圍外的刪除）。
-4. **失敗** → 將批次對半二分（驗證每一半），而不是逐一重新驗證；
-   將違規 PR 連同證據退回審查佇列。
-5. **絕不可**：在凍結期間合併至已凍結的分支；在任何地方使用 `git stash`；
-   不加判斷地重新執行 CI，期待失敗自行消失（規則：失敗就是資訊）。
+從`main`到下一個發布分支的同步也透過合併提交實現。稍後同步需要保留`main`祖先。請參閱[工作樹隔離](WORKTREE_ISOLATION.md#sync-back-landings-are-merge-commits-never-squash)。
 
-## 分層（為何僅使用快速關卡的佇列仍然安全）
+## 本地合併訓練驗證器
 
-- **每個 PR**（quality.yml 快速關卡）：受 TIA 影響的測試 + 完整單元測試 4-shard +
-  vitest + lint 集合 + typecheck + 文件／changelog 完整性。
-- **每個批次／tip**（持續發布綠燈）：每次 push 至發布分支時執行 `--quick`
-  強制關卡；每天執行 3 次完整的 `--with-build --full-ci` 掃描。
-- **每次發布**（發布 PR 上的 ci.yml）：完整矩陣，包括 E2E ×9、
-  package-artifact + tarball 啟動冒煙測試、coverage/ratchets。
+```bash
+scripts/release/merge-train.sh [--plan] [--fast] <base-branch> <PR#> [<PR#>...]
+```
 
-所有項目的驗證程度都不低於以往——高負載範圍只是改為按批次／tip 執行，
-而非按每個 PR 執行；這正是消除 O(N) 往返作業的方式。
+驗證器會取得基本頭和PR頭並將它們組合在一次性工作樹中。它在生成的樹上運行一次奇偶校驗套件。失敗的頭部獲取或合併衝突會彈出該PR ，腳本繼續處理剩餘的PRs。
 
-## `merge-train.sh` 的全新 checkout 前置需求
+- **`--plan`**列印所選模式的步驟並退出，無需建立工作樹或聯絡遙控器。與`--fast`結合檢查快速計劃。
+- **`--fast`**運行常見的靜態閘、 `tests/unit/`和`npm run test:vitest`下選定的已更改`node:test`檔。使用快速模式時，每天至少對累積小費運行一次完整的本地驗證。
+- **完整模式**新增純靜態閘並運行`npm run test:unit`和`npm run test:vitest`。
 
-此指令碼會先在根 checkout 上執行快速失敗的**預檢**（早於任何 worktree
-作業），因此損壞的安裝絕不會偽裝成失敗的列車：
+如果基礎探針可用，則在未觸及的基礎上重新執行失敗的靜態閘。此腳本會報告繼承的故障，並在每個已識別的違規行也出現在基礎上且總計數未增加時繼續。
 
-1. 執行 `npm ci`，接著執行 npm 所阻擋的 `bun` postinstall：
-   `(cd node_modules/bun && node install.js)`——否則 `check:provider-consistency`
-   與 `check:known-symbols`（兩者皆為 `bun scripts/…`）會在列車與 base 上
-   同時失敗，且不會顯示違規行。
-2. 不得存在多餘的 `node_modules/node_modules`（重複的相依性樹；React 會載入兩次，
-   導致 UI vitest 測試套件立即失敗）。
-3. `node_modules/.bin/tsc` 必須存在且可執行（不完整的安裝會缺少此檔案）。
+| 出口 | 意義                                                                                   |
+| ---- | -------------------------------------------------------------------------------------- |
+| `0`  | 列印計劃或完成套件。套件摘要列出了所有繼承的靜態故障和彈出的PRs。                      |
+| `1`  | 參數無效、沒有 Git 簽出、預檢失敗或沒有登上PR 。                                       |
+| `2`  | 套件檢查失敗，不符合繼承條件。操作員可以將批次一分為二，彈出有問題的PR，然後重新運行。 |
 
-列車會執行具阻擋作用的 `npm run check:cycles:ratchet`；單獨執行
-`npm run check:cycles` 僅供參考（它會列出 SCC，即使 base 正常也會以非零狀態結束）。
+本地通行證僅為所有者的檔案提供診斷證據。每次登陸仍然需要所有者授權、其自己所需的檢查以及影子隊列判決（如果適用）。
+
+## 分層
+
+- **根據PR。** CI和 Quality 選擇基於變更的路徑進行檢查。程式碼PRs運行快速品質閘和受影響的測試，並在CI中使用單獨的單元和Vitest作業。
+- **每個隊列候選人。** CI和 Quality 在其佇列引用上運行組合候選者的完整設定檔。
+- **每個發布提示。** Release-Green 在與其路徑過濾器匹配的推送上運行快速硬門。每天 3 次計畫的運行使用發布分支的全面掃描。
+- **每個版本。**完整的CI矩陣包括E2E分片、包驗證、tarball 引導煙霧和覆蓋率檢查。請[參閱發布清單](RELEASE_CHECKLIST.md)。
+
+## `merge-train.sh`新鮮結帳先決條件
+
+預檢在創建工作樹之前運行。使用`npm ci`安裝相依性。確認`node_modules/.bin/tsc`可執行且`node_modules/node_modules`不存在。檢查`node_modules/.bin/bun --version`是否成功。
+
+如果跳過Bun安裝後，請執行`(cd node_modules/bun && node install.js)`。提供者一致性和已知符號檢查使用Bun。驗證器將`npm run check:cycles:ratchet`作為阻塞門運作。獨立的`npm run check:cycles`指令是建議性的。
+
+## 歷史
+
+Mergify 合併佇列已於 2026 年 11 月 19 日停用。

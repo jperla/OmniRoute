@@ -12,61 +12,53 @@ OmniRoute有三種不同但相關的彈性機制。每個都有不同的範圍�
 
 > **彈性切換的環境與儀表板優先權。**從環境— `QUOTA_PREFLIGHT_CUTOFF_ENABLED`、 `PROVIDER_COOLDOWN_ENABLED`、 `STREAM_RECOVERY_ENABLED`、 `STREAM_RECOVERY_MIDSTREAM_ENABLED`、 `STREAM_THROUGHPUT_WATCHDOG_ENABLED` —播種的選擇加入彈性切換僅提供 *default* （`DEFAULT_RESILIENCE_SETTINGS`、 `src/lib/resilience/settings.ts`）。 `resilienceSettings`中保留了一個布林值（儀表板→**設定→彈性**/ `PATCH /api/resilience`，儲存在`key_value`中）勝過 env 值：規範化（`toBoolean`， `src/lib/resilience/settings/normalize.ts`）在存在時保留儲存的布林值。在儀表板已儲存`false`部署上將這樣的環境變數設為`true`因此不會改變任何—翻轉切換**設定→彈性**（或清除儲存的欄位）。
 
-## 1. 提供者斷路器(Provider Circuit Breaker)
+## 1. 提供者熔斷機制
 
-**範圍:**整個提供者(例如 `glm`、`openai`、`anthropic`)。
+**範圍：**整個提供者（例如， `glm`、 `openai`、 `anthropic`）。
 
-**用途:**停止將流量傳送給在上游/服務層級反覆失敗的提供者。
+**目的：**停止向在upstream/service層級重複失敗的提供者發送流量。
 
-**實作:**
+**執行：**
 
-- 核心類別:`src/shared/utils/circuitBreaker.ts`
-- 串接位置:`src/sse/handlers/chatHelpers.ts`、`src/sse/handlers/chat.ts`
-- 狀態 API:`GET /api/monitoring/health`
-- 重設 API:`POST /api/resilience/reset`
-- 包裝器:`open-sse/services/accountFallback.ts`
-- 資料庫資料表:`domain_circuit_breakers`
+- 核心類別： `src/shared/utils/circuitBreaker.ts`
+- 接線： `src/sse/handlers/chatHelpers.ts`、 `src/sse/handlers/chat.ts`
+- 狀態API: `GET /api/monitoring/health`
+- 重置API: `POST /api/resilience/reset`
+- 包裝： `open-sse/services/accountFallback.ts`
+- DB表： `domain_circuit_breakers`
 
-**狀態:**
+**國家：**
 
-- `CLOSED` — 允許正常流量
-- `DEGRADED` — 仍允許流量,但正在追蹤升高的提供者失敗次數;在累積足夠的成功次數、連線測試通過,或最後一種失敗類型經過最長的 `OPEN` 保持時間(其 `cooldownByKind` 值,否則為 `resetTimeout`,× `maxBackoffMultiplier`,至少一個冷卻期)且無新失敗後,返回 `CLOSED`
-- `OPEN` — 提供者暫時被封鎖;組合路由會跳過它
-- `HALF_OPEN` — 重設逾時已屆滿;允許探測請求
+- `CLOSED` —允許正常流量
+- `DEGRADED` —流量仍然允許，但正在追蹤增加的提供者故障；在足夠成功的情況下、在有效的連接測試中或在最後一種失敗類型的最長`OPEN`保持之後（其`cooldownByKind`值，否則`resetTimeout`、 × `maxBackoffMultiplier`，至少一次冷卻）後返回`CLOSED` ，而沒有新的失敗
+- `OPEN` —提供者暫時被屏蔽；組合路由會跳過它
+- `HALF_OPEN` —重置逾時已過；允許偵測請求
 
-**可設定的預設值(`open-sse/config/constants.ts`,於儀表板 → 設定 → 韌性中公開):**
+**可設定的預設值（`open-sse/config/constants.ts`，在儀表板→設定→彈性中公開）：**
 
-| 類別    | 降級於   | 開啟於    | 重設逾時 |
-| ------- | -------- | --------- | -------- |
-| OAuth   | 5 次失敗 | 8 次失敗  | 60s      |
-| API-key | 7 次失敗 | 12 次失敗 | 30s      |
-| Local   | 衍生     | 2 次失敗  | 15s      |
+| 班級    | 降級於  | 開放時間 | 重置超時 |
+| ------- | ------- | -------- | -------- |
+| OAuth   | 5次失敗 | 8次失敗  | 60年代   |
+| API金鑰 | 7次失敗 | 12次失敗 | 30秒     |
 
-`degradationThreshold` 控制提供者何時進入 `DEGRADED`;`failureThreshold` 控制其何時開啟並被跳過。本機提供者設定檔尚未在韌性設定頁面中公開。
+`degradationThreshold`控制提供者何時進入`DEGRADED`; `failureThreshold`控制何時打開並被跳過。 `PROVIDER_PROFILES.local` （2次失敗/15秒）在`open-sse/config/constants.ts`中定義，但是**還沒接線**： `getProviderCategory()`僅傳回`oauth`或`apikey`，因此本機提供者使用OAuth或 API 金鑰設定檔。
 
-**觸發代碼:**僅提供者層級狀態碼 `[408, 500, 502, 503, 504]`。請勿因帳號層級錯誤而觸發(大多數 401/403/429 — 那些屬於冷卻或鎖定的範疇)。
+**行程代碼：**僅提供者層級的狀態`[408, 500, 502, 503, 504]`。做NOT行程為帳戶級錯誤（大多數401/403/429 —屬於冷卻或鎖定）。
 
-**延遲復原:**當 `OPEN` 到期時,`getStatus()`、`canExecute()`、`getRetryAfterMs()` 會將狀態刷新為 `HALF_OPEN`。相同的讀取(以及下一次失敗)會使過期的 `DEGRADED` 衰減回 `CLOSED`。不需要背景計時器。
+**惰性恢復：**當`OPEN`過期時， `getStatus()`、 `canExecute()`、 `getRetryAfterMs()`刷新狀態為`HALF_OPEN`。相同的讀取（以及下一次失敗）將陳舊的`DEGRADED`衰減回`CLOSED`。無需後台計時器。
 
 ---
 
-### 選擇性啟用的全域提供者冷卻(時間窗閘門)
+### 選擇加入全球提供者冷卻（窗口門）
 
-第四個**選擇性啟用**的層級(`PROVIDER_COOLDOWN_ENABLED`,預設**關閉**)在
-`open-sse/services/providerCooldownTracker.ts` 中保存失敗提供者的跨請求記憶,
-組合目標解析會查詢此記憶,使連續的組合請求不再重新走訪剛失敗的提供者。
-提供者層級項目遵循 `PROVIDER_PROFILES` 時間窗閘門:
+第四個，**選擇加入**層（`PROVIDER_COOLDOWN_ENABLED`，預設**離開**）在`open-sse/services/providerCooldownTracker.ts`中保留失敗提供者的交叉請求記憶體，並透過組合目標解析進行諮詢，以便連續的組合請求停止重新遍歷剛剛失敗的提供者。提供者層級的條目尊重`PROVIDER_PROFILES`視窗門：
 
-| 設定檔  | 觸發於(`providerFailureThreshold`) | 時間窗內(`providerFailureWindowMs`) | 冷卻時間(`providerCooldownMs`) |
-| ------- | ---------------------------------: | ----------------------------------: | -----------------------------: |
-| OAuth   |                               `10` |                             `15min` |                         `5min` |
-| API key |                               `15` |                             `30min` |                        `10min` |
+| 輪廓  | (`providerFailureThreshold`) 之後的行程 | 裡面（`providerFailureWindowMs`） | 冷卻 (`providerCooldownMs`) |
+| ----- | --------------------------------------: | --------------------------------: | --------------------------: |
+| OAuth |                                    `10` |                           `15min` |                      `5min` |
+| API鍵 |                                    `15` |                           `30min` |                     `10min` |
 
-低於閾值時,提供者**不會**被視為冷卻中;一次成功會清除該時間窗。
-連線層級項目(`provider:connectionId`)則改為保留指數式的
-`minRetryCooldownMs → maxRetryCooldownMs` 退避。覆寫方式:
-`OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`。
-迴歸防護:`tests/unit/provider-cooldown-window-gate.test.ts`。
+提供者低於閾值**不是**考慮冷卻；成功清除了視窗。連接級條目 (`provider:connectionId`) 保留指數`minRetryCooldownMs → maxRetryCooldownMs`退避。覆蓋： `OMNIROUTE_PROVIDER_BREAKER_{OAUTH,API_KEY}_{FAILURE_THRESHOLD,FAILURE_WINDOW_MS,COOLDOWN_MS}`。回歸守衛： `tests/unit/provider-cooldown-window-gate.test.ts`。
 
 ## 2. 連接冷卻
 
@@ -571,95 +563,68 @@ excludeMarkers, defaultRetryAfterMs}`），透過 `applyStatusRestatement()` 進
 
 ---
 
-## 執行時期狀態 — 代理快速參考
+## 運行時狀態—代理快速參考
 
-> 自 `AGENTS.md` →「Resilience Runtime State」逐字搬移（PR #12743），使代理
-> 指南維持在 40k 上下文預算之內。此為上述章節的精簡、面向代理版本；
-> 編號章節仍是完整參考文件。
+> 從`AGENTS.md` → 「彈性運行時狀態」(PR #12743) 中逐字移動，因此代理指南保持在 40k 上下文預算以下。這是上面各部分的面向代理人的濃縮視圖；編號部分仍然是完整的參考。
 
-OmniRoute 有三種相關但各自不同的暫時性失敗機制。除錯路由行為時，
-請務必區分它們的適用範圍。請參閱
-[三層韌性架構圖](../diagrams/exported/resilience-3layers.svg)
-（來源：[diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd)）
-以快速掌握全貌。
+OmniRoute有三種相關但不同的臨時故障機制。在調試路由行為時保持它們的作用域是分開的。請參閱[3 層彈性圖](../diagrams/exported/resilience-3layers.svg)（來源： [diagrams/resilience-3layers.mmd](../diagrams/resilience-3layers.mmd) ）以取得概覽圖。
 
-### 提供者熔斷器
+### 提供者斷路器
 
-**範圍**：整個提供者，例如 `glm`、`openai`、`anthropic`。
+**範圍**：整個提供者，例如`glm`、 `openai`、 `anthropic`。
 
-**目的**：停止將流量送往在上游/服務層級持續失敗的提供者，
-避免單一不健康的提供者拖慢每一個請求。
+**目的**：停止向在upstream/service層級反覆失敗的提供者發送流量，因此不健康的提供者不會減慢每個請求。
 
-**實作**：
+**執行**:
 
-- 核心類別：`src/shared/utils/circuitBreaker.ts`
-- 聊天閘門/執行接線：`src/sse/handlers/chatHelpers.ts`、`src/sse/handlers/chat.ts`
-- 執行時期狀態 API：`src/app/api/monitoring/health/route.ts`
-- 共用包裝器：`open-sse/services/accountFallback.ts`
-- 持久化狀態資料表：`domain_circuit_breakers`
+- 核心類別： `src/shared/utils/circuitBreaker.ts`
+- 聊天gate/execution接線： `src/sse/handlers/chatHelpers.ts`、 `src/sse/handlers/chat.ts`
+- 運行時狀態API: `src/app/api/monitoring/health/route.ts`
+- 共享包裝器： `open-sse/services/accountFallback.ts`
+- 持久狀態表： `domain_circuit_breakers`
 
-**狀態**（4 種 — `src/shared/utils/circuitBreaker.ts`）：
+**州**(4 — `src/shared/utils/circuitBreaker.ts`):
 
 - `CLOSED`：允許正常流量。
-- `DEGRADED`：早期警告區間 — 失敗次數已超過降級閾值，但尚未達到
-  熔斷器閾值；流量仍會通過，儀表板會顯示警告。有效的連線
-  測試或一段沒有新失敗的安靜窗口會使其回到 `CLOSED`
-  （窗口設定見 `docs/architecture/RESILIENCE_GUIDE.md`）。
-- `OPEN`：提供者暫時被封鎖；呼叫端會收到 provider-circuit-open 回應，
-  或組合路由跳至另一個目標。
-- `HALF_OPEN`：重置逾時已屆滿；允許一個探測請求。成功則關閉
-  熔斷器，失敗則再次開啟。
+- `DEGRADED`：預警帶—故障已超過降級閾值，但尚未達到斷路器閾值；交通仍暢通，儀表板顯示警告。有效的連線測試或沒有新故障的安靜視窗將其傳回給`CLOSED` （`docs/architecture/RESILIENCE_GUIDE.md`有該視窗）。
+- `OPEN`：提供者被暫時阻止；呼叫者取得提供者電路開放回應或組合路由跳到另一個目標。
+- `HALF_OPEN`: 重置逾時已過；允許偵測請求。成功關閉斷路器，失敗再次開啟斷路器。
 
-**預設值**（`open-sse/config/constants.ts` → `PROVIDER_PROFILES`，透過
-`src/lib/resilience/settings.ts` 中的 `DEFAULT_RESILIENCE_SETTINGS.providerBreaker` 使用，
-再接到 `src/sse/handlers/chatHelpers.ts` 中的 `getCircuitBreaker(provider, …)`）。
-整個提供者層級的熔斷器依據 `circuitBreakerThreshold` / `circuitBreakerReset` 運作：
+**預設值**（`open-sse/config/constants.ts` → `PROVIDER_PROFILES`，透過`DEFAULT_RESILIENCE_SETTINGS.providerBreaker` `src/lib/resilience/settings.ts` → in `src/sse/handlers/chatHelpers.ts`中的`getCircuitBreaker(provider, …)`消耗）。整體提供者斷路器在`circuitBreakerThreshold` / `circuitBreakerReset`上運作：
 
-| 設定檔   |       降級於 | 開啟於（`circuitBreakerThreshold`） | 重置（`circuitBreakerReset`） |
-| -------- | -----------: | ----------------------------------: | ----------------------------: |
-| OAuth    |          `5` |                                 `8` |                         `60s` |
-| API 金鑰 |          `7` |                                `12` |                         `30s` |
-| 本地     | （推導得出） |                                 `2` |                         `15s` |
+| 輪廓  | 降解於 | 開盤於 (`circuitBreakerThreshold`) | 重置（`circuitBreakerReset`） |
+| ----- | -----: | ---------------------------------: | ----------------------------: |
+| OAuth |    `5` |                                `8` |                         `60s` |
+| API鍵 |    `7` |                               `12` |                         `30s` |
 
-`PROVIDER_PROFILES` 也定義了 `providerFailureThreshold`（10/15/2）、
-`providerFailureWindowMs`（15/30/5 分鐘）與 `providerCooldownMs`（5/10/1 分鐘）：這些是
-**選用式全域 Provider Cooldown 的窗口閘門**（`PROVIDER_COOLDOWN_ENABLED`，預設
-關閉）的運作依據 — `open-sse/services/providerCooldownTracker.ts` 中的提供者層級
-項目，只有在 `providerFailureWindowMs` 窗口內累積 `providerFailureThreshold` 次失敗後
-才算進入冷卻，接著冷卻 `providerCooldownMs`。它們「不是」實際運作中熔斷器的
-閾值 — 請勿調整它們並期望熔斷器行為改變。所有預設值都可透過
-`OMNIROUTE_PROVIDER_BREAKER_*` 與 `OMNIROUTE_CIRCUIT_BREAKER_*` 環境變數覆寫；
-執行時期最準確的參考表位於 `docs/architecture/RESILIENCE_GUIDE.md`。
+`local`設定檔 (`2` Failures / `15s`) 也存在於`PROVIDER_PROFILES`中，但它沒有連接到斷路器： `buildProviderProfile()` (`open-sse/services/accountFallback.ts`) 只接受`oauth`或`apikey`，而`getProviderCategory()` (`open-sse/config/providerRegistry.ts`) 傳回這兩個之一（未註冊的提供者取得`apikey`）。
 
-只有提供者層級的失敗狀態碼才應觸發提供者熔斷器：
+`PROVIDER_PROFILES`也定義了`providerFailureThreshold` (10/15/2)、 `providerFailureWindowMs` (15/30/5 min) 和`providerCooldownMs` (5/10/1 min) — OAuth/API key/local，其中局部值是惰性的，原因與上述相同：這些為**選擇加入全球提供者冷卻時間的窗口**（`PROVIDER_COOLDOWN_ENABLED`，預設為關閉） — `open-sse/services/providerCooldownTracker.ts`中的提供者等級條目僅在`providerFailureWindowMs`內的`providerFailureThreshold`失敗後才算作冷卻，然後為`providerCooldownMs`冷卻。它們是NOT實時斷路器的閾值—不會根據期望的斷路器行為來調整它們。每個預設值都可以透過`OMNIROUTE_PROVIDER_BREAKER_*`和`OMNIROUTE_CIRCUIT_BREAKER_*`環境變數覆蓋；運行時精確的參考表位於`docs/architecture/RESILIENCE_GUIDE.md`。
+
+只有提供程式層級的故障狀態才應使提供者斷路器跳脫：
 
 ```ts
 (408, 500, 502, 503, 504);
 ```
 
-對於一般的帳號/金鑰/模型錯誤（例如大多數 `401`、`403` 或 `429`
-情況），請勿觸發整個提供者層級的熔斷器。這些錯誤通常屬於連線冷卻
-或模型鎖定的範疇。一般 API 金鑰提供者的 `403` 應可恢復，
-除非它被歸類為終端性的提供者/帳號錯誤。
+不要因正常的account/key/model錯誤（如大多數`401`、 `403`或`429`情況）而觸發整個提供者斷路器。這些通常屬於連接冷卻或模型鎖定。通用 API 金鑰提供者`403`應該是可恢復的，除非它被分類為終端provider/account錯誤。
 
-熔斷器採用惰性恢復（lazy recovery），而非背景計時器。當 `OPEN` 狀態過期時，諸如
-`getStatus()`、`canExecute()` 與 `getRetryAfterMs()` 這類讀取操作會將狀態刷新為
-`HALF_OPEN`，因此儀表板與組合候選建構器不會永遠持續排除一個已過期的提供者。
+斷路器使用延遲恢復，而不是後台計時器。當`OPEN`過期時， `getStatus()`、 `canExecute()`和`getRetryAfterMs()`等讀取會將狀態刷新為`HALF_OPEN`，因此儀表板和組合候選建構器不會永遠排除過期的提供者。
 
-### 連線冷卻（Connection Cooldown）
+### 連接冷卻
 
-**範圍**：單一提供者連線／帳號／金鑰。
+**範圍**： 一位提供者connection/account/key.
 
-**目的**：暫時跳過一個異常的金鑰／帳號，同時允許同一提供者的其他連線繼續服務請求。
+**目的**：暫時跳過一個壞的key/account同時允許同一提供者的其他連線繼續服務請求。
 
-**實作**：
+**執行**:
 
-- 寫入／更新路徑：`src/sse/services/auth.ts::markAccountUnavailable()`
-- 帳號選擇／過濾：`src/sse/services/auth.ts::getProviderCredentials...`
-- 冷卻時間計算：`open-sse/services/accountFallback.ts::checkFallbackError()`
-- 設定：`src/lib/resilience/settings.ts`
+- Write/update路徑： `src/sse/services/auth.ts::markAccountUnavailable()`
+- 帳號selection/filtering: `src/sse/services/auth.ts::getProviderCredentials...`
+- 冷卻時間計算： `open-sse/services/accountFallback.ts::checkFallbackError()`
+- 設定： `src/lib/resilience/settings.ts`
 
-提供者連線上的重要欄位：
+提供者連線的重要欄位：
 
 ```ts
 rateLimitedUntil;
@@ -670,52 +635,50 @@ errorCode;
 backoffLevel;
 ```
 
-在帳號選擇期間，當以下條件成立時，連線會被跳過：
+在帳戶選擇過程中，在以下情況下會跳過連線：
 
 ```ts
 new Date(rateLimitedUntil).getTime() > Date.now();
 ```
 
-冷卻同樣是惰性的：當 `rateLimitedUntil` 已成過去時間，連線便再次具備資格。成功使用後，`clearAccountError()` 會清除 `testStatus`、
-`rateLimitedUntil`、錯誤欄位以及 `backoffLevel`。
+冷卻時間也是惰性的：當`rateLimitedUntil`過去時，連接再次變得合格。成功使用後， `clearAccountError()`會清除`testStatus`、 `rateLimitedUntil`、錯誤欄位和`backoffLevel`。
 
 預設連線冷卻行為：
 
-- OAuth 基礎冷卻時間：`5s`。
-- API 金鑰基礎冷卻時間：`3s`。
-- API 金鑰的 `429` 應優先採用上游的重試提示（`Retry-After`、重置標頭，或可解析的重置文字），若有的話。
-- 重複發生的可恢復失敗會使用指數退避：
+- OAuth基礎冷卻時間： `5s`。
+- API 金鑰基礎冷卻時間： `3s`。
+- API 金鑰`429`應該更喜歡上游重試提示（`Retry-After`、重置標頭或可解析重置文字）（如果可用）。
+- 重複的可恢復故障使用指數退避：
 
 ```ts
 baseCooldownMs * 2 ** failureIndex;
 ```
 
-防驚群（anti-thundering-herd）機制可防止同一連線上的併發失敗重複延長冷卻時間或重複遞增 `backoffLevel`。
+反雷群保護可防止在同一連接上重複延長冷卻時間或雙倍遞增`backoffLevel`而發生併發故障。
 
-終態不是冷卻。`banned`、`expired`（僅在透過 `EXPIRED_RETRY_MAX` 進行 N 次有上限的重試後才會成為終態）以及 `credits_exhausted`
-旨在保持不可用狀態，直到憑證／設定變更或維運人員手動重置為止。請勿用暫時性冷卻狀態覆寫終態。
+終止狀態不是冷卻時間。 `banned`、 `expired` （僅在通過`EXPIRED_RETRY_MAX` N 次有界重試後才變為終端）和`credits_exhausted`旨在保持不可用，直到credentials/settings更改或操作員重置它們。不要用瞬態冷卻狀態覆蓋最終狀態。
 
-### 模型鎖定（Model Lockout）
+### 型號鎖定
 
-**範圍**：提供者 + 連線 + 模型。
+**範圍**：提供者+連接+模型。
 
-**目的**：當只有某個模型對該連線不可用或配額受限時，避免停用整條連線。
+**目的**：當只有一個模型無法使用或該連線受到配額限制時，避免停用整個連線。
 
 範例：
 
-- 以模型為單位計算配額的提供者回傳 `429`。
-- 本地提供者對某個缺失的模型回傳 `404`。
-- 提供者特定的模式／模型權限失敗，例如所選的 Grok 模式。
+- 每個模型的配額提供者回傳`429`。
+- 本地提供者針對一種缺失型號返回`404` 。
+- 特定於提供者的mode/model權限失敗，例如選定的Grok模式。
 
-模型鎖定位於 `open-sse/services/accountFallback.ts`，讓同一連線可繼續服務其他模型。
+模型鎖定存在於`open-sse/services/accountFallback.ts`中，並允許相同的連接繼續為其他模型提供服務。
 
-### 除錯指引
+### 調試指導
 
-- 若某提供者的所有金鑰都被跳過，請同時檢查提供者熔斷器狀態以及每條連線的 `rateLimitedUntil`／`testStatus`。
-- 若某提供者在重置窗口後仍被永久排除，請檢查程式碼是否直接讀取原始的 `state`，而非使用 `getStatus()`／`canExecute()`。
-- 若某提供者的一組金鑰失敗但其他金鑰應可運作，請優先使用連線冷卻而非提供者熔斷器。
-- 若只有一個模型失敗，請優先使用模型鎖定而非連線冷卻。
-- 若某狀態應能自我恢復，它應具備未來的時間戳／重置逾時，以及能刷新過期狀態的讀取路徑。永久狀態需要手動變更憑證或設定。
+- 如果跳過提供者的所有鍵，請檢查提供者斷路器狀態和每個連接的`rateLimitedUntil`/`testStatus`。
+- 如果提供者在重置視窗後顯示為永久排除，請檢查程式碼是否正在讀取原始`state`而不是使用`getStatus()`/`canExecute()`。
+- 如果一個提供程式金鑰失敗，但其他提供者金鑰應該可以工作，則優先選擇連接冷卻而不是提供程式斷路器。
+- 如果只有一個模型失敗，則優先選擇模型鎖定而不是連接冷卻。
+- 如果一個狀態應該自我恢復，它應該有一個未來的timestamp/reset逾時和一個刷新過期狀態的讀取路徑。永久狀態需要手動憑證或設定變更。
 
 ---
 

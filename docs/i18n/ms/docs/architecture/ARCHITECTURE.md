@@ -514,9 +514,10 @@ DB Keadaan Domain (SQLite):
 
 ## 5) Penyegerakan Awan
 
-- Pemulaan penjadual: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
-- Tugas berkala: `src/shared/services/cloudSyncScheduler.ts`
-- Tugas berkala: `src/shared/services/modelSyncScheduler.ts`
+- Penjadual init: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- Tugasan berkala: `src/shared/services/cloudSyncScheduler.ts`
+- Tugasan berkala: `src/shared/services/modelSyncScheduler.ts`
+- Tugas berkala (ikut serta setiap sambungan): `src/shared/services/modelHealthCheckScheduler.ts` — menguji model sambungan, auto-menyembunyikan kegagalan dan memulihkan hanya apa yang disembunyikannya sendiri (`src/lib/db/modelHealthAutoHidden.ts`)
 - Laluan kawalan: `src/app/api/sync/cloud/route.ts`
 
 ## Kitaran Hayat Permintaan (`/v1/chat/completions`)

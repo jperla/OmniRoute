@@ -502,11 +502,12 @@ Banco de Dados de Estado do Domínio (SQLite):
 - Autenticação do handshake WebSocket: `src/lib/ws/handshake.ts` — valida solicitações de upgrade de WS por meio de uma chave de API ou cookie de sessão
 - Autenticação WebSocket do painel em tempo real: `src/server/ws/liveServer.ts` — o sidecar (porta `LIVE_WS_PORT`) aceita um cookie de sessão do painel ou uma chave de API Bearer com escopo de gerenciamento (`manage`/`admin`); chaves exclusivas para inferência são recusadas. Seu endpoint publicador interno `POST /__omniroute_event` aceita pares de loopback somente quando nenhum cabeçalho de salto de proxy (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`) está presente
 
-## 5) Sincronização com a Nuvem
+## 5) Sincronização na nuvem
 
 - Inicialização do agendador: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
 - Tarefa periódica: `src/shared/services/cloudSyncScheduler.ts`
 - Tarefa periódica: `src/shared/services/modelSyncScheduler.ts`
+- Tarefa periódica (opt-in por conexão): `src/shared/services/modelHealthCheckScheduler.ts` — testa os modelos de uma conexão, oculta falhas automaticamente e restaura apenas o que ela escondeu (`src/lib/db/modelHealthAutoHidden.ts`)
 - Rota de controle: `src/app/api/sync/cloud/route.ts`
 
 ## Ciclo de vida da requisição (`/v1/chat/completions`)

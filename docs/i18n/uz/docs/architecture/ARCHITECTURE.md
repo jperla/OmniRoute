@@ -512,12 +512,13 @@ Domen holati maʼlumotlar bazasi (SQLite):
 - WebSocket ulanishni boshlash autentifikatsiyasi: `src/lib/ws/handshake.ts` — WS yangilash soʻrovlarini API kaliti yoki sessiya cookie fayli orqali tekshiradi
 - Jonli boshqaruv paneli WebSocket autentifikatsiyasi: `src/server/ws/liveServer.ts` — sidecar (`LIVE_WS_PORT` porti) boshqaruv paneli sessiya cookie faylini yoki boshqaruv qamroviga (`manage`/`admin`) ega Bearer API kalitini qabul qiladi; faqat inferensiya uchun moʻljallangan kalitlar rad etiladi. Uning ichki `POST /__omniroute_event` nashr etuvchi endpointi loopback tugunlarini faqat proksi-oʻtish sarlavhasi (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`) mavjud boʻlmaganda qabul qiladi
 
-## 5) Bulut bilan sinxronlash
+## 5) Cloud Sync
 
-- Rejalashtiruvchini ishga tushirish: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- Rejalashtiruvchi ishga tushirish: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
 - Davriy vazifa: `src/shared/services/cloudSyncScheduler.ts`
 - Davriy vazifa: `src/shared/services/modelSyncScheduler.ts`
-- Boshqaruv marshruti: `src/app/api/sync/cloud/route.ts`
+- Davriy vazifa (har bir ulanish uchun ulanish): `src/shared/services/modelHealthCheckScheduler.ts` — ulanish modellarini sinovdan o‘tkazadi, nosozliklarni avtomatik yashiradi va faqat o‘zi yashirgan narsani tiklaydi (`src/lib/db/modelHealthAutoHidden.ts`)
+- Boshqarish yo'nalishi: `src/app/api/sync/cloud/route.ts`
 
 ## Soʻrovning hayot sikli (`/v1/chat/completions`)
 

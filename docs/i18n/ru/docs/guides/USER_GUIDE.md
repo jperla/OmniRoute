@@ -432,7 +432,7 @@ omniroute autostart disable
 ### Развертывание VPS
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -514,8 +514,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -710,7 +710,7 @@ curl -X POST http://localhost:20128/api/provider-models \
 
 ### Пользовательские поставщики, совместимые с OpenAI
 
-Любой шлюз, поддерживающий OpenAI API (автономный прокси-сервер, vLLM, сторонний агрегатор), можно добавить в качестве собственного узла провайдера:
+Любой шлюз, поддерживающий OpenAI API (собственный прокси-сервер, vLLM, сторонний агрегатор), можно добавить в качестве собственного узла провайдера:
 
 1. **Поставщики → Добавить OpenAI Совместимость** .
 2. **Имя** : отображаемая метка узла.
@@ -735,7 +735,7 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 Эти ключи входят в `providerSpecificData` соединения (например, через `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (целое число, 1–1024) — для соединений, совместимых с форматом чата OpenAI, шлюз которых отклоняет длинные имена инструментов. Более длинные имена передаются как короткие псевдонимы и восстанавливаются в ответе. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go и Muse Code уже используют псевдонимы имен длиной более 64 символов без каких-либо настроек. Значение соединения заменяет значение по умолчанию Azure OpenAI /Azur AI Foundry (подключение Azure за более строгим шлюзом) и устанавливает ограничение для настраиваемого совместимого узла; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go и Muse Code сохраняют ограничение реестра и игнорируют его.
+- `toolNameMaxLength` (целое число, 1–1024) — для соединений, совместимых с форматом чата OpenAI, шлюз которых отклоняет длинные имена инструментов. Более длинные имена передаются как короткие псевдонимы и восстанавливаются в ответе. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go и Muse Code уже используют псевдонимы имен длиной более 64 символов без каких-либо настроек. Значение подключения заменяет значение по умолчанию для Azure OpenAI /Azure AI Foundry (подключение Azure за более строгим шлюзом) и устанавливает ограничение для настраиваемого совместимого узла; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go и Muse Code сохраняют ограничение реестра и игнорируют его.
 - `quotaEndpoint` — конечная точка quota/credits шлюза, чтение полосы квот панели мониторинга и маршрутизации с учетом квот. Работает как с OpenAI, так и с Anthropic-совместимыми соединениями; полная форма документирована в `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
@@ -771,9 +771,9 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Заголовок `X-OmniRoute-Peer-Trace` получают только запросы, отправленные узлу URL явно включенному в разрешенный список. Шлюз отклоняет повторный экземпляр ID или исчерпанный бюджет переходов с помощью HTTP `508 Loop Detected`; обычные вышестоящие поставщики не получают метаданных одноранговых узлов.
+Заголовок `X-OmniRoute-Peer-Trace` получают только запросы, отправленные узлу URL явно включенному в разрешенный список. Шлюз отклоняет повторный экземпляр ID или исчерпанный бюджет переходов с помощью HTTP `508 Loop Detected`; обычные вышестоящие провайдеры не получают метаданных одноранговых узлов.
 
-Цепочка одноранговых узлов не является репликацией базы данных или переключением хоста при сбое. Каждый шлюз сохраняет независимое состояние SQLite, кэши, счетчики скорости и сеансы. Используйте обратный прокси-сервер с проверкой работоспособности или аварийное переключение клиента для доступности active/passive или active/active и никогда не монтируйте одну базу данных SQLite в несколько работающих экземпляров OmniRoute.
+Цепочка одноранговых узлов не является репликацией базы данных или аварийным переключением хоста. Каждый шлюз сохраняет независимое состояние SQLite, кэши, счетчики скорости и сеансы. Используйте обратный прокси-сервер с проверкой работоспособности или аварийное переключение клиента для доступности active/passive или active/active и никогда не монтируйте одну базу данных SQLite в несколько работающих экземпляров OmniRoute.
 
 ### Выделенные маршруты провайдера
 
@@ -883,8 +883,8 @@ curl http://localhost:20128/api/models/catalog
 - `least-used` и `cost-optimized`
 - `auto` — на основе оценок всех кандидатов
 - `lkgp` (последний удачный поставщик) — связывается с последним успешным поставщиком, а затем возвращается к правилам
-- `context-optimized` — выбирает модель с самым большим окном свободного контекста
-- `context-relay` — объединяет модели с длинным контекстом для последующих ходов
+- `context-optimized` — сначала пробует модель с самым большим известным контекстным окном
+- `context-relay` — приоритетный порядок плюс сводка передачи, когда разговор переходит к другому аккаунту
 
 #### Внешний заголовок закрепленного сеанса
 
@@ -1159,9 +1159,9 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 Глобальные настройки комбо по умолчанию можно установить в** Панель мониторинга Настройки → Маршрутизация → Комбинированные настройки → по умолчанию** . Целевые тайм-ауты комбо по умолчанию наследуют текущий тайм-аут запроса. Использовать** Целевой тайм-аут (секунды)** по умолчанию для комбо или отдельного комбо только в том случае, если более короткий лимит для каждой цели должен вызвать более быстрый откат.
 
-Комбинированная оптимизация с нулевой задержкой включена по желанию. Оставлять** Оптимизация с нулевой задержкой** отключено, чтобы предотвратить использование этих функций задержки в гонке за резервными целями, пропуске целей на основе истории TTFT или сжатии резервных запросов; его включение позволяет настраивать хеджирование, прогнозировать пропуски TTFT и упреждающее резервное сжатие, чтобы заменить точность routing/request на меньшую задержку хвоста.
+Комбинированная оптимизация с нулевой задержкой включена по желанию. Оставлять** Оптимизация с нулевой задержкой** отключено, чтобы эти функции задержки не приводили к гонке за резервными целями, пропуску целей на основе истории TTFT или сжатию резервных запросов; его включение позволяет настраивать хеджирование, прогнозировать пропуски TTFT и упреждающее резервное сжатие, чтобы заменить точность routing/request на меньшую задержку хвоста.
 
-Запрещать** Буфер токена рассуждения** когда вышестоящие провайдеры требуют строгих ограничений `max_tokens` / `maxOutputTokens`. Если эта функция включена, комбинированная маршрутизация добавляет запас для модели рассуждения только для моделей с известным ограничением вывода и оставляет предел клиентского токена неизменным, когда безопасное буферизованное значение превысит это ограничение. Если лимит клиента уже превышает известный предел, OmniRoute ограничивает его до этого предела перед отправкой восходящего запроса.
+Запрещать** Буфер токена рассуждения** когда вышестоящие провайдеры требуют строгих ограничений `max_tokens` / `maxOutputTokens`. Если эта функция включена, комбинированная маршрутизация добавляет запас для модели рассуждения только для моделей с известным ограничением вывода и оставляет предел токена клиента неизменным, когда безопасное буферизованное значение превышает это ограничение. Если лимит клиента уже превышает известный предел, OmniRoute ограничивает его до этого предела перед отправкой восходящего запроса.
 
 ---
 
@@ -1333,32 +1333,34 @@ curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUT
 
 ## 💻 Внутренний CLI
 
-OmniRoute поставляется с внутренним CLI (`omniroute …`) для настройки, диагностики и управления во время выполнения. Он **отличается от страницы «Инструменты CLI» в панели управления**, где настраиваются сторонние CLI (Claude Code, Cursor, Codex, Cline, …), чтобы они могли взаимодействовать с OmniRoute.
+OmniRoute поставляет внутренний CLI (`omniroute …`) для настройки, диагностики и управления временем выполнения. Это** отдельно от страницы «Инструменты CLI » на панели управления.** , который настраивает сторонний CLIs (Claude Code, Cursor, Codex, Cline, …), чтобы они могли общаться с OmniRoute.
 
 ```bash
-omniroute setup                    # Интерактивный мастер (пароль, провайдеры, комбинации)
-omniroute setup --non-interactive  # Подходит для CI
-omniroute doctor                   # Диагностика состояния (каталог данных, БД, провайдеры, порты)
-omniroute providers available      # Вывести список поддерживаемых провайдеров
-omniroute providers list           # Вывести список настроенных подключений
-omniroute providers test <id>      # Проверить подключение к провайдеру в реальном времени
-omniroute combos list              # Вывести список комбинаций
-omniroute combos switch <name>     # Установить комбинацию по умолчанию
-omniroute models                   # Вывести список доступных моделей (--json, --search)
-omniroute keys add | list | remove # Управлять ключами API из терминала
-omniroute backup                   # Создать снимок конфигурации и БД
-omniroute restore [<timestamp>]    # Восстановить данные из снимка
-omniroute health                   # Подробное состояние (предохранители, кеш, память)
-omniroute quota                    # Использование квот провайдеров
-omniroute mcp status               # Состояние сервера MCP
-omniroute a2a status               # Состояние сервера A2A
-omniroute tunnel list|create|stop  # Туннели Cloudflare/Tailscale/ngrok
-omniroute reset-password           # Сбросить пароль администратора
-omniroute --mcp                    # Запустить сервер MCP через stdio
-omniroute --port 3000              # Запустить сервер на пользовательском порту
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-Совет: используйте `omniroute doctor --json` вместе со своим инструментом мониторинга, чтобы получать оповещения о неработоспособных подключениях к провайдерам.
+Совет: соедините `omniroute doctor --json` со своим инструментом мониторинга, чтобы получать оповещения о сбоях в локальной установке. `doctor` не проверяет соединения провайдера; используйте для этого `omniroute providers test <id>`.
 
 ---
 

@@ -512,11 +512,12 @@ Domænetilstandsdatabase (SQLite):
 - Godkendelse ved WebSocket-handshake: `src/lib/ws/handshake.ts` — validerer WS-opgraderingsanmodninger via API-nøgle eller sessionscookie
 - WebSocket-godkendelse til live-dashboardet: `src/server/ws/liveServer.ts` — sidecar-tjenesten (port `LIVE_WS_PORT`) accepterer en dashboard-sessionscookie eller en Bearer-API-nøgle med et administrationsscope (`manage`/`admin`); nøgler, der kun er beregnet til inferens, afvises. Dens interne `POST /__omniroute_event`-udgiverendpoint accepterer kun peers på loopback-adresser, når der ikke findes en proxy-hop-header (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`)
 
-## 5) Cloudsynkronisering
+## 5) Cloud Sync
 
-- Initialisering af planlægger: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- Planlægger init: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
 - Periodisk opgave: `src/shared/services/cloudSyncScheduler.ts`
 - Periodisk opgave: `src/shared/services/modelSyncScheduler.ts`
+- Periodisk opgave (opt-in pr. forbindelse): `src/shared/services/modelHealthCheckScheduler.ts` — tester en forbindelses modeller, skjuler automatisk fejl og gendanner kun det, den skjulte selv (`src/lib/db/modelHealthAutoHidden.ts`)
 - Kontrolrute: `src/app/api/sync/cloud/route.ts`
 
 ## Anmodningens livscyklus (`/v1/chat/completions`)

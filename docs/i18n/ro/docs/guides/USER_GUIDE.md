@@ -432,7 +432,7 @@ Când nu mai aveți nevoie OmniRoute, vă oferim două scripturi rapide pentru o
 ### VPS Implementare
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -514,8 +514,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -771,13 +771,13 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Doar cererile trimise către un peer URL listat în mod explicit primesc antetul `X-OmniRoute-Peer-Trace`. Un gateway respinge o instanță repetată ID sau un buget hop epuizat cu HTTP `508 Loop Detected`; furnizorii obișnuiți din amonte nu primesc metadate peer.
+Doar cererile trimise către un peer URL listat în mod explicit primesc antetul `X-OmniRoute-Peer-Trace`. Un gateway respinge o instanță repetată ID sau un buget hop epuizat cu HTTP `508 Loop Detected`; furnizorii obișnuiți din amonte nu primesc metadate de la egal la egal.
 
 Înlănțuirea peer nu este o replicare a bazei de date sau un failover al gazdei. Fiecare gateway păstrează starea SQLite, cache-urile, contoarele de rate și sesiunile independente. Utilizați un proxy invers verificat de starea de sănătate sau un failover al clientului pentru disponibilitatea active/passive sau active/active și nu montați niciodată o bază de date SQLite în mai multe instanțe OmniRoute care rulează.
 
 ### Rute de furnizori dedicate
 
-Dirijați cererile direct către un anumit furnizor cu validarea modelului:
+Direcționați cererile direct către un anumit furnizor cu validarea modelului:
 
 ```bash
 POST http://localhost:20128/v1/providers/openai/chat/completions
@@ -883,8 +883,8 @@ Configurați prin** Tabloul de bord → Setări → Rutare** . Tabloul de bord e
 - `least-used` și `cost-optimized`
 - `auto` — bazat pe scoruri pentru toți candidații
 - `lkgp` (Ultimul furnizor bun cunoscut) — fixează ultimul furnizor de succes, apoi revine la reguli
-- `context-optimized` — alege modelul cu cea mai mare fereastră de context liberă
-- `context-relay` — înlănțuiește modele cu context lung pentru virajele ulterioare
+- `context-optimized` — încearcă mai întâi modelul cu cea mai mare fereastră de context cunoscută
+- `context-relay` — ordine de prioritate plus un rezumat de transfer atunci când conversația se mută într-un alt cont
 
 #### Antet de sesiune lipicios extern
 
@@ -904,7 +904,7 @@ underscores_in_headers on;
 
 #### Aliasuri ale modelului wildcard
 
-Creați modele de metacară pentru a remapa numele modelelor:
+Creați modele de metacara pentru a remapa numele modelelor:
 
 ```
 Pattern: claude-sonnet-*     →  Target: cc/claude-sonnet-4-6
@@ -1010,7 +1010,7 @@ OmniRoute implementează rezistența la nivel de furnizor cu cinci componente:
    - **OPEN** Furnizorul — este blocat temporar după eșecuri repetate
    - **HALF_OPEN** — Testarea dacă furnizorul și-a revenit
 
-   Limitele de rată `429` stabilite pentru conexiune rămân în vigoare** Răcirea conexiunii** și nu contați pentru întrerupătorul furnizorului.
+   Limitele ratei `429` stabilite pentru conexiune rămân în vigoare** Răcirea conexiunii** și nu contați pentru întrerupătorul furnizorului.
 
    Starea de rulare a întreruptorului furnizorului este afișată** Tabloul de bord → Health** numai.
 
@@ -1068,7 +1068,7 @@ Pagina de setări este organizată în** 7 file** pentru navigare usoara:
 | **Reziliență** | Coada de solicitări, răcirea conexiunii, configurarea întrerupătorului furnizorului și comportamentul de așteptare pentru răcire                                               |
 | **Avansat**    | Configurație globală de proxy (HTTP/SOCKS5), înlocuiri de proxy pentru fiecare furnizor                                                                                        |
 
-General nu mai dublează înregistrările numai pentru citire și notele din cache. Setările de reținere și optimizare a bazei de date sunt menținute prin `/api/settings/database`; ștergerea manuală a memoriei cache folosește `DELETE /api/cache`. Limitele rândurilor de jurnal de solicitare și proxy sunt controlate de `CALL_LOGS_TABLE_MAX_ROWS` și `PROXY_LOGS_TABLE_MAX_ROWS`.
+General nu mai dublează înregistrările numai pentru citire și notele din cache. Setările de reținere și optimizare a bazei de date sunt menținute prin `/api/settings/database`; ștergerea manuală a memoriei cache folosește `DELETE /api/cache`. Limitele rândurilor de jurnal de solicitare și de proxy sunt controlate de `CALL_LOGS_TABLE_MAX_ROWS` și `PROXY_LOGS_TABLE_MAX_ROWS`.
 
 ---
 
@@ -1333,32 +1333,34 @@ Consultați [API_REFERENCE.md](../reference/API_REFERENCE.md) pentru catalogul c
 
 ## 💻 CLI intern
 
-OmniRoute include un CLI intern (`omniroute …`) pentru configurare, diagnosticare și control în timpul rulării. Acesta este **separat de pagina „Instrumente CLI” din panoul de control**, care configurează CLI-uri terțe (Claude Code, Cursor, Codex, Cline, …), astfel încât acestea să poată comunica cu OmniRoute.
+OmniRoute furnizează un CLI intern (`omniroute …`) pentru configurare, diagnosticare și controlul timpului de execuție. Aceasta este** separat de pagina „CLI Tools” din tabloul de bord** , care configurează CLIs terță parte (Claude Code, Cursor, Codex, Cline, …) astfel încât aceștia să poată vorbi cu OmniRoute.
 
 ```bash
-omniroute setup                    # Expert interactiv (parolă, furnizori, combinații)
-omniroute setup --non-interactive  # Adecvat pentru CI
-omniroute doctor                   # Diagnosticarea stării (director de date, BD, furnizori, porturi)
-omniroute providers available      # Listează furnizorii acceptați
-omniroute providers list           # Listează conexiunile configurate
-omniroute providers test <id>      # Testează în timp real conexiunea unui furnizor
-omniroute combos list              # Listează combinațiile
-omniroute combos switch <name>     # Setează combinația implicită
-omniroute models                   # Listează modelele disponibile (--json, --search)
-omniroute keys add | list | remove # Gestionează cheile API din terminal
-omniroute backup                   # Creează un instantaneu al configurației + BD
-omniroute restore [<timestamp>]    # Restaurează dintr-un instantaneu
-omniroute health                   # Stare detaliată (întrerupătoare, cache, memorie)
-omniroute quota                    # Utilizarea cotei furnizorului
-omniroute mcp status               # Starea serverului MCP
-omniroute a2a status               # Starea serverului A2A
-omniroute tunnel list|create|stop  # Tuneluri Cloudflare/Tailscale/ngrok
-omniroute reset-password           # Resetează parola de administrator
-omniroute --mcp                    # Pornește serverul MCP prin stdio
-omniroute --port 3000              # Pornește serverul pe un port personalizat
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-Sfat: utilizați `omniroute doctor --json` împreună cu instrumentul dumneavoastră de monitorizare pentru a primi alerte privind conexiunile nesănătoase ale furnizorilor.
+Sfat: asociați `omniroute doctor --json` cu instrumentul dvs. de monitorizare pentru a vă alerta cu privire la o instalare locală întreruptă. `doctor` nu testează conexiunile furnizorilor; utilizați `omniroute providers test <id>` pentru asta.
 
 ---
 

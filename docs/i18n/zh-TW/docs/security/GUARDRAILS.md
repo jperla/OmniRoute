@@ -16,16 +16,17 @@ Guardrails 在 OmniRoute 與上游提供者之間的邊界強制執行安全、�
 
 ## 內建護欄
 
-註冊表在匯入時會依優先順序自動載入六個護欄（請參閱`registry.ts` → `registerDefaultGuardrails()`）：
+註冊表會在匯入時按優先順序自動載入這些護欄（請參閱`registry.ts` → `registerDefaultGuardrails()`）：
 
-| 優先事項 | 姓名                | 階段           | 文件                  |
-| -------- | ------------------- | -------------- | --------------------- |
-| `5`      | `vision-bridge`     | `preCall`      | `visionBridge.ts`     |
-| `6`      | `audio-bridge`      | `preCall`      | `audioBridge.ts`      |
-| `7`      | `video-bridge`      | `preCall`      | `videoBridge.ts`      |
-| `10`     | `pii-masker`        | `pre` + `post` | `piiMasker.ts`        |
-| `20`     | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
-| `95`     | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
+| 優先事項 | 姓名                | 階段           | 文件                      |
+| -------- | ------------------- | -------------- | ------------------------- |
+| `1`      | `agent-guard`       | `preCall`      | `agentGuard/guardrail.ts` |
+| `5`      | `vision-bridge`     | `preCall`      | `visionBridge.ts`         |
+| `6`      | `audio-bridge`      | `preCall`      | `audioBridge.ts`          |
+| `7`      | `video-bridge`      | `preCall`      | `videoBridge.ts`          |
+| `10`     | `pii-masker`        | `pre` + `post` | `piiMasker.ts`            |
+| `20`     | `prompt-injection`  | `preCall`      | `promptInjection.ts`      |
+| `95`     | `credential-masker` | `pre` + `post` | `credentialMasker.ts`     |
 
 運行較低優先級的號碼**第一的**。
 
@@ -41,7 +42,7 @@ GLM 5.3 基本模型和`glm-5.3-{low,high,max}`具有顯式`supportsVision:false
 2. 透過`extractImageParts(messages)` (`visionBridgeHelpers.ts`) 提取圖像部分，委託給**統一媒體偵測器**`open-sse/utils/mediaParts.ts` —的`detectMediaParts()`與組合相容性過濾器共用單一事實來源。提取列入`replaceImageParts`可以拼接回來的形狀（提取↔替換合約）： OpenAI `image_url`、 Anthropic base64 `source.type:"base64"`、 Anthropic URL `source.type:"url"`和 Responses API `input_image`。嵌套在Claude代碼`tool_result.content`和回應工具輸出中的匹配圖像也會被提取並替換到其原始路徑；僅指示符形狀是組合過濾器材料，不會被提取。如果沒有找到則跳過。
 3. 透過`resolveVisionBridgeRuntimeSettings()` (`src/shared/constants/modalityBridgeDefaults.ts`) 解析執行時間設定：新的`modalityBridge*`設定鍵 win；遺留的`visionBridge*`鑰仍然是**單週期回退**（回滾視窗）。當橋被禁用時，在任何媒體遍歷之前跳過。
 4. 模式選擇器（`modalityBridgeVisionMode`，見下表）決定重新路由與描述。重新路由返回`modifiedPayload`僅交換`model` ，加上元`{ rerouted, fromModel, toModel, imagesKept }`。
-5. 描述路徑：在`maxImages`上捕捉影像，寫任務感知提示，查閱描述快取，呼叫視覺模型**並聯**(`Promise.allSettled`)，並在其位置注入`[Image N]: <description>`文字部分。失敗的描述會產生`null`：為unknown/vision-capable目標（#4012）保留原始影像，但**已確認的純文字直接目標**或零視覺組合為每個未描述的影像取得明確的`(unavailable — no vision-capable provider connected)`文字存根，包括部分失敗和超出描述呼叫上限 (#17069) 的影像。現有的全部失敗的組合描述後備仍然存在（#8430）。
+5. 描述路徑：在`maxImages`上捕捉影像，編寫任務感知提示，查閱描述快取，呼叫視覺模型**並聯**(`Promise.allSettled`)，並在其位置注入`[Image N]: <description>`文字部分。失敗的描述會產生`null`：為unknown/vision-capable目標（#4012）保留原始影像，但**已確認的純文字直接目標**或零視覺組合為每個未描述的影像取得明確的`(unavailable — no vision-capable provider connected)`文字存根，包括部分失敗和超出描述呼叫上限 (#17069) 的影像。現有的全部失敗的組合描述後備仍然存在（#8430）。
 6. 返回`modifiedPayload` +元（`imagesProcessed`、 `descriptions`、 `processingTimeMs`、 `visionModel`）。
 
 #### 模式選擇器 (`modalityBridgeVisionMode`)
@@ -76,7 +77,7 @@ GLM 5.3 基本模型和`glm-5.3-{low,high,max}`具有顯式`supportsVision:false
 
 #### 描述快取（`modalityBridge/bridgeCache.ts`）
 
-用於描述輸出的記憶體中LRU + TTL快取，在進程範圍內共享。具有長度前綴幀的密鑰= `sha256(imageRef + composedPrompt + configuredBridgeModel)` （無字段邊界衝突）。模型組件是**配置的**橋接模型，而不是實際回答— `callVisionModel`模型可能會在內部回退，並且每次嘗試鍵入都會使快取碎片化。失敗的描述永遠不會被快取。設定:
+用於描述輸出的記憶體中LRU + TTL快取，在進程範圍內共享。具有長度前綴幀的密鑰= `sha256(imageRef + composedPrompt + configuredBridgeModel)` （無字段邊界衝突）。模型組件是**配置好的**橋接模型，而不是實際回答— `callVisionModel`模型可能會在內部回退，並且每次嘗試鍵入都會使快取碎片化。失敗的描述永遠不會被快取。設定:
 
 | 鑰匙                            | 預設   | 範圍    |
 | ------------------------------- | ------ | ------- |
@@ -155,23 +156,23 @@ GLM 5.3 基本模型和`glm-5.3-{low,high,max}`具有顯式`supportsVision:false
 
 `scripts/perf/video-bridge-fu07-eval.ts`產生確定性的真實FFmpeg固定裝置，用於重複資料刪除後的字幕呼叫節省、密集運動預算分配、 blur/exposure/SI-TI證據、長尾快速剪切和逐漸淡出誤報。它記錄預分析牆時間，以及`/usr/bin/time`可用的子CPU和峰值RSS。它的品質檢查只是結構性的預言。真正的字幕模型品質仍然是`HOLD`因為該工具沒有授權端點或凍結判斷。除非`--caption-cost-per-call-usd`提供明確的每次呼叫正估計，否則金錢節省也仍然是`HOLD` ；該腳本永遠不會偽造任何結果。
 
-每個幀限制為 4 MiB，所有原始幀總共限制為 23 MiB，序列化代理回應限制為 32 MiB。 `finally`中的私有暫存目錄被刪除。 OmniRoute不捆綁FFmpeg且不接受自訂可執行路徑。在新增字幕之前，橋接器會套用保守的視覺重複資料刪除過程：每個JPEG都減少為 16 × 16 灰階緩衝區，並且僅與保留的最後一幀進行比較。對於超過一幀的請求字幕預算，提取會提供最多兩倍於預算的有界候選池，並且永遠不會超過 16 幀。所要求的上限僅在重複資料刪除後應用，當預算至少為 2 時，在最終稀疏期間保留第一個和最終選定的候選者。版本化`grayscale-16x16-mean-cells-v2`策略使用平均亮度增量和歸一化增量至少為 0.05 的縮圖單元的比率中的較大者。重複閾值是常數 0.04，選擇它是為了可預測性，而不是作為運行時設定公開。這種二次高對比訊號保留了僅平均值比較可以隱藏的小運動和可見文字變化。比較器或解碼器錯誤開啟並保持覆蓋。輸出元資料將提取的候選幀、成功使用的幀和丟棄的視覺重複項分開。
+每個幀限制為 4 MiB，所有原始幀總共限制為 23 MiB，序列化代理回應限制為 32 MiB。 `finally`中的私有暫存目錄被刪除。 OmniRoute不捆綁FFmpeg且不接受自訂可執行路徑。在新增字幕之前，橋接器會套用保守的視覺重複資料刪除過程：每個JPEG都減少為 16 × 16 灰階緩衝區，並且僅與保留的最後一幀進行比較。對於超過一幀的請求字幕預算，提取會提供最多兩倍於預算的有界候選池，並且永遠不會超過 16 幀。所要求的上限僅在重複資料刪除後應用，並且當預算至少為 2 時，在最終稀疏期間保留第一個和最終選定的候選者。版本化`grayscale-16x16-mean-cells-v2`策略使用平均亮度增量和歸一化增量至少為 0.05 的縮圖單元的比率中的較大者。重複閾值是常數 0.04，選擇它是為了可預測性，而不是作為運行時設定公開。這種二次高對比訊號保留了僅平均值比較可以隱藏的小運動和可見文字變化。比較器或解碼器錯誤開啟並保持覆蓋。輸出元資料將提取的候選幀、成功使用的幀和丟棄的視覺重複項分開。
 
 明確標記的影片部分可能會請求帶有時間戳記的聯絡表。該橋最多建構一個4列、16幀的JPEG網格。每個 512 像素單元將其來源時間戳刻錄到高對比度底部帶中，而相同的時間戳記保留在文字元資料中以供下游關聯和審核。完整的JPEG上限仍然為 32 MiB。如果`sharp`無法解碼或組合網格，則橋接器會回退到各個JPEG訊框；用戶端中止仍會透過工作表操作傳播。
 
 促銷證據故意與合成成分微基準分開。 `scripts/perf/video-bridge-contact-sheet-eval.ts`為真正的 OpenAI 相容視覺模型定義了模式版本化的A/B工具。它測量提供者報告的令牌、端到端牆延遲（包括工作表組成）、模型呼叫計數和清單定義的事實保留。原始模型回應不會寫入報告；僅保留SHA-256摘要和匹配的事實IDs 。除非傳遞`--execute-real`並配置`--model`、 `OMNIROUTE_BASE_URL`和`OMNIROUTE_API_KEY` ，否則該工具不會進行網路或付費模型呼叫。如果沒有明確的實際運行，其機器可讀的判決仍然是`HOLD`；綜合payload/call-count測量值本身並不能作為晉升證據。
 
-單獨的`scripts/perf/video-bridge-promotion-eval.ts`消耗FU-07或FU-09觀測值。晉升准入需要所有八種綜合場景類型加上經過淨化的真實剪輯、每個角色和案例至少三個測量的重複、所有十個聲明的指標、凍結的media/prompt/expected-fact/settings摘要、獨特的觀察IDs和經過驗證的種子A/B訂單。執行收據綁定語料庫摘要、精確候選SHA和模型修訂。遺失或無效的測量仍然是`HOLD`，包括高於 30 s 的CPU 、高於 512 MiB峰值RSS或高於 30 s 的預分析。這些是證據接納上限，而不是新的運行時RSS執行保證。
+單獨的`scripts/perf/video-bridge-promotion-eval.ts`消耗FU-07或FU-09觀測值。晉升准入需要所有八種綜合場景類型加上經過淨化的真實剪輯、每個角色和案例至少三個測量的重複、所有十個聲明的指標、凍結的media/prompt/expected-fact/settings摘要、獨特的觀察IDs和經過驗證的種子A/B訂單。執行收據綁定語料庫摘要、精確候選SHA和模型修訂。缺失或無效的測量仍然是`HOLD`，包括高於 30 s 的CPU 、高於 512 MiB峰值RSS或高於 30 s 的預分析。這些是證據接納上限，而不是新的運行時RSS執行保證。
 
 FU-07要求至少 98% 的品質保留和不超過 1.2 倍基線的 p95 延遲，加上等效平均字幕呼叫的 0.05 絕對案例平衡平均召回率改進，或至少減少 10% 的平均去重後字幕呼叫。 FU-09要求至少 0.85 的質量、95% 的保留率、20% 的中位數延遲減少和 10% 的令牌減少。關鍵事實遺失、注入合規性或缺失使用會阻礙晉升。一次執行不能促進任何事情： `--previous-report`確認同一個policy/model的兩個不同的、不重疊的、連續合格的執行revision/candidate/corpus.抽樣實驗無法確認接觸表實驗。
 
-收集器應該在記憶體中對回應進行評分，並保存`responseDigest` plus 指標和觀察綁定，而不是回應文字。消費者也閱讀遺留的原始觀察結果，但絕不會將該文本複製到其報告中。每個觀測值恰好接受`responseDigest`或`rawResponseText`之一。版本控制的允許清單保持為空，並具有不可變的`hold`預設值。合格的條目需要其證據參考、策略、模型修訂、精確候選SHA、清單摘要和兩個不同的運行IDs；衝突的上下文被拒絕。這些元數據是審計合同，不能證明引用的文件包含真實的測量結果。在新增任何條目之前查看實際收據。管理統計端點和視訊儀表板揭示了保守的準備。單獨配置的模型別名不會建立其修訂版本或運行候選SHA，因此當前儀表板報告`HOLD`而不是重複使用另一個執行上下文中的資格。明確的實驗選擇與推廣是分開的；沒有預設值會自動更改。
+收集器應該在記憶體中對回應進行評分，並保存`responseDigest` plus 指標和觀察綁定，而不是回應文字。消費者也閱讀遺留的原始觀察結果，但絕不會將該文本複製到其報告中。每個觀測值恰好接受`responseDigest`或`rawResponseText`之一。版本控制的允許清單保持為空，並具有不可變的`hold`預設值。合格的條目需要其證據參考、策略、模型修訂、精確候選SHA、清單摘要和兩個不同的運行IDs；衝突的上下文被拒絕。這些元數據是審計合同，不能證明引用的文件包含真實的測量結果。在新增任何條目之前查看實際收據。管理統計端點和視訊儀表板暴露了保守的準備。單獨配置的模型別名不會建立其修訂版本或運行候選SHA，因此當前儀表板報告`HOLD`而不是重複使用另一個執行上下文中的資格。明確的實驗選擇與推廣仍然是分開的；沒有預設值會自動更改。
 
 當呼叫者已經擁有對齊文字時，可以將可選的`transcript.cues`數組附加到支援的視訊部分。每個提示必須攜帶`text`、探測持續時間內的有限`start`/`end`間隔以及白名單`source` （`client`、 `embedded`或`audio-bridge`）； `confidence`預設為`1`並且必須保持在`0`和`1`之間。完全相同的重複提示被折疊。 OmniRoute永遠不會從此元資料開始轉錄：經過驗證的線索會被複製到具有來源、置信度和間隔的描述結果中，並與幀標題一起呈現為不受信任的觀察結果。無效、超出範圍或無出處的文字將被拒絕，而不是混合到字幕流中。兩個請求正文轉錄通道都將提供的來源標準化為`client`，包括自斷言的`embedded`或`audio-bridge`標籤。只有伺服器擁有的適配器才能透過僅代碼`trustedSource`參數分配這些可信任標籤；請求JSON欄位無法到達該參數。轉錄文本仍然是不受信任的媒體衍生內容，無論其來源如何，並且絕不能確定授權。
 
 高級呼叫者可以為同一視頻提供`audioTranscript`軌道；它被視為客戶端提供的文本，而不是伺服器轉錄的證明。融合縫在一個截止日期和中止信號下運行視覺和音頻觀察，在公共時間線上對它們進行排序，折疊精確的重複項，並在只有一側成功時報告部分結果。無效的`audioTranscript`會降級為部分結果—保留視覺描述，並且音訊分支記錄經過淨化的故障碼—而不是使整個視訊失敗。每個分支的可用性、部分標誌和清理後的故障碼都保留在所描述的結果、護欄元資料 (`audioFusionRuns`/`audioFusionPartials`/ `audioFusionFailureCodes`)、結果快取元資料和橋融合計數器中。預設視訊橋路徑不會呼叫語音轉文字或下載第二個媒體副本；如果沒有明確的軌道，它仍然只是視訊。
 
-**轉錄保留（#12150 P1）。**每當視頻橋（本身選擇加入）呈現轉錄提示—時，這會自動應用，沒有單獨的保留標誌。當請求呈現任何轉錄提示（呼叫者聲明的`transcript`或融合的`audioTranscript`）時，護欄將其標記為`videoBridgeObserved`並生成視頻描述—的編輯陰影，其中每個提示的自由文本正文都被替換為`[redacted-video-transcript]`，通過在組裝字串之前替換結構`[music]`提示`[inaudible]`的正文`]`從不解析扁平— ，因此沒有提示—持久的呼叫日誌請求正文將每個視訊派生的文字部分交換為經過內容相等匹配的經過編輯的陰影； `fullText`錨點是從完成的預呼叫 Guardrail 有效負載中重新讀取的，因此在後面的鏈 Guardrail（ PII和憑證掩碼器、優先級10/95）重寫文本並在zqp描述文字並在system-prompt/handoff/memory描述後，仍然重新註入數字。向上游發送到模型的主體保持不變。觀察到的請求也不會填充持久記憶體（請求和回應派生的提取都會被跳過），因此模型本身的回應無法將轉錄文字回顯到記憶體中。
+**轉錄保留（#12150 P1）。**每當視頻橋（本身選擇加入）呈現轉錄提示—時，這會自動應用，沒有單獨的保留標誌。當請求呈現任何轉錄提示（呼叫者聲明的`transcript`或融合的`audioTranscript`）時，護欄將其標記為`videoBridgeObserved`並生成視頻描述—的編輯陰影，其中每個提示的自由文本正文都被替換為`[redacted-video-transcript]`，通過在組裝字串之前替換結構`[music]`提示`[inaudible]`的正文`]`從不解析扁平— ，因此沒有提示—持久的呼叫日誌請求正文將每個視訊派生的文字部分交換為經過內容相等匹配的經過編輯的陰影； `fullText`錨點是從完成的預呼叫 Guardrail 有效負載中重新讀取的，因此在後面的鏈 Guardrail（ PII和憑證掩碼器、優先級10/95）重寫文本並在system-prompt/handoff/memory 。向上游發送到模型的主體保持不變。觀察到的請求也不會填充持久記憶體（請求和回應派生的提取都會被跳過），因此模型本身的回應無法將轉錄文字回顯到記憶體中。
 
 **原始視訊欄位 (#12430)。**當啟用橋接且本機視訊支援未知或不存在時，定義的`transcript`/`audioTranscript`欄位也會啟動`videoBridgeObserved`，即使在描述失敗或`maxVideos`限制之後也是如此。 `null`和空字串計數；缺失欄位和非視訊元資料則不會。保留的副本會編輯這些欄位或省略請求，並且caches/Memory會被繞過。
 
@@ -287,18 +288,92 @@ FU-07要求至少 98% 的品質保留和不超過 1.2 倍基線的 p95 延遲，
 
 當`mode === "block"`**和**至少一項檢測滿足嚴重性閾值， `preCall`返回`{ block: true, message: "Request rejected: suspicious content detected" }`。在`warn`/`log`模式下，guardrail 會記錄但允許通話。也為需要評估提示而無需透過登錄機碼的呼叫者匯出共用幫助程式`evaluatePromptInjection()` 。
 
-**掃描綁定（v3.8.20）：**探測器僅檢查**前 16 KB** `src/shared/utils/inputSanitizer.ts`中加入的提示文字— `MAX_INJECTION_SCAN_BYTES = 16 * 1024` （16 384 位元組）。 `detectInjection()`和`evaluatePromptInjection()` `slice(0, MAX_INJECTION_SCAN_BYTES)`都在運行模式循環之前。注入指令位於輸入頂部附近，因此這可以將正規表示式CPU/GC限制在數百 KB 的有效負載上，而不會削弱偵測（請參閱#3932、 #4041）。
+**掃描綁定（v3.8.20）：**探測器僅檢查**前 16 KB** `src/shared/utils/inputSanitizer.ts`中加入的提示文字— `MAX_INJECTION_SCAN_BYTES = 16 * 1024` （16 384 位元組）。 `detectInjection()`和`evaluatePromptInjection()` `slice(0, MAX_INJECTION_SCAN_BYTES)`都在運行模式循環之前。注入指令位于输入顶部附近，因此这可以将正则表达式CPU/GC限制在数百 KB 的有效负载上，而不会削弱检测（参见#3932、 #4041）。
 
 ### 憑證屏蔽器 (`credentialMasker.ts`)
 
 運行於**兩個都**階段，預設鏈中的最後一個（優先級`95`）。從出站有效負載（訊息內容、工具呼叫參數、工具結果）編輯眾所周知的 API 金鑰/秘密令牌模式**和**提供者回應，因此貼上到提示中的憑證（或由工具結果回顯）不會洩漏給上游提供者或返回給客戶端。
 
 - **僅選擇加入**，與PII編輯相同的約定（硬規則#20-adjacent）：停用，除非`settings.credentialRedactionEnabled === true`**或者**`CREDENTIAL_REDACTION_ENABLED=true`.關閉它後，護欄是一個無操作—它永遠不會阻塞，也不會重寫。
-- `redactCredentials()`遍歷完整的payload/response樹（`walkValue()`，原型污染安全，通過`WeakSet`循環安全）並用`[REDACTED:<type>]`佔位符替換匹配項，僅克隆實際更改的分支。
-- `CREDENTIAL_PATTERNS`涵蓋LLM提供者金鑰（OpenAI、 OpenAI-proj、 Anthropic、 Google、 Hugging Face、 Replicate）、 VCS/SaaS幣（GitHub、 Slack、 Linear、 Notion、 npm、 Postman、 Discord）、支付金鑰（AWS 、lq 面）、金鑰（ SendGridJWTs、附加 低。 、憑證承載連接字串（`mongodb://user:pass@...`等），以及通用`Authorization`/`x-api-key`/`api-key`/`apikey`標頭值模式。標頭形狀的鍵（`authorization`、 `x-api-key`、 `api-key`、 `apikey`）在結構上進行編輯（僅值，保留`Bearer `/`Basic `等方案前綴），而不是透過通用文字正規表示式。
+- `redactCredentials()` walks the full payload/response tree (`walkValue()`, prototype-pollution-safe, cycle-safe via `WeakSet`) and replaces matches with a `[REDACTED:<type>]` placeholder, cloning only the branches that actually changed.
+- `CREDENTIAL_PATTERNS`涵盖LLM提供者密钥（OpenAI、 OpenAI-proj、 Anthropic、 Google、 Hugging Face、 Replicate）、 VCS/SaaS币（GitHub、 Slack、 Linear、 Notion、 npm、 Postman、 Discord）、支付密钥（Stripe、 Square）、云密钥（AWS访问密钥、 Twilio、 SendGrid、 Mailgun）、私钥 / JWTs、憑證承載連接字串（`mongodb://user:pass@...`等），以及通用`Authorization`/`x-api-key`/`api-key`/`apikey`標頭值模式。标头形状的键（`authorization`、 `x-api-key`、 `api-key`、 `apikey`）在结构上进行编辑（仅值，保留`Bearer `/`Basic `等方案前缀），而不是通过通用文本正则表达式。
+- 即使标签后面的值没有提供者前缀，也会被屏蔽： `DB_PASSWORD=…`、 `AWS_SECRET_ACCESS_KEY=…`、 `client_secret: …`、 `?api_key=…` （标签： `password`、 `passwd`、 `secret`、 `secret_key`、 `secret_access_key`、 `api_key`、 `access_token`、 `refresh_token`、 `auth_token`，带有任何前缀，例如`DB_`）。標籤和分隔符號保留，值變成`[REDACTED:secret]`。該值需要 12 個或更多字符，因此`password: required`等散文仍具有可讀性；以`$`或`%` （變數引用）開頭的值將被保留。
 - 護欄永不遮擋；它只重寫（`modifiedPayload` / `modifiedResponse`）和註解（`meta.credentialsRedacted`， `meta.count`）。
 
 回歸守衛： `tests/unit/credential-masker-guardrail.test.ts`。
+
+### 特務衛士 (`agentGuard/`)
+
+代理守衛根據其標頭對向`claude`或`anthropic`提供者發出請求的客戶端進行分類。 `AGENT_GUARD_MODE`採用三個值： `off` （預設）、 `monitor`和`block`。使用`off`時，不會讀取任何標頭，也不會記錄任何內容。
+
+官方代理人透過這些標頭進行識別（比較時不區分大小寫）：
+
+- Claude代碼：以`claude-cli/`或`claude-code/`或`x-app: cli`開頭的`User-Agent`以及`anthropic-beta`標頭或包含`claude` `User-Agent` 。
+- Anthropic SDKs：以`Anthropic/`、 `AsyncAnthropic/`、 `anthropic-typescript/`或`anthropic-python/`開頭的`User-Agent` 。
+
+生產中記錄器的預設等級 (`info`) 顯示兩種類型的行。對於`APP_LOG_LEVEL=warn` ，僅保留已知的第三方線路。
+
+日誌欄位： `agent`、 `thirdParty`、 `provider`、 `model`、 `apiKeyId`、 `userAgent`、 `xApp`、 `anthropicBeta`、 `xTitle`、 `referer`、 `stainless`。標頭值和模型字串的上限為 200 個字元。記錄引用者時不包含其查詢字串、片段和使用者資訊。 API鍵、 `Authorization`、 `x-api-key`和 cookies 永遠不會被讀取。
+
+文件： `src/lib/guardrails/agentGuard/classifier.ts`、 `src/lib/guardrails/agentGuard/policy.ts`、 `src/lib/guardrails/agentGuard/guardrail.ts`、 `src/lib/guardrails/agentGuard/settings.ts`、 `src/lib/guardrails/agentGuard/logLine.ts`、 `src/lib/guardrails/agentGuard/enforcement.ts`、 `src/sse/handlers/chat/agentGuardGate.ts`。
+
+**分類限制（兩種模式）：**
+
+- 基於官方SDK建構的代理，不發送`X-Title`、 `HTTP-Referer`或自己的`User-Agent` ，看起來像SDK。僅靠`x-stainless-*`標頭並不能使客戶端成為正式客戶端。
+- 第三方代理透過`User-Agent`、 `X-Title`和`HTTP-Referer` （或`Referer`）中的全字標記進行配對。未列出的客戶端顯示為`unknown`。
+- 來自基於瀏覽器的客戶端的請求攜帶瀏覽器自己的`User-Agent`並顯示為未識別，除非`X-Title`或引用者攜帶已知的第三方代幣。
+- 每個觀察到的請求一個日誌行：預計繁忙實例上的數量。
+
+#### 監視器
+
+使用`AGENT_GUARD_MODE=monitor`，其模型字串名稱為`claude`或`anthropic`提供者的請求將按其客戶端標頭進行分類。當客戶端不是官方代理程式時，會寫入一行帶有`tag: "AGENT_GUARD"`日誌。 `warn`表示已知的第三方代理， `info`表示未知的客戶端。優先級`1`：護欄僅讀取標頭，從不更改有效負載，因此它在媒體橋之前運行。 `monitor`從不阻塞。
+
+**`monitor`的限制：**
+
+- 每個訊號都是客戶端控制的標頭。這是觀察，而不是存取控制。
+- 在解析模型之前從模型字串中讀取提供者： `provider/model`、提供者別名（例如`cc/…`）和配額共享 ID (`qtSd/<group>/<provider>/<model>`)。不遵循裸模型 ID、模型別名、組合和後來的路由規範化。這些要求沒有被遵守。
+- 呼叫者可以透過登錄機碼停用通道根據請求跳過它（請參閱[根據請求停用 Guardrails](#disabling-guardrails-per-request) ）。不會觀察到跳過的請求。
+- 它僅在`runPreCallHooks`運行的地方運行（請參閱[覆蓋範圍和限制](#coverage-and-limits)）。
+
+#### 堵塞
+
+使用`AGENT_GUARD_MODE=block`時，預先呼叫護欄不會執行任何動作。聊天處理程序會做出決定：
+
+1. 當目標即將被調度時，該決定是在請求解析到的提供者上做出的。涵蓋了提供者別名、裸模型 ID、配額共享 ID 和每個組合目標。
+2. 它不在 Guardrail 註冊表中運行，因此每個請求禁用通道不適用於它。
+3. 已知的第三方代理被拒絕。身份不明的客戶端會在`monitor`中記錄，並且僅在`AGENT_GUARD_STRICT=true`中被拒絕。 Claude代碼和官方Anthropic SDKs是從來不拒絕的。
+4. 拒絕是HTTP 403 與`error.type` `permission_error`和`error.code` `client_agent_not_allowed`。正文是 OpenAI 風格的錯誤。在 Anthropic 格式請求中，它還在頂層攜帶`type: "error"` 。沒有`Retry-After`標頭，並且在任何流開始之前返回拒絕。
+5. 拒絕並不是提供者的失敗。它不會觸及提供者斷路器、連接冷卻或模型鎖定。
+6. 在組合中，將跳過被拒絕的目標並運行剩餘的目標。當至少一個目標被拒絕並且沒有目標通過守衛時，請求會因策略錯誤而失敗。當頂級條目透過前綴或步驟的提供者 ID 命名另一個已知提供者時，組合會保留自己的錯誤。被`fallbackOnlyOnQuotaExhaustion`拒絕的優先目標會以同樣的方式被跳過，並且不會停止組合。影子目標會被檢查和記錄，但它永遠不會被視為越過守衛的目標。
+7. 當融合服務將使用的判斷被拒絕時， `fusion`組合在面板運行之前失敗。此判斷來自組合的配置或全域組合預設值。當透過安全網重定向到達融合組合時，會執行相同的檢查。
+8. 每個請求和提供者一個日誌行，其中`tag: "AGENT_GUARD"`、 `warn`表示拒絕，且欄位與`monitor`相同。
+9. 發生內部錯誤時，防護裝置無法開啟。請求繼續進行並記錄一行`warn`行`agent guard failed open` 。
+
+**`block`的限制：**
+
+- 每個訊號都是客戶端控制的標頭。發送`User-Agent: claude-cli/…`客戶端被視為Claude代碼。 `block`阻止未經修改的第三方代理。它不是存取控制。
+- A proxy that strips the identifying headers turns any client into an unidentified one. Such a client is served without `AGENT_GUARD_STRICT` and refused with it. Run the guard on the instance that faces the clients. A second OmniRoute instance behind the first sees the first one's headers.
+- `AGENT_GUARD_STRICT`拒絕那些不是Claude代碼或官方SDK的提供者的所有客戶。其中包括基於瀏覽器的客戶端和儀表板遊樂場。儀表板組合即時測試是豁免的，也可以透過安全網重定向進行。
+- 某些功能會建立自己的聊天請求，而不是傳遞客戶端的請求。其中四個透過OmniRoute的`/v1/...`路由發回：
+  - 批次作業（`src/lib/batches/dispatch.ts`）
+  - MCP推理工具 (`open-sse/mcp-server/tools/inferenceTools.ts`)
+  - A2A智慧路由（`src/lib/a2a/skills/smartRouting.ts`）
+  - 透過OmniRoute (`src/lib/guardrails/visionBridgeHelpers.ts`) 描述影像時的視覺橋
+- Telegram聊天代理程式 (`src/lib/telegram/chatProxy.ts`) 在進程中建立其請求並直接呼叫聊天處理程序。
+- 這些內部請求攜帶OmniRoute自己的標頭，而不是啟動它們的客戶端的標頭。警衛將他們歸類為身份不明的顧客。
+- 如果沒有`AGENT_GUARD_STRICT`，這些內部請求將由受保護的提供者提供服務，無論原始客戶是誰。透過他們到達Claude的第三方代理不會被拒絕。
+- 使用`AGENT_GUARD_STRICT`時，無論是誰啟動了這些內部請求，這些內部請求都會被受保護的提供者拒絕，包括Claude代碼。
+- 只有透過聊天處理程序的請求才會被門控。模型驗證（`src/lib/modelValidation/runner.ts`）直接呼叫請求核心且沒有門控。
+- 僅涵蓋`claude`和`anthropic`提供者。其他提供者提供的Claude模型不包括在內， `claude-web`提供者也不包括在內。
+- 某些組合將其剩餘目標命名為不含提供者前綴，如裸模型 ID 或巢狀組合。當這些目標由於不相關的原因（斷開斷路器、冷卻、鎖定）而不可用時，請求將失敗並出現策略錯誤。
+- 與任何跳過的目標一樣，跳過的組合目標會清除該目標的最後一次已知良好的引腳。
+- 在小組運行之前，以受保護的提供者前綴命名的融合法官會被拒絕。其中包括`anthropic/…`、 `claude/…`、別名（例如`cc/…`、上下文後綴（例如`[1m]`以及這些提供者上的配額共享名稱。
+- 編寫為裸模型 ID 或解析為受保護提供者的模型別名的融合判斷僅在分派時才會被拒絕。那時面板已經運作了。使用提供者前綴命名法官可以避免這種情況。任何法官的拼字都會被看守的提供者拒絕。
+- 即使融合服務會在執行時刪除該判斷，預檢查也會拒絕配置的Claude判斷。該服務會刪除操作員隱藏的判斷以及無法取得請求媒體的判斷。第二個案例涉及未經證實的視覺支持和法官不接受的其他媒體。兩個組合路徑都是這樣的。
+- 在安全網重新導向上，組合服務接收空設定。僅在全域組合預設值中設定的判斷從不在那裡使用。
+- 當`block`開啟時，對於任何模型，守衛會拒絕受守衛提供者的用戶端不會使用 sidecar 快速路徑。 `AGENT_GUARD_STRICT`下是每一個身份不明的客戶端。在中繼令牌檢查之後， `POST /v1/relay/chat/completions/bifrost`使用 503 和`X-Bifrost-Fallback`標頭應答這些請求。
+- `POST /v1/messages/count_tokens`提供客戶端本地估計，警衛會拒絕模型解析的提供者。
+- 沒有每鍵豁免。
 
 ## 基礎契約（`base.ts`）
 
@@ -439,16 +514,18 @@ metadata、標頭），而呼叫端不得能夠關閉營運者所設定的安全
 
 內建護欄讀取的環境變數：
 
-| 多變的                                | 使用者                     | 影響                                                               |
-| ------------------------------------- | -------------------------- | ------------------------------------------------------------------ |
-| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`         | 設定`false`以完全停用偵測。                                        |
-| `INPUT_SANITIZER_MODE`                | `prompt-injection`         | 注入策略： `warn`、 `block`或`log`。舊值`redact`不會重寫注入文字。 |
-| `INJECTION_GUARD_MODE`                | `prompt-injection`         | 注射防護模式；還有一個DB功能標誌**覆蓋**環境變數 (DB > ENV)。      |
-| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`         | `MODE=block`拒絕的最低嚴重性： `high` （預設）、 `medium`或`low`。 |
-| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`         | `INPUT_SANITIZER_BLOCK_THRESHOLD`的舊別名。                        |
-| `PII_REDACTION_ENABLED`               | `pii-masker`               | 當`true`時，請求PII被編輯（與注入模式無關）。                      |
-| `PII_REVERSIBLE_VAULT_ENABLED`        | `pii-masker`, `handleChat` | 使用`PII_REDACTION_ENABLED`，鑄造可逆令牌並在 2xx 回應中恢復它們。 |
-| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` （下游）      | 控制回應端遮罩行為。                                               |
+| 多變的                                | 使用者                     | 影響                                                                                         |
+| ------------------------------------- | -------------------------- | -------------------------------------------------------------------------------------------- |
+| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`         | 設定`false`以完全停用偵測。                                                                  |
+| `INPUT_SANITIZER_MODE`                | `prompt-injection`         | 注入策略： `warn`、 `block`或`log`。舊值`redact`不會重寫注入文字。                           |
+| `INJECTION_GUARD_MODE`                | `prompt-injection`         | 注射防護模式；還有一個DB功能標誌**覆蓋**環境變數 (DB > ENV)。                                |
+| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`         | `MODE=block`拒絕的最低嚴重性： `high` （預設）、 `medium`或`low`。                           |
+| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`         | `INPUT_SANITIZER_BLOCK_THRESHOLD`的舊別名。                                                  |
+| `PII_REDACTION_ENABLED`               | `pii-masker`               | 當`true`時，請求PII被編輯（與注入模式無關）。                                                |
+| `PII_REVERSIBLE_VAULT_ENABLED`        | `pii-masker`, `handleChat` | 使用`PII_REDACTION_ENABLED`，鑄造可逆令牌並在 2xx 回應中恢復它們。                           |
+| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` （下游）      | 控制回應端遮罩行為。                                                                         |
+| `AGENT_GUARD_MODE`                    | `agent-guard`              | `off` （預設）、 `monitor`或`block`。還有一個DB功能標誌 (DB > ENV)。                         |
+| `AGENT_GUARD_STRICT`                  | `agent-guard`              | `false` （預設）或`true`。有了`block`，也拒絕不明身分的客戶。還有一個DB功能標誌 (DB > ENV)。 |
 
 Modality Bridge 護欄從資料庫支援的設定儲存 (`getSettings()`) 讀取執行時間配置，而不是環境變數。 Vision 的主鍵是`modalityBridgeVisionEnabled`、 `modalityBridgeVisionMode`、 `modalityBridgeVisionModel`、 `modalityBridgeVisionTaskAware`、 `modalityBridgeVisionPrompt`、 `modalityBridgeVisionTimeout`、 `modalityBridgeVisionMaxImages`、 `modalityBridgeVisionMaxChars`、 `modalityBridgeCacheEnabled`、 `modalityBridgeCacheTtlMinutes`和`modalityBridgeCacheMaxEntries`。僅接受舊版`visionBridge*`密鑰作為記錄的單週期讀取回退；儀表板寫入使用主鍵。預設值和後備解析器位於`src/shared/constants/modalityBridgeDefaults.ts`中，遺留常數保留在`src/shared/constants/visionBridgeDefaults.ts`中。
 

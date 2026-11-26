@@ -434,7 +434,7 @@ omniroute autostart disable
 ### VPS යෙදවීම
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -516,8 +516,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -609,7 +609,7 @@ post_install() {
 | `PORT`                                  | රාමුව පෙරනිමිය           | සේවා වරාය (උදාහරණ ලෙස `20128` )                                                                                                               |
 | `HOSTNAME`                              | රාමුව පෙරනිමිය           | ධාරකය බඳින්න (Docker පෙරනිමි `0.0.0.0` වෙත)                                                                                                   |
 | `NODE_ENV`                              | ධාවන කාල පෙරනිමිය        | යෙදවීම සඳහා `production` සකසන්න                                                                                                               |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | පොදු පදනම URL උපකරණ පුවරුවට මතු වී සේවාදායකයට නිරාවරණය වේ (පරම්පරාගත `BASE_URL` ප්‍රතිස්ථාපනය කරයි)                                           |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | පොදු පදනම URL උපකරණ පුවරුවට මතු වී සේවාදායකයට නිරාවරණය විය (පරම්පරාගත `BASE_URL` ප්‍රතිස්ථාපනය කරයි)                                          |
 | `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | වලාකුළු සමමුහුර්ත අන්ත ලක්ෂ්‍ය පාදය URL (පරම්පරාගත `CLOUD_URL` ප්‍රතිස්ථාපනය කරයි)                                                            |
 | `API_KEY_SECRET`                        | _(ස්වයං-උත්පාදනය)_       | ජනනය කරන ලද API යතුරු සඳහාHMAC රහස — පළමු ධාවනයේදී ස්වයංක්‍රීයව උත්පාදනය කර `server.env` දක්වා පැවතුනි                                        |
 | `REQUIRE_API_KEY`                       | `false`                  | `/v1/*` මත Bearer API යතුර බලාත්මක කරන්න                                                                                                      |
@@ -813,7 +813,7 @@ curl -X POST http://localhost:20128/api/settings/proxy/test \
 curl http://localhost:20128/api/models/catalog
 ```
 
-වර්ග (`chat`, `embedding`, `image`) සපයන්නා විසින් කාණ්ඩගත කරන ලද ආකෘති ආපසු ලබා දෙයි.
+(`chat`, `embedding`, `image`) වර්ග සහිත සැපයුම්කරු විසින් කාණ්ඩගත කරන ලද ආකෘති ආපසු ලබා දෙයි.
 
 ### Cloud Sync
 
@@ -826,9 +826,9 @@ curl http://localhost:20128/api/models/catalog
 - ලබා ගත හැක** උපකරණ පුවරුව → අන්ත ලක්ෂ්‍ය** Docker සහ වෙනත් ස්වයං-සත්කාරක යෙදවීම් සඳහා
 - ඔබගේ වත්මන් OpenAI-අනුකූල `/v1` අන්ත ලක්ෂ්‍යය වෙත යොමු කරන තාවකාලික `https://*.trycloudflare.com` URL නිර්මාණය කරයි
 - පළමුව අවශ්‍ය වූ විට පමණක් ස්ථාපනය `cloudflared` සක්‍රීය කරන්න; පසුව නැවත ආරම්භ කිරීම එකම කළමනාකරණය කළ ද්විමය නැවත භාවිතා කරයි
-- OmniRoute හෝ බහාලුම් නැවත ආරම්භ කිරීමෙන් පසු ඉක්මන් උමං ස්වයංක්‍රීයව ප්‍රතිස්ථාපනය නොවේ; අවශ්‍ය විටෙක උපකරණ පුවරුවෙන් ඒවා නැවත සක්‍රීය කරන්න
+- OmniRoute හෝ බහාලුම් නැවත ආරම්භ කිරීමෙන් පසු ඉක්මන් උමං ස්වයංක්‍රීයව ප්‍රතිසාධනය නොකෙරේ; අවශ්‍ය විටෙක උපකරණ පුවරුවෙන් ඒවා නැවත සක්‍රීය කරන්න
 - උමං URLs යනු තාවකාලික වන අතර ඔබ උමග stop/start සෑම අවස්ථාවකම වෙනස් වේ
-- සීමා සහිත බහාලුම්වල ඝෝෂාකාරී QUIC UDP බෆර අනතුරු ඇඟවීම් වළක්වා ගැනීම සඳහා HTTP/2 ප්‍රවාහනයට පෙරනිමියෙන් කළමනාකරණය කරන ලද ඉක්මන් උමං මාර්ග
+- සීමා සහිත බහාලුම්වල ඝෝෂාකාරී QUIC UDP බෆර අනතුරු ඇඟවීම් වළක්වා ගැනීම සඳහා කළමනාකරණය කරන ලද ඉක්මන් උමං පෙරනිමියෙන් HTTP/2 ප්‍රවාහනය කරයි
 - ඔබට කළමනාකරණය කළ ප්‍රවාහන තේරීම අභිබවා යාමට අවශ්‍ය නම් `CLOUDFLARED_PROTOCOL=quic` හෝ `auto` සකසන්න
 - කළමනාකරණය කළ බාගැනීම වෙනුවට පෙර ස්ථාපනය කර ඇති `cloudflared` ද්විමය භාවිතා කිරීමට ඔබ කැමති නම් `CLOUDFLARED_BIN` සකසන්න
 - Cloudflare Quick Tunnel, Tailscale Funnel, සහ ngrok Tunnel panels පෙන්වීමට හෝ සැඟවීමට හැකිය** සැකසුම් → පෙනුම** . පැනලයක් සඟවා තැබීමෙන් ධාවනය වන උමගක් නතර නොවේ.
@@ -866,14 +866,14 @@ curl http://localhost:20128/api/models/catalog
 
 **උපකරණ පුවරුව-පෙනෙන උපාය මාර්ග (ගිණුම් මට්ටමේ මාර්ගගත කිරීම):**
 
-| උපාය මාර්ගය                 | විස්තරය                                                                                                    |
-| --------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| **මුලින්ම පුරවන්න**         | ප්‍රමුඛතා අනුපිළිවෙලෙහි ගිණුම් භාවිතා කරයි — ප්‍රාථමික ගිණුම ලබා ගත නොහැකි වන තෙක් සියලුම ඉල්ලීම් හසුරුවයි |
-| **රවුන්ඩ් රොබින්**          | වින්‍යාසගත කළ හැකි ඇලෙන සුළු සීමාවක් සහිත සියලුම ගිණුම් හරහා චක්‍රීය කරයි (පෙරනිමිය: ගිණුමකට ඇමතුම් 3ක්)   |
-| **P2C (වරණ දෙකක බලය)**      | සසම්භාවී ගිණුම් 2ක් තෝරාගෙන සෞඛ්‍ය සම්පන්න එක් — ශේෂයන් වෙත සෞඛ්‍යය පිළිබඳ දැනුවත්භාවය සමඟ ගමන් කරයි       |
-| **අහඹු**                    | Fisher-Yates shuffle භාවිතයෙන් අහඹු ලෙස එක් එක් ඉල්ලීම සඳහා ගිණුමක් තෝරා ගනී                               |
-| **අවම වශයෙන් භාවිතා කර ඇත** | පැරණිතම `lastUsedAt` වේලා මුද්‍රාව සහිත ගිණුමට මාර්ග, ගමනාගමනය ඒකාකාරව බෙදා හැරීම                          |
-| **පිරිවැය ප්‍රශස්ත කර ඇත**  | අඩුම මිල සපයන්නන් සඳහා ප්‍රශස්ත කරමින්, අඩුම ප්‍රමුඛතා අගයක් සහිත ගිණුමට මාර්ග                             |
+| උපාය මාර්ගය                 | විස්තරය                                                                                                      |
+| --------------------------- | ------------------------------------------------------------------------------------------------------------ |
+| **මුලින්ම පුරවන්න**         | ප්‍රමුඛතා අනුපිළිවෙලෙහි ගිණුම් භාවිතා කරයි — ප්‍රාථමික ගිණුම ලබා ගත නොහැකි වන තෙක් සියලුම ඉල්ලීම් හසුරුවයි   |
+| **රවුන්ඩ් රොබින්**          | වින්‍යාසගත කළ හැකි ඇලෙන සුළු සීමාවක් සහිත සියලුම ගිණුම් හරහා චක්‍රීය කරයි (පෙරනිමිය: ගිණුමකට ඇමතුම් 3ක්)     |
+| **P2C (වරණ දෙකක බලය)**      | සසම්භාවී ගිණුම් 2ක් සහ සෞඛ්‍ය සම්පන්න එක් — වෙත මාර්ග තෝරන අතර සෞඛ්‍යය පිළිබඳ දැනුවත්භාවය සමඟ ශේෂ බර පැටවෙයි |
+| **අහඹු**                    | Fisher-Yates shuffle භාවිතයෙන් අහඹු ලෙස එක් එක් ඉල්ලීම සඳහා ගිණුමක් තෝරා ගනී                                 |
+| **අවම වශයෙන් භාවිතා කර ඇත** | පැරණිතම `lastUsedAt` වේලා මුද්‍රාව සහිත ගිණුමට මාර්ග, ගමනාගමනය ඒකාකාරව බෙදා හැරීම                            |
+| **පිරිවැය ප්‍රශස්ත කර ඇත**  | අඩුම මිල සපයන්නන් සඳහා ප්‍රශස්ත කිරීම, අඩුම ප්‍රමුඛතා අගය සහිත ගිණුම වෙත ගමන් මාර්ග                          |
 
 **උසස් සංයුක්ත සහ ස්වයංක්‍රීය උපාය මාර්ග** (combo එකකට වින්‍යාස කළ හැකි හෝ `auto/*` උපසර්ග — හරහා [AUTO-COMBO.md](../routing/AUTO-COMBO.md) බලන්න):
 
@@ -885,8 +885,8 @@ curl http://localhost:20128/api/models/catalog
 - `least-used` සහ `cost-optimized`
 - `auto` — ලකුණු-සියලු අපේක්ෂකයන් හරහා ධාවනය වේ
 - `lkgp` (අවසාන දන්නා හොඳ සැපයුම්කරු) — අවසාන සාර්ථක සැපයුම්කරුට පින් කරයි, පසුව නැවත නීතිවලට වැටේ
-- `context-optimized` — විශාලතම නිදහස් සන්දර්භය කවුළුව සහිත ආකෘතිය තෝරා ගනී
-- පසු විපරම් හැරීම් සඳහා`context-relay` — දාම දිගු සන්දර්භය ආකෘති
+- `context-optimized` — ප්‍රථමයෙන් දන්නා විශාලතම සන්දර්භය කවුළුව සහිත ආකෘතිය උත්සාහ කරයි
+- `context-relay` — ප්‍රමුඛතා ඇණවුම සහ සංවාදය වෙනත් ගිණුමකට යන විට භාරදීමේ සාරාංශයක්
 
 #### බාහිර ඇලෙන සුළු සැසි ශීර්ෂකය
 
@@ -932,7 +932,7 @@ Chain: production-fallback
 
 OmniRoute හි බහු සැපයුම්කරුවන් ඒකාබද්ධ කිරීම සහ ඔවුන් අතර මාර්ගගත කිරීම සඳහා උදාහරණ රටා මෙන්න:
 
-#### 1. කේතීකරණ නියෝජිත කොම්බෝ: Cost/Speed Fallback සමඟ ඉහළ-අවසාන තර්ක කිරීම
+#### 1. කේතීකරණ නියෝජිත කොම්බෝ: Cost/Speed ෆෝල්බැක් සමඟ උසස් තර්කනය
 
 කේතීකරණ නියෝජිතයන් සඳහා වඩාත් සුදුසුය (OpenCode, Claude කේතය, Cursor, Cline). ප්‍රථමයෙන් මායිම් තාර්කික ආකෘතීන් වෙත ගමන් කරන මාර්ග, කෝටා වෙහෙස හෝ දෝෂ මත වේගවත් කේතීකරණ ආකෘති වෙත ආපසු යයි.
 
@@ -977,7 +977,7 @@ omniroute combo create free-stack \
 
 #### 3. බහුවිධ / දැක්ම සහ පෙළ නල මාර්ගය
 
-රූප අවබෝධය සහ කේත උත්පාදනය ඇතුළත් කාර්ය ප්‍රවාහ සඳහා අධිවේගී පෙළ උත්පාදනය සමඟ විශේෂිත දර්ශන ආකෘති යුගල කිරීම.
+රූප අවබෝධය සහ කේත උත්පාදනය සම්බන්ධ වැඩ ප්‍රවාහ සඳහා අධිවේගී පෙළ උත්පාදනය සමඟ විශේෂිත දර්ශන ආකෘති යුගල කිරීම.
 
 - **රටාව** : `Priority` සංයෝජනයක් පළමුව දෘෂ්‍ය හැකියාව ඇති ආකෘති ලැයිස්තුගත කරන අතර ඉහළ ඵලදායි text/code ආකෘතියක් අවසන් වේ.
 - **ආකෘති** :
@@ -1067,10 +1067,10 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 | **AI**                   | සිතීමේ අයවැය (passthrough / auto-strip / custom / adaptive — බලන්න [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), ගෝලීය පද්ධති විමසුම, ක්ෂණික හැඹිලි සංඛ්‍යාලේඛන                        |
 | **ආරක්ෂාව**              | Login/Password සැකසුම්, IP ප්‍රවේශ පාලනය, `/models` සඳහා API auth, සැපයුම්කරු අවහිර කිරීම, ඉක්මන් එන්නත් ආරක්ෂක                                                                        |
 | **මාර්ගගත කිරීම**        | ගෝලීය මාර්ගගත කිරීමේ උපාය (Fill First / Round Robin / P2C / සසම්භාවී / අවම වශයෙන් භාවිතා කරන ලද / පිරිවැය ප්‍රශස්ත කිරීම), වයිල්ඩ්කාඩ් ආකෘති අන්වර්ථයන්, පසුබැසීම දාම, සංයුක්ත පෙරනිමි |
-| **ඔරොත්තු දීමේ හැකියාව** | පෝලිම, සම්බන්ධතා සිසිල් කිරීම, සැපයුම්කරු බ්‍රේකර් වින්‍යාසය සහ සිසිලනය සඳහා රැඳී සිටීමේ හැසිරීම ඉල්ලන්න                                                                               |
+| **ඔරොත්තු දීමේ හැකියාව** | පෝලිම, සම්බන්ධතා සිසිල් කිරීම, සපයන්නාගේ බ්‍රේකර් වින්‍යාසය සහ සිසිලනය සඳහා රැඳී සිටීමේ හැසිරීම ඉල්ලන්න                                                                                |
 | **උසස්**                 | ගෝලීය ප්‍රොක්සි වින්‍යාසය (HTTP/SOCKS5), එක් සපයන්නෙකුගේ ප්‍රොක්සි අභිබවා යයි                                                                                                          |
 
-සාමාන්‍ය තවදුරටත් කියවීමට පමණක් ලොග් වීම සහ හැඹිලි සටහන් අනුපිටපත් නොකරයි. දත්ත සමුදාය රඳවා තබා ගැනීම සහ ප්‍රශස්තකරණ සැකසුම් `/api/settings/database` හරහා පවතී; අතින් හැඹිලි නිෂ්කාශනය `DELETE /api/cache` භාවිතා කරයි. ඉල්ලීම් සහ ප්‍රොක්සි ලොග් පේළි කැප් පාලනය කරනු ලබන්නේ `CALL_LOGS_TABLE_MAX_ROWS` සහ `PROXY_LOGS_TABLE_MAX_ROWS` මගිනි.
+සාමාන්‍ය තවදුරටත් කියවීමට පමණක් ලොග් වීම සහ හැඹිලි සටහන් අනුපිටපත් නොකරයි. දත්ත සමුදාය රඳවා තබා ගැනීම සහ ප්‍රශස්තිකරණ සැකසීම් `/api/settings/database` හරහා පවතී; අතින් හැඹිලි නිෂ්කාශනය `DELETE /api/cache` භාවිතා කරයි. ඉල්ලීම් සහ ප්‍රොක්සි ලොග් පේළි කැප් පාලනය කරනු ලබන්නේ `CALL_LOGS_TABLE_MAX_ROWS` සහ `PROXY_LOGS_TABLE_MAX_ROWS` මගිනි.
 
 ---
 
@@ -1078,10 +1078,10 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 
 හරහා පිවිසෙන්න** උපකරණ පුවරුව → පිරිවැය** .
 
-| ටැබ්               | අරමුණ                                                                                               |
-| ------------------ | --------------------------------------------------------------------------------------------------- |
-| **අයවැය**          | daily/weekly/monthly අයවැය සහ තත්‍ය කාලීන ලුහුබැඳීම සමඟ API යතුරකට වියදම් සීමාවන් සකසන්න            |
-| **මිල නියම කිරීම** | එක් සැපයුම්කරුවෙකු සඳහා 1K input/output ටෝකන සඳහා ආදර්ශ මිල ඇතුළත් කිරීම් — බලන්න සහ සංස්කරණය කරන්න |
+| ටැබ්               | අරමුණ                                                                                                       |
+| ------------------ | ----------------------------------------------------------------------------------------------------------- |
+| **අයවැය**          | daily/weekly/monthly අයවැය සහ තත්‍ය කාලීන ලුහුබැඳීම සමඟ API යතුරකට වියදම් සීමාවන් සකසන්න                    |
+| **මිල නියම කිරීම** | එක් සැපයුම්කරුවෙකු සඳහා 1K input/output ටෝකන සඳහා — පිරිවැය ආකෘති මිල ඇතුළත් කිරීම් බලන්න සහ සංස්කරණය කරන්න |
 
 ```bash
 # API: Set a budget
@@ -1333,34 +1333,36 @@ curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUT
 
 ---
 
-## 💻 අභ්යන්තර CLI
+## 💻 අභ්‍යන්තර CLI
 
-පිහිටුවීම, රෝග නිර්ණය සහ ධාවනකාල පාලනය සඳහා OmniRoute අභ්යන්තර CLI එකක් (`omniroute …`) සමඟ පැමිණේ. මෙය තෙවන පාර්ශ්වීය CLI (Claude Code, Cursor, Codex, Cline, …) වලට OmniRoute සමඟ සන්නිවේදනය කළ හැකි වන පරිදි ඒවා වින්යාස කරන, උපකරණ පුවරුවේ ඇති **"CLI මෙවලම්" පිටුවෙන් වෙනස් වූවකි**.
+සැකසුම, රෝග විනිශ්චය සහ ධාවන කාල පාලනය සඳහාOmniRoute අභ්‍යන්තර CLI (`omniroute …`) යවයි. මෙයයි** උපකරණ පුවරුවේ "CLI මෙවලම්" පිටුවෙන් වෙන් කරන්න** , එය තෙවන පාර්ශවීය CLIs වින්‍යාස කරයි (Claude කේතය, Cursor, Codex, Cline, …) එබැවින් ඔවුන්ට OmniRoute සමඟ කතා කළ හැකිය.
 
 ```bash
-omniroute setup                    # අන්තර්ක්රියාකාරී විශාරදය (මුරපදය, සපයන්නන්, සංයෝජන)
-omniroute setup --non-interactive  # CI සඳහා හිතකරයි
-omniroute doctor                   # සෞඛ්ය රෝග නිර්ණය (දත්ත නාමාවලිය, DB, සපයන්නන්, පෝට්)
-omniroute providers available      # සහාය දක්වන සපයන්නන් ලැයිස්තුගත කරන්න
-omniroute providers list           # වින්යාස කළ සම්බන්ධතා ලැයිස්තුගත කරන්න
-omniroute providers test <id>      # සපයන්නෙකුගේ සම්බන්ධතාව සජීවීව පරීක්ෂා කරන්න
-omniroute combos list              # සංයෝජන ලැයිස්තුගත කරන්න
-omniroute combos switch <name>     # පෙරනිමි සංයෝජනය සකසන්න
-omniroute models                   # ලබා ගත හැකි ආකෘති ලැයිස්තුගත කරන්න (--json, --search)
-omniroute keys add | list | remove # ටර්මිනලයෙන් API යතුරු කළමනාකරණය කරන්න
-omniroute backup                   # වින්යාසය + DB හි ස්නැප්ෂොට් එකක් ගන්න
-omniroute restore [<timestamp>]    # ස්නැප්ෂොට් එකකින් ප්රතිසාධනය කරන්න
-omniroute health                   # සවිස්තරාත්මක සෞඛ්ය තොරතුරු (බ්රේකර්, හැඹිලිය, මතකය)
-omniroute quota                    # සපයන්නන්ගේ කෝටා භාවිතය
-omniroute mcp status               # MCP සේවාදායකයේ තත්ත්වය
-omniroute a2a status               # A2A සේවාදායකයේ තත්ත්වය
-omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok ටනල්
-omniroute reset-password           # පරිපාලක මුරපදය යළි සකසන්න
-omniroute --mcp                    # stdio හරහා MCP සේවාදායකය ආරම්භ කරන්න
-omniroute --port 3000              # අභිරුචි පෝට් එකක සේවාදායකය ආරම්භ කරන්න
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-ඉඟිය: අසෞඛ්ය සපයන්නන්ගේ සම්බන්ධතා පිළිබඳ අනතුරු ඇඟවීම් ලබා ගැනීමට `omniroute doctor --json` ඔබගේ අධීක්ෂණ මෙවලම සමඟ යුගල කරන්න.
+ඉඟිය: කැඩුණු දේශීය ස්ථාපනයක් ගැන අනතුරු ඇඟවීමට ඔබේ අධීක්ෂණ මෙවලම සමඟ `omniroute doctor --json` යුගල කරන්න. `doctor` සපයන්නාගේ සම්බන්ධතා පරීක්ෂා නොකරයි; ඒ සඳහා `omniroute providers test <id>` භාවිතා කරන්න.
 
 ---
 

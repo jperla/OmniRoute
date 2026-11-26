@@ -513,9 +513,10 @@ FSM ਪਰਿਵਰਤਨ ਆਟੋ ਕੰਬੋ ਦੇ ਸਕੋਰਿੰਗ �
 
 ## 5) ਕਲਾਉਡ ਸਿੰਕ
 
-- ਸ਼ਡਿਊਲਰ ਸ਼ੁਰੂਆਤ: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- ਸ਼ਡਿਊਲਰ init: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
 - ਆਵਰਤੀ ਕਾਰਜ: `src/shared/services/cloudSyncScheduler.ts`
 - ਆਵਰਤੀ ਕਾਰਜ: `src/shared/services/modelSyncScheduler.ts`
+- ਪੀਰੀਅਡਿਕ ਟਾਸਕ (ਪ੍ਰਤੀ ਕੁਨੈਕਸ਼ਨ ਔਪਟ-ਇਨ): `src/shared/services/modelHealthCheckScheduler.ts` — ਇੱਕ ਕਨੈਕਸ਼ਨ ਦੇ ਮਾਡਲਾਂ ਦੀ ਜਾਂਚ ਕਰਦਾ ਹੈ, ਅਸਫਲਤਾਵਾਂ ਨੂੰ ਸਵੈ-ਛੁਪਾਉਂਦਾ ਹੈ ਅਤੇ ਸਿਰਫ਼ ਉਹੀ ਰੀਸਟੋਰ ਕਰਦਾ ਹੈ ਜੋ ਉਸਨੇ ਆਪਣੇ ਆਪ ਨੂੰ ਲੁਕਾਇਆ ਸੀ (`src/lib/db/modelHealthAutoHidden.ts`)
 - ਕੰਟਰੋਲ ਰੂਟ: `src/app/api/sync/cloud/route.ts`
 
 ## ਬੇਨਤੀ ਜੀਵਨ-ਚੱਕਰ (`/v1/chat/completions`)

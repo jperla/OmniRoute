@@ -512,12 +512,13 @@ Cloud Agents គ្របដណ្តប់វេទិកាភ្នាក់�
 - ការផ្ទៀងផ្ទាត់អត្តសញ្ញាណពេលចាប់ដៃ WebSocket៖ `src/lib/ws/handshake.ts` — ផ្ទៀងផ្ទាត់សំណើដំឡើងកម្រិត WS តាមរយៈ API key ឬ session cookie
 - ការផ្ទៀងផ្ទាត់អត្តសញ្ញាណ WebSocket ផ្ទាល់របស់ Dashboard៖ `src/server/ws/liveServer.ts` — sidecar (port `LIVE_WS_PORT`) ទទួលយក session cookie របស់ Dashboard ឬ Bearer API key ដែលមានវិសាលភាពគ្រប់គ្រង (`manage`/`admin`); key ដែលសម្រាប់តែ inference ត្រូវបានបដិសេធ។ endpoint ផ្សព្វផ្សាយខាងក្នុង `POST /__omniroute_event` របស់វាទទួលយកតែ peer ពី loopback ប៉ុណ្ណោះ នៅពេលមិនមាន header ឆ្លងកាត់ proxy (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`)
 
-## 5) ការធ្វើសមកាលកម្ម Cloud
+## 5) Cloud សមកាលកម្ម
 
-- ការចាប់ផ្ដើមកម្មវិធីកំណត់កាលវិភាគ៖ `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- កម្មវិធីកំណត់ពេល init៖ `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
 - ភារកិច្ចតាមកាលកំណត់៖ `src/shared/services/cloudSyncScheduler.ts`
 - ភារកិច្ចតាមកាលកំណត់៖ `src/shared/services/modelSyncScheduler.ts`
-- route សម្រាប់គ្រប់គ្រង៖ `src/app/api/sync/cloud/route.ts`
+- កិច្ចការតាមកាលកំណត់ (ជ្រើសរើសចូលក្នុងមួយការតភ្ជាប់)៖ `src/shared/services/modelHealthCheckScheduler.ts` — សាកល្បងម៉ូដែលនៃការតភ្ជាប់ លាក់ការបរាជ័យដោយស្វ័យប្រវត្តិ និងស្ដារតែអ្វីដែលវាលាក់ខ្លួនប៉ុណ្ណោះ (`src/lib/db/modelHealthAutoHidden.ts`)
+- ផ្លូវគ្រប់គ្រង៖ `src/app/api/sync/cloud/route.ts`
 
 ## វដ្តជីវិតនៃសំណើ (`/v1/chat/completions`)
 

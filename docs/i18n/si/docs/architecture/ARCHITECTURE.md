@@ -513,12 +513,13 @@ FSM සංක්‍රාන්ති ස්වයංක්‍රීය කො�
 - WebSocket අතට-අත දීමේ සත්යාපනය: `src/lib/ws/handshake.ts` — API යතුරක් හෝ සැසි කුකියක් භාවිතයෙන් WS උත්ශ්රේණිගත කිරීමේ ඉල්ලීම් සත්යාපනය කරයි
 - සජීවී උපකරණ පුවරුවේ WebSocket සත්යාපනය: `src/server/ws/liveServer.ts` — පැති සේවාව (`LIVE_WS_PORT` තොට) උපකරණ පුවරු සැසි කුකියක් හෝ කළමනාකරණ විෂය පථයක් (`manage`/`admin`) සහිත Bearer API යතුරක් පිළිගනී; අනුමාන සඳහා පමණක් වන යතුරු ප්රතික්ෂේප කෙරේ. එහි අභ්යන්තර `POST /__omniroute_event` ප්රකාශක අන්ත ලක්ෂ්යය, කිසිදු ප්රොක්සි-පියවර ශීර්ෂකයක් (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`) නොමැති විට පමණක් loopback සමපාර්ශ්ව පිළිගනී
 
-## 5) Cloud සමමුහුර්තකරණය
+## 5) Cloud Sync
 
-- Scheduler ආරම්භනය: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
-- ආවර්තික කාර්යය: `src/shared/services/cloudSyncScheduler.ts`
-- ආවර්තික කාර්යය: `src/shared/services/modelSyncScheduler.ts`
-- පාලන route එක: `src/app/api/sync/cloud/route.ts`
+- උපලේඛන ආරම්භය: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- ආවර්තිතා කාර්යය: `src/shared/services/cloudSyncScheduler.ts`
+- ආවර්තිතා කාර්යය: `src/shared/services/modelSyncScheduler.ts`
+- ආවර්තිතා කාර්යය (සම්බන්ධතාවයකට තෝරා ගැනීම): `src/shared/services/modelHealthCheckScheduler.ts` — සම්බන්ධතාවයේ මාදිලි පරීක්ෂා කරයි, අසාර්ථක වීම් ස්වයංක්‍රීයව සඟවයි සහ එය සැඟවූ දේ පමණක් ප්‍රතිසාධනය කරයි (`src/lib/db/modelHealthAutoHidden.ts`)
+- පාලන මාර්ගය: `src/app/api/sync/cloud/route.ts`
 
 ## ඉල්ලීම් ජීවන චක්රය (`/v1/chat/completions`)
 

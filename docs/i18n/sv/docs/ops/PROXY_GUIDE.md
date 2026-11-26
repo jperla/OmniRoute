@@ -270,150 +270,150 @@ Detta sker en gång vid den första uppstarten efter uppgraderingen. Använd `mi
 
 ---
 
-## 1proxy – marknadsplats för kostnadsfria proxyservrar
+## 1proxy gratis proxymarknadsplats
 
-> 🆕 **Bidrag från [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/diegosouzapw/OmniRoute/pull/1847) (ärende [#1788](https://github.com/diegosouzapw/OmniRoute/issues/1788))
+> 🆕** Bidragit av [@oyi77](https://github.com/oyi77)** — PR [#1847](https://github.com/cheaper-inference/OmniRoute/pull/1847) (utgåva [#1788](https://github.com/cheaper-inference/OmniRoute/issues/1788) )
 
-OmniRoute integreras med communityplattformen **[1proxy](https://1proxy-api.aitradepulse.com)** för att ge åtkomst till **hundratals kostnadsfria, validerade proxyservrar** från hela världen. Detta är perfekt för användare som inte har någon egen proxyinfrastruktur.
+OmniRoute integreras med** [1 proxy](https://1proxy-api.aitradepulse.com)** gemenskapsplattform att ge tillgång till** hundratals gratis, validerade proxyservrar** från hela världen. Detta är perfekt för användare som inte har sin egen proxyinfrastruktur.
 
-### Så fungerar det
+### Hur det fungerar
 
 ```
-┌─────────────┐   Synkronisera   ┌─────────────────┐    Rotera     ┌──────────┐
-│  1proxy API │ ───────────────▶ │  proxy_registry  │ ────────────▶ │ Leverantör│
-│  (extern)   │   upp till 500   │  source=oneproxy │ efter kvalitet│   API    │
-└─────────────┘  proxyservrar    └─────────────────┘               └──────────┘
+┌─────────────┐     Sync      ┌─────────────────┐    Rotate     ┌──────────┐
+│  1proxy API │ ────────────▶ │  proxy_registry  │ ────────────▶ │ Provider │
+│  (external) │   up to 500   │  source=oneproxy │  by quality   │   API    │
+└─────────────┘    proxies    └─────────────────┘               └──────────┘
 ```
 
-1. **Synkronisera** — OmniRoute hämtar validerade proxyservrar från 1proxy-API:t
-2. **Lagra** — Proxyservrarna sparas i samma `proxy_registry`-tabell med `source = 'oneproxy'`
-3. **Filtrera** — Filtrera efter protokoll, land och kvalitetspoäng
-4. **Rotera** — Välj den bästa proxyservern med hjälp av kvalitetsbaserade, slumpmässiga eller sekventiella strategier
-5. **Automatisk nedgradering** — Misslyckade proxyservrar får sin kvalitetspoäng sänkt; under tröskelvärdet → markeras som inaktiva
+1. **Synkronisera** — OmniRoute hämtar validerade proxyservrar från 1proxy API
+2. **Lagra** — Proxies sparas i samma `proxy_registry` tabell som `source = 'oneproxy'`
+3. **Filtrera** — Filtrera efter protokoll, land, kvalitetspoäng
+4. **Rotera** — Välj den bästa proxyn med hjälp av kvalitets-, slumpmässiga eller sekventiella strategier
+5. **Automatisk nedbrytning** — Misslyckade proxyservrar får sitt kvalitetsresultat reducerat; under tröskelvärdet → markerat inaktivt
 
-### Synkronisera proxyservrar
+### Synkroniserar proxyer
 
-**Via kontrollpanelen:**
+**Via instrumentpanelen:**
 
-1. Gå till fliken **Inställningar → 1proxy**
-2. Klicka på **"Synkronisera nu"**
-3. Visa statistik: totalt antal proxyservrar, antal aktiva, genomsnittlig kvalitet och fördelning per land
+1. Gå till** Inställningar → 1proxy** flik
+2. Klick** "Synkronisera nu"**
+3. Visa statistik: totala proxyservrar, aktivt antal, genomsnittlig kvalitet, uppdelning per land
 
 **Via API:**
 
 ```bash
-# Starta synkronisering
+# Trigger sync
 curl -X POST http://localhost:20128/api/settings/oneproxy \
   -H "Content-Type: application/json" \
   -d '{}'
 
-# Svar:
+# Response:
 # { "success": true, "added": 127, "updated": 45, "failed": 2, "total": 172 }
 ```
 
-### Filtrera proxyservrar
+### Filtrera proxyer
 
 ```bash
-# Filtrera efter protokoll
+# Filter by protocol
 curl "http://localhost:20128/api/settings/oneproxy?protocol=socks5"
 
-# Filtrera efter land
+# Filter by country
 curl "http://localhost:20128/api/settings/oneproxy?countryCode=US"
 
-# Filtrera efter lägsta kvalitetspoäng
+# Filter by minimum quality score
 curl "http://localhost:20128/api/settings/oneproxy?minQuality=80"
 
-# Kombinera filter
+# Combine filters
 curl "http://localhost:20128/api/settings/oneproxy?protocol=http&countryCode=DE&minQuality=70"
 ```
 
-### Proxyservrarnas kvalitetspoäng
+### Proxykvalitetsresultat
 
-Varje proxyserver från 1proxy har metadata:
+Varje 1proxy-proxy kommer med metadata:
 
-| Fält            | Beskrivning                                         |
-| --------------- | --------------------------------------------------- |
-| `qualityScore`  | Betyg från 0 till 100 från 1proxys validering       |
-| `latencyMs`     | Uppmätt nätverkslatens                              |
-| `anonymity`     | `transparent`, `anonymous` eller `elite`            |
-| `googleAccess`  | Huruvida proxyservern kan komma åt Googles tjänster |
-| `countryCode`   | Tvåställig ISO-landskod                             |
-| `lastValidated` | Tidsstämpel för den senaste valideringen            |
+| Fält            | Beskrivning                              |
+| --------------- | ---------------------------------------- |
+| `qualityScore`  | 0-100 betyg från 1 proxy-validering      |
+| `latencyMs`     | Uppmätt nätverkslatens                   |
+| `anonymity`     | `transparent`, `anonymous` eller `elite` |
+| `googleAccess`  | Om proxyn kan komma åt Google tjänster   |
+| `countryCode`   | Två bokstäver ISO landskod               |
+| `lastValidated` | Tidsstämpel för senaste validering       |
 
-Kvalitetspoängen justeras dynamiskt:
+Kvalitetspoäng justeras dynamiskt:
 
-- **Misslyckade förfrågningar** minskar poängen med 10
-- **Poängen sjunker till ≤10** → proxyservern markeras som `inactive`
-- Inaktiva proxyservrar utesluts från rotationen
+- **Misslyckade förfrågningar** minska poängen med 10 poäng
+- **Poängen sjunker till ≤ 10** → proxy är märkt med `inactive`
+- Inaktiva fullmakter exkluderas från rotation
 
 ### Rotationsstrategier
 
 ```bash
-# Rotera efter kvalitet (bästa proxyservern först) — standard
+# Rotate by quality (best proxy first) — default
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -H "Content-Type: application/json" \
   -d '{"strategy": "quality"}'
 
-# Slumpmässig rotation
+# Random rotation
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -d '{"strategy": "random"}'
 
-# Sekventiell (minst nyligen validerad först)
+# Sequential (least recently validated first)
 curl -X POST http://localhost:20128/api/settings/oneproxy/rotate \
   -d '{"strategy": "sequential"}'
 ```
 
-### Kretsbrytare
+### Strömbrytare
 
-1proxy-synkroniseringen har en inbyggd kretsbrytare:
+1proxy sync har en inbyggd strömbrytare:
 
-- Efter **5 misslyckade synkroniseringar i följd** blockeras ytterligare synkroniseringsförsök
+- Efter** 5 synkroniseringsfel i följd** , blockeras ytterligare synkroniseringsförsök
 - Återställ med: `resetOneproxyCircuitBreaker()` eller starta om servern
 - Synkroniseringsstatus är tillgänglig på `GET /api/settings/oneproxy?action=status`
 
-### Rensa proxyservrar från 1proxy
+### Rensa 1proxy proxyer
 
 ```bash
-# Ta bort en enskild proxyserver från 1proxy
+# Delete a single 1proxy proxy
 curl -X DELETE "http://localhost:20128/api/settings/oneproxy?id=proxy-uuid"
 
-# Rensa ALLA proxyservrar från 1proxy (manuella proxyservrar påverkas inte)
+# Clear ALL 1proxy proxies (manual proxies are untouched)
 curl -X DELETE "http://localhost:20128/api/settings/oneproxy?clearAll=1"
 ```
 
 ---
 
-## Antidetektering och smygteknik
+## Anti-detektion och smygande
 
-OmniRoute dirigerar inte bara trafik genom en proxy — det får även trafiken att se legitim ut:
+OmniRoute dirigerar inte bara trafik genom en proxy — det får trafiken att se legitim ut:
 
-### Förfalskning av TLS-fingeravtryck
+### TLS Fingeravtryckspoofing
 
-Använder `wreq-js` för att generera webbläsarliknande TLS-fingeravtryck och därmed kringgå botdetekteringssystem som flaggar TLS-handskakningar som inte kommer från webbläsare.
+Använder `wreq-js` för att generera webbläsarliknande TLS -fingeravtryck och kringgår botdetekteringssystem som flaggar TLS -handskakningar som inte är webbläsare.
 
-### Matchning av CLI-fingeravtryck
+### CLI Fingeravtrycksmatchning
 
-**Reglaget för CLI-fingeravtryck** (`Inställningar → Säkerhet`) ändrar ordningen på HTTP-rubriker och fält i JSON-brödtexten så att de matchar den exakta signaturen för inbyggda CLI-binärfiler (Claude Code, Codex osv.). Detta fungerar **ovanpå** proxyn:
+De**CLI Fingerprint Toggle** (`Settings → Security`) ordnar om HTTP rubriker och JSON -kroppsfält för att matcha den exakta signaturen för infödda CLI binärer (Claude -kod, Codex, etc.). Det här fungerar** ovanpå** proxy:
 
 ```
-Din IP (blockerad) → Proxy-IP (USA) → Leverantörens API
-                      + TLS-förfalskning
-                      + CLI-fingeravtryck
+Your IP (blocked) → Proxy IP (US) → Provider API
+                    + TLS spoof
+                    + CLI fingerprint
 ```
 
-Du får både **IP-maskering** och **autentiska förfrågningar** samtidigt.
+Du får båda**IP maskering** och** begära äkthet** samtidigt.
 
-### Bevarande av proxyns IP-adress
+### Proxy IP bevarande
 
-Färgkodade märken på instrumentpanelen visar vilken proxynivå som är aktiv:
+Färgkodade märken i instrumentpanelen visar vilken proxynivå som är aktiv:
 
-| Märke | Nivå       | Betydelse                                                |
-| ----- | ---------- | -------------------------------------------------------- |
-| 🟢    | Global     | All trafik går genom den här proxyn                      |
-| 🟡    | Leverantör | Endast den här leverantörens trafik använder proxyn      |
-| 🔵    | Anslutning | Den här specifika nyckeln/det här kontot använder proxyn |
+| Emblem | Nivå        | Menande                                          |
+| ------ | ----------- | ------------------------------------------------ |
+| 🟢     | Global      | All trafik går via denna proxy                   |
+| 🟡     | Leverantör  | Endast denna leverantörs trafik är proxy         |
+| 🔵     | Förbindelse | Denna specifika key/account använder denna proxy |
 
-Märket visar även proxyns fastställda IP-adress för verifiering.
+Märket visar också den lösta proxy IP för verifiering.
 
 ---
 
@@ -777,51 +777,28 @@ Använd `random`
 jämnt)
 ```
 
-## Automatisk exkludering av felande egna proxyservrar
+## Automatisk uteslutning av fel för dina egna proxyservrar
 
-Marknadspoolen i 1proxy nedgraderar redan automatiskt felande proxyservrar på egen hand (se
-[Proxykvalitetspoäng](#proxy-quality-scores)). För
-proxyservrar som **du** har lagt till i registret ger hälsoschemaläggaren i bakgrunden
-(`src/lib/proxyHealth/scheduler.ts`) samma beteende för att ”automatiskt exkludera en
-otillgänglig medlem från kedjan”, utan att något tas bort:
+1proxy-marknadsplatspoolen degraderar redan automatiskt misslyckade proxyservrar på egen hand (se [Proxykvalitetsresultat](#proxy-quality-scores) ). För fullmakt** du** läggs till i registret, ger bakgrundshälsoschemaläggaren (`src/lib/proxyHealth/scheduler.ts`) samma beteende "uteslut en död medlem från kedjan automatiskt", utan att ta bort någonting:
 
 ```bash
-# .env — inaktivera tillfälligt en proxy efter 3 misslyckade kontroller i följd och återaktivera den
-# automatiskt så snart den börjar svara på kontroller igen.
+# .env — soft-disable a proxy after 3 consecutive failed probes, re-enable it
+# automatically once it starts answering probes again.
 PROXY_AUTO_DISABLE=true
 PROXY_AUTO_REMOVE_AFTER=3
 ```
 
-Så här fungerar det i en kedja med flera proxyservrar:
+Hur det passar in i en multi-proxy-kedja:
 
-1. Schemaläggaren kontrollerar varje registrerad proxy med intervallet `PROXY_HEALTH_INTERVAL_MS`
-   (standardvärde 10 min; minimum 1 min).
-2. Efter `PROXY_AUTO_REMOVE_AFTER` **definitiva** fel i följd (ett faktiskt
-   anslutningsfel — en tidsgräns eller kontrollmålets eget 5xx-svar räknas aldrig, se
-   [Hälsokontroll av proxyservrar](#proxy-health-checking-v3816)) sätts proxyns `status`
-   till `dead`.
-3. `dead` är en av de statusar som filtret för aktiva statusar, som används vid matchning
-   av pool/rotation, exkluderar. Därför slutar ett omfångs rotation (round-robin/slumpmässig/sticky/
-   latens — se [Beslutsträd för rotationsstrategi](#rotation-strategy-decision-tree))
-   omedelbart att tilldela den proxyn till nya förfrågningar. Inga andra proxyservrar i
-   poolen påverkas, och hela poolen övergår aldrig i tysthet till en direktanslutning
-   — se fail-closed-skyddet i [Proxysystemet med fyra nivåer](#4-level-proxy-system).
-4. Schemaläggaren fortsätter att kontrollera `dead`-proxyservrar med samma intervall. Nästa
-   lyckade kontroll ändrar tillbaka `status` till `active`, varpå proxyn återgår till rotationen —
-   ingen manuell återinläggning krävs.
+1. Schemaläggaren sonderar varje registrerad proxy varje `PROXY_HEALTH_INTERVAL_MS` (standard 10 min; minst 1 min).
+2. Efter `PROXY_AUTO_REMOVE_AFTER` i rad** avgörande** misslyckanden (ett verkligt anslutningsfel — en timeout eller sondmålets egen 5xx räknas aldrig, se [Proxy Health Checking](#proxy-health-checking-v3816) ), proxyns `status` är satt till `dead`.
+3. `dead` är en av de statusar som alive-status-filtret som används av pool/rotation upplösning utesluter, så en scopes rotation (round-robin / random / sticky / latency / session — se [Rotation Strategy Decision Tree](#rotation-strategy-decision-tree) ) slutar omedelbart att lämna ut den proxyn till nya förfrågningar. Inga andra proxyservrar i poolen påverkas, och hela poolen faller aldrig tyst tillbaka till en [direkt](#4-level-proxy-system) anslutning —
+4. Schemaläggaren fortsätter att sondera `dead` proxyer på samma intervall. Nästa framgångsrika sond vänder `status` tillbaka till `active` och den återgår till rotation — ingen manuell återtillägg krävs.
 
-Detta är avsiktligt **frivilligt och icke-destruktivt**: som standard räknar och loggar
-schemaläggaren endast fel (se policy C i `decision.ts`), och `PROXY_AUTO_DISABLE`
-tar aldrig bort en rad — det är vad den separata, mer aggressiva flaggan
-`PROXY_AUTO_REMOVE` är till för. Om båda är inställda på `true` har `PROXY_AUTO_REMOVE`
-företräde (en proxy som ska tas bort har ingen nytta av att först inaktiveras tillfälligt). Se
-referensen [Miljökonfiguration](../reference/ENVIRONMENT.md) för en fullständig
-variabellista.
+Detta är medvetet** opt-in och oförstörande** : som standard räknar och loggar schemaläggaren bara fel (se policy C i `decision.ts`), och `PROXY_AUTO_DISABLE` tar aldrig bort en rad — som är vad den separata, mer aggressiva `PROXY_AUTO_REMOVE` flaggan är till för. Om båda är inställda på `true` vinner `PROXY_AUTO_REMOVE` (en proxy som ska raderas har ingen användning för en mjuk inaktivering däremellan). Se referensen [Environment Config](../reference/ENVIRONMENT.md) för hela variabellistan.
 
 ---
 
-> 📖 **Relaterad dokumentation:**
+> 📖** Relaterad dokumentation:**
 >
-> - [Användarhandbok](../guides/USER_GUIDE.md) — Allmän installation och konfiguration
-> - [API-referens](../reference/API_REFERENCE.md) — Fullständig API-dokumentation
-> - [Miljökonfiguration](../reference/ENVIRONMENT.md) — Alla miljövariabler
+> - [Användarhandbok](../guides/USER_GUIDE.md) — Allmän inställning och konfiguration - [API Referens](../reference/API_REFERENCE.md) — Fullständig API -dokumentation - [Miljökonfiguration](../reference/ENVIRONMENT.md) — Alla miljövariabler

@@ -431,7 +431,7 @@ Cuando ya no necesites OmniRoute, te proporcionamos dos scripts rápidos para un
 ### Implementación VPS
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -513,8 +513,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -713,7 +713,7 @@ Cualquier puerta de enlace que hable OpenAI API (un proxy autohospedado, vLLM, u
 
 1. **Proveedores → Añadir OpenAI Compatible** .
 2. **Nombre** : una etiqueta de visualización para el nodo.
-3. **Prefijo** : el nombre de la ruta. Los clientes llaman a los modelos `<prefix>/<model>`, por lo que un nodo con prefijo `mygw` sirve `mygw/gpt-4o-mini`. Requerido; no hay restricción de caracteres.
+3. **Prefijo** : el nombre de la ruta. Los clientes llaman a los modelos como `<prefix>/<model>`, por lo que un nodo con prefijo `mygw` sirve `mygw/gpt-4o-mini`. Requerido; no hay restricción de caracteres.
 4. **Tipo API** : la familia de puntos finales a los que sirve la puerta de enlace (finalizaciones de chat, respuestas, incrustaciones, audio, imágenes).
 5. **base URL** : la raíz API, hasta `/v1` inclusive (por ejemplo `https://gateway.example.com/v1`), no la ruta completa `/chat/completions`. Las puertas de enlace con rutas no estándar las configuran en** Configuración avanzada** (ruta de chat, ruta de modelos).
 6. El** Clave API (para cheque)** El campo solo prueba la conexión. Después de crear el nodo, ábrelo y usa** Agregar conexión** para almacenar la clave que utilizarán las solicitudes.
@@ -870,7 +870,7 @@ Configurar mediante** Panel de control → Configuración → Enrutamiento** . E
 | **P2C (Poder de dos opciones)** | Elige 2 cuentas aleatorias y rutas hacia la más saludable. Los saldos — se cargan con conciencia de la salud.      |
 | **Aleatorio**                   | Selecciona aleatoriamente una cuenta para cada solicitud mediante la reproducción aleatoria de Fisher-Yates        |
 | **Menos usado**                 | Rutas a la cuenta con la marca de tiempo `lastUsedAt` más antigua, distribuyendo el tráfico de manera uniforme     |
-| **Costo optimizado**            | Rutas a la cuenta con el valor de prioridad más bajo, optimizando para proveedores de menor costo.                 |
+| **Costo optimizado**            | Rutas a la cuenta con el valor de prioridad más bajo, optimizando para proveedores de menor costo                  |
 
 **Combo avanzado y estrategias automáticas.** (configurable por combo o mediante prefijos `auto/*` — ver [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
@@ -882,8 +882,8 @@ Configurar mediante** Panel de control → Configuración → Enrutamiento** . E
 - `least-used` y `cost-optimized`
 - `auto` — basado en la puntuación de todos los candidatos
 - `lkgp` (Último buen proveedor conocido) — fija al último proveedor exitoso y luego recurre a las reglas
-- `context-optimized` — elige el modelo con la ventana de contexto libre más grande
-- `context-relay` — encadena modelos de contexto largo para turnos de seguimiento
+- `context-optimized` — prueba primero el modelo con la ventana de contexto más grande conocida
+- Orden de prioridad `context-relay` — más un resumen de transferencia cuando la conversación pasa a otra cuenta
 
 #### Encabezado de sesión fijo externo
 
@@ -995,7 +995,7 @@ OmniRoute implementa resiliencia a nivel de proveedor con cinco componentes:
    - **Tiempo mínimo entre solicitudes** — Brecha mínima en milisegundos entre solicitudes
    - **Solicitudes simultáneas máximas** — Máximo de solicitudes simultáneas por cuenta
 
-2. **Enfriamiento de conexión** — Configuración de tipo por autenticación para una única conexión después de fallas reintentables:
+2. **Enfriamiento de conexión** Configuración — por tipo de autenticación para una única conexión después de fallas reintentables:
    - **Enfriamiento básico** — Ventana de enfriamiento predeterminada para fallas ascendentes reintentables
    - **Utilice sugerencias de reintento ascendentes** — honra `Retry-After` autorizado o restablece sugerencias cuando se proporcionan
    - **Pasos máximos de retroceso** — Nivel máximo de retroceso exponencial para fallas repetidas
@@ -1064,7 +1064,7 @@ La página de configuración está organizada en** 7 pestañas** para facilitar 
 | **AI**           | Pensando en el presupuesto (transferencia/auto-strip/ — personalizado/adaptativo ver [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), aviso del sistema global, aviso de estadísticas de caché              |
 | **Seguridad**    | Configuración Login/Password, control de acceso IP, autenticación API para `/models`, bloqueo de proveedor, protección de inyección rápida                                                               |
 | **Enrutamiento** | Estrategia de enrutamiento global (completar primero / Round Robin / P2C / Aleatorio / Menos usado / Costo optimizado), alias de modelo comodín, cadenas de respaldo, valores predeterminados combinados |
-| **Resiliencia**  | Cola de solicitudes, tiempo de reutilización de la conexión, configuración del disyuntor del proveedor y comportamiento de espera del tiempo de reutilización                                            |
+| **Resiliencia**  | Cola de solicitudes, tiempo de recuperación de la conexión, configuración del disyuntor del proveedor y comportamiento de espera de tiempo de recuperación                                               |
 | **Avanzado**     | Configuración de proxy global (HTTP/SOCKS5), anulaciones de proxy por proveedor                                                                                                                          |
 
 General ya no duplica registros de solo lectura y notas de caché. Las configuraciones de retención y optimización de la base de datos se conservan a través de `/api/settings/database`; El borrado manual de caché utiliza `DELETE /api/cache`. Los límites de las filas del registro de solicitudes y proxy están controlados por `CALL_LOGS_TABLE_MAX_ROWS` y `PROXY_LOGS_TABLE_MAX_ROWS`.
@@ -1330,34 +1330,36 @@ Consulta [API_REFERENCE.md](../reference/API_REFERENCE.md) para ver el catálogo
 
 ---
 
-## 💻 CLI interna
+## 💻 Interno CLI
 
-OmniRoute incluye una CLI interna (`omniroute …`) para la configuración, el diagnóstico y el control en tiempo de ejecución. Esta es **independiente de la página "Herramientas de CLI" del panel**, que configura CLI de terceros (Claude Code, Cursor, Codex, Cline, …) para que puedan comunicarse con OmniRoute.
+OmniRoute envía un CLI interno (`omniroute …`) para configuración, diagnóstico y control de tiempo de ejecución. Esto es** Separado de la página "Herramientas CLI " en el tablero.** , que configura CLIs de terceros (Claude Code, Cursor, Codex, Cline,…) para que puedan hablar con OmniRoute.
 
 ```bash
-omniroute setup                    # Asistente interactivo (contraseña, proveedores, combinaciones)
-omniroute setup --non-interactive  # Adecuado para CI
-omniroute doctor                   # Diagnósticos de estado (directorio de datos, BD, proveedores, puertos)
-omniroute providers available      # Enumera los proveedores compatibles
-omniroute providers list           # Enumera las conexiones configuradas
-omniroute providers test <id>      # Prueba en vivo una conexión de proveedor
-omniroute combos list              # Enumera las combinaciones
-omniroute combos switch <name>     # Establece la combinación predeterminada
-omniroute models                   # Enumera los modelos disponibles (--json, --search)
-omniroute keys add | list | remove # Administra las claves de API desde la terminal
-omniroute backup                   # Crea una instantánea de la configuración y la BD
-omniroute restore [<timestamp>]    # Restaura desde una instantánea
-omniroute health                   # Estado detallado (disyuntores, caché, memoria)
-omniroute quota                    # Uso de cuota de los proveedores
-omniroute mcp status               # Estado del servidor MCP
-omniroute a2a status               # Estado del servidor A2A
-omniroute tunnel list|create|stop  # Túneles de Cloudflare/Tailscale/ngrok
-omniroute reset-password           # Restablece la contraseña de administrador
-omniroute --mcp                    # Inicia el servidor MCP mediante stdio
-omniroute --port 3000              # Inicia el servidor en un puerto personalizado
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-Consejo: combina `omniroute doctor --json` con tu herramienta de monitorización para recibir alertas sobre conexiones de proveedores que no estén en buen estado.
+Consejo: empareje `omniroute doctor --json` con su herramienta de monitoreo para alertar sobre una instalación local defectuosa. `doctor` no prueba las conexiones del proveedor; usa `omniroute providers test <id>` para eso.
 
 ---
 

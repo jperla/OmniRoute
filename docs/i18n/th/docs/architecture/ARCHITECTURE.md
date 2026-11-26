@@ -512,12 +512,13 @@ Cloud Agents ล้อมแพลตฟอร์มโค้ดเอเจน�
 - การยืนยันตัวตนระหว่างการจับมือ WebSocket: `src/lib/ws/handshake.ts` — ตรวจสอบคำขออัปเกรด WS ผ่าน API key หรือคุกกี้เซสชัน
 - การยืนยันตัวตน WebSocket สำหรับแดชบอร์ดแบบสด: `src/server/ws/liveServer.ts` — sidecar (พอร์ต `LIVE_WS_PORT`) ยอมรับคุกกี้เซสชันของแดชบอร์ดหรือ Bearer API key ที่มีขอบเขตสิทธิ์การจัดการ (`manage`/`admin`); คีย์ที่ใช้สำหรับ inference เท่านั้นจะถูกปฏิเสธ ปลายทางผู้เผยแพร่ภายใน `POST /__omniroute_event` จะยอมรับเพียร์แบบ loopback เฉพาะเมื่อไม่มีส่วนหัวที่บ่งชี้การผ่านพร็อกซี (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`) เท่านั้น
 
-## 5) การซิงค์กับคลาวด์
+## 5) การซิงค์บนคลาวด์
 
-- การเริ่มต้นตัวกำหนดเวลา: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
-- งานตามรอบเวลา: `src/shared/services/cloudSyncScheduler.ts`
-- งานตามรอบเวลา: `src/shared/services/modelSyncScheduler.ts`
-- เส้นทางควบคุม: `src/app/api/sync/cloud/route.ts`
+- เริ่มต้นตัวกำหนดเวลา: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- งานประจำงวด: `src/shared/services/cloudSyncScheduler.ts`
+- งานประจำงวด: `src/shared/services/modelSyncScheduler.ts`
+- งานเป็นระยะ (เลือกใช้ต่อการเชื่อมต่อ): `src/shared/services/modelHealthCheckScheduler.ts` — ทดสอบโมเดลของการเชื่อมต่อ ซ่อนความล้มเหลวโดยอัตโนมัติ และกู้คืนเฉพาะสิ่งที่ซ่อนไว้ (`src/lib/db/modelHealthAutoHidden.ts`)
+- เส้นทางการควบคุม: `src/app/api/sync/cloud/route.ts`
 
 ## วงจรชีวิตของคำขอ (`/v1/chat/completions`)
 

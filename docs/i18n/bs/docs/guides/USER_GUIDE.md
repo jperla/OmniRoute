@@ -423,7 +423,7 @@ omniroute autostart disable
 
 Kada vam više ne treba OmniRoute, nudimo dvije brze skripte za čisto uklanjanje:
 
-| Command                  | Akcija                                                                                |
+| Zapovjedi                | Akcija                                                                                |
 | ------------------------ | ------------------------------------------------------------------------------------- |
 | `npm run uninstall`      | Uklanja sistemsku aplikaciju ali** čuva vaše DB i konfiguracije** u `~/.omniroute`.   |
 | `npm run uninstall:full` | Trajno uklanja aplikaciju AND** briše sve konfiguracije, ključeve i baze podataka** . |
@@ -433,7 +433,7 @@ Kada vam više ne treba OmniRoute, nudimo dvije brze skripte za čisto uklanjanj
 ### VPS Deployment
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -515,8 +515,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -754,7 +754,7 @@ Ovi ključevi idu u `providerSpecificData` veze (na primjer preko `PUT /api/prov
 
 ### Lanac OmniRoute Peers
 
-Drugi OmniRoute gateway se može dodati kao a** Prilagođeni OpenAI-kompatibilan** provajdera. Koristite `/v1` bazu URL i namjenski API ključ s najmanjim privilegijama koje je izdao taj ravnopravni partner.
+Drugi OmniRoute gateway se može dodati kao a** Prilagođeni OpenAI-kompatibilan** provajdera. Koristite `/v1` bazu URL i namjenski API ključ sa najmanjim privilegijama koje je izdao taj ravnopravni partner.
 
 Za recipročne ili višestruke lance, omogućite opt-in zaštitu petlje na svakom pristupniku:
 
@@ -772,7 +772,7 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-`X-OmniRoute-Peer-Trace` zaglavlje primaju samo zahtjevi poslani na eksplicitno dozvoljenu listu ravnopravnih URL. Gateway odbija ponovljene instance ID ili iscrpljeni budžet skoka sa HTTP `508 Loop Detected`; obični upstream provajderi ne primaju metapodatke istovrsnih uređaja.
+`X-OmniRoute-Peer-Trace` zaglavlje primaju samo zahtjevi poslani na eksplicitno dozvoljenu listu ravnopravnih URL. Gateway odbija ponovljenu instancu ID ili iscrpljeni budžet skoka sa HTTP `508 Loop Detected`; obični uzvodni provajderi ne primaju metapodatke ravnopravnih korisnika.
 
 Povezivanje ravnopravnih lanaca nije replikacija baze podataka ili prelazak na grešku hosta. Svaki gateway čuva nezavisno SQLite stanje, keš memorije, brojače brzine i sesije. Koristite provjereni obrnuti proxy ili prelazak na grešku klijenta za dostupnost active/passive ili active/active i nikada ne montirajte jednu SQLite bazu podataka u više pokrenutih OmniRoute instanci.
 
@@ -884,8 +884,8 @@ Konfigurišite putem** Dashboard → Settings → Routing** . Kontrolna tabla pr
 - `least-used` i `cost-optimized`
 - `auto` — vođen rezultatom za sve kandidate
 - `lkgp` (Posljednji poznati dobar provajder) — prikvači posljednjeg uspješnog provajdera, a zatim se vraća na pravila
-- `context-optimized` — bira model sa najvećim prozorom slobodnog konteksta
-- `context-relay` — povezuje modele dugog konteksta za naredne skretanja
+- `context-optimized` — prvo isprobava model s najvećim poznatim kontekstnim prozorom
+- `context-relay` — prioritetni redoslijed plus sažetak primopredaje kada se razgovor premjesti na drugi račun
 
 #### Eksterno lepljivo zaglavlje sesije
 
@@ -1002,7 +1002,7 @@ OmniRoute implementira otpornost na nivou provajdera sa pet komponenti:
    - **Koristite upstream Retry Hints** — Poštuje autoritativni `Retry-After` ili savjete za resetiranje kada su dostupni
    - **Max Backoff Steps** — Maksimalni eksponencijalni nivo odustajanja za ponovljene kvarove
 
-3. **Provajderski prekidač** — Prati kvarove provajdera od kraja do kraja, označava provajdera koji je degradiran na konfigurisanom pragu upozorenja i otvara prekidač kada se dostigne konfigurisani prag greške:
+3. **Provajderski prekidač** — Prati kvarove provajdera od kraja do kraja, označava provajdera koji je degradiran na konfiguriranom pragu upozorenja i otvara prekidač kada se dostigne konfigurirani prag kvara:
    - **Prag degradacije** — Uzastopni kvarovi provajdera prije ulaska `DEGRADED`
    - **Prag neuspjeha** — Uzastopni kvarovi provajdera prije ulaska `OPEN`
    - **Reset Timeout** — Vremenski okvir prije nego što se provajder ponovo testira
@@ -1152,7 +1152,7 @@ Konfigurirajte balansiranje po kombinaciji** Kontrolna ploča → Combos → Cre
 | Strategija                 | Opis                                                                      |
 | -------------------------- | ------------------------------------------------------------------------- |
 | **Round-Robin**            | Uzastopno se rotira kroz modele                                           |
-| **Prioritet**              | Uvijek isprobava prvi model; vraća se samo u slučaju greške               |
+| **Prioritet**              | Uvijek isprobava prvi model; vraća se samo zbog greške                    |
 | **Slučajno**               | Bira nasumični model iz kombinacije za svaki zahtjev                      |
 | **Weighted**               | Rute proporcionalno zasnovane na dodijeljenim težinama po modelu          |
 | **Najmanje korišteni**     | Rute do modela s najmanje nedavnih zahtjeva (koristi kombiniranu metriku) |
@@ -1334,32 +1334,34 @@ Pogledajte [API_REFERENCE.md](../reference/API_REFERENCE.md) za potpuni katalog 
 
 ## 💻 Interni CLI
 
-OmniRoute dolazi sa internim CLI-jem (`omniroute …`) za podešavanje, dijagnostiku i kontrolu tokom rada. Ovo je **odvojeno od stranice "CLI Tools" u kontrolnoj ploči**, koja konfiguriše CLI alate trećih strana (Claude Code, Cursor, Codex, Cline, …) kako bi mogli komunicirati sa OmniRoute-om.
+OmniRoute isporučuje interni CLI (`omniroute …`) za podešavanje, dijagnostiku i kontrolu vremena rada. Ovo je** odvojeno od stranice "CLI Tools" na kontrolnoj tabli** , koji konfiguriše CLIs treće strane (Claude Code, Cursor, Codex, Cline, …) tako da mogu razgovarati sa OmniRoute.
 
 ```bash
-omniroute setup                    # Interaktivni čarobnjak (lozinka, provajderi, kombinacije)
-omniroute setup --non-interactive  # Prilagođeno za CI
-omniroute doctor                   # Dijagnostika zdravlja (direktorijum podataka, DB, provajderi, portovi)
-omniroute providers available      # Lista podržanih provajdera
-omniroute providers list           # Lista konfigurisanih konekcija
-omniroute providers test <id>      # Testiranje konekcije provajdera u realnom vremenu
-omniroute combos list              # Lista kombinacija
-omniroute combos switch <name>     # Postavljanje podrazumijevane kombinacije
-omniroute models                   # Lista dostupnih modela (--json, --search)
-omniroute keys add | list | remove # Upravljanje API ključevima iz terminala
-omniroute backup                   # Snapshot konfiguracije + DB
-omniroute restore [<timestamp>]    # Vraćanje iz snapshot-a
-omniroute health                   # Detaljno zdravlje (breakers, cache, memorija)
-omniroute quota                    # Korištenje kvote provajdera
-omniroute mcp status               # Status MCP servera
-omniroute a2a status               # Status A2A servera
-omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tuneli
-omniroute reset-password           # Resetovanje administratorske lozinke
-omniroute --mcp                    # Pokretanje MCP servera preko stdio
-omniroute --port 3000              # Pokretanje servera na prilagođenom portu
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-Savjet: kombinujte `omniroute doctor --json` sa vašim alatom za monitoring kako biste dobili obavještenja o neispravnim konekcijama provajdera.
+Savjet: uparite `omniroute doctor --json` sa svojim alatom za nadzor da biste upozorili na pokvarenu lokalnu instalaciju. `doctor` ne testira veze provajdera; koristite `omniroute providers test <id>` za to.
 
 ---
 

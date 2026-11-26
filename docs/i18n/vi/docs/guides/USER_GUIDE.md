@@ -431,7 +431,7 @@ Khi bạn không cần OmniRoute nữa, chúng tôi cung cấp hai tập lệnh 
 ### VPS
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -513,8 +513,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -734,7 +734,7 @@ Chọn một tiền tố riêng biệt (`mygw`, `acme-proxy`). Nếu yêu cầu 
 
 Các khóa này nằm trong `providerSpecificData` của kết nối (ví dụ: qua `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (số nguyên, 1–1024) — dành cho các kết nối tương thích với định dạng trò chuyện OpenAI có cổng từ chối tên công cụ dài. Tên dài hơn được gửi dưới dạng bí danh ngắn và được khôi phục trong phản hồi. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go và Muse Code đã có tên bí danh trên 64 ký tự không cần cài đặt. Giá trị kết nối thay thế mặc định của Azure OpenAI / Azure AI Foundry (kết nối Azure phía sau cổng chặt chẽ hơn) và đặt giới hạn cho nút tương thích tùy chỉnh; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go và Muse Code giữ giới hạn đăng ký của họ và bỏ qua nó.
+- `toolNameMaxLength` (số nguyên, 1–1024) — dành cho các kết nối tương thích với định dạng trò chuyện OpenAI có cổng từ chối tên công cụ dài. Tên dài hơn được gửi dưới dạng bí danh ngắn và được khôi phục trong phản hồi. OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go và Muse Code đã có tên bí danh trên 64 ký tự không cần cài đặt. Giá trị kết nối thay thế giá trị mặc định của Azure OpenAI / Azure AI Foundry (kết nối Azure phía sau cổng chặt chẽ hơn) và đặt giới hạn cho nút tương thích tùy chỉnh; OpenAI, Mistral, NVIDIA, OpenCode Zen/Go và Muse Code giữ giới hạn đăng ký của họ và bỏ qua nó.
 - `quotaEndpoint` — điểm cuối quota/credits của cổng, đọc dải hạn ngạch trang tổng quan và định tuyến nhận biết hạn ngạch. Hoạt động trên cả kết nối tương thích với OpenAI và Anthropic; hình dạng đầy đủ được ghi lại trong `open-sse/services/usage/openaiCompatible.ts`.
 
 ```json
@@ -821,7 +821,7 @@ Trả về các mô hình được nhóm theo nhà cung cấp với các loại 
 ### Đường hầm nhanh Cloudflare
 
 - Có sẵn ở** Điểm cuối → của bảng điều khiển** dành cho Docker và các hoạt động triển khai tự lưu trữ khác
-- Tạo một `https://*.trycloudflare.com` URL tạm thời chuyển tiếp đến điểm cuối `/v1` tương thích với OpenAI hiện tại của bạn
+- Tạo một `https://*.trycloudflare.com` URL tạm thời để chuyển tiếp đến điểm cuối `/v1` tương thích với OpenAI hiện tại của bạn
 - Đầu tiên chỉ kích hoạt cài đặt `cloudflared` khi cần thiết; sau đó khởi động lại, sử dụng lại cùng một tệp nhị phân được quản lý
 - Đường hầm nhanh không được tự động khôi phục sau khi khởi động lại OmniRoute hoặc container; kích hoạt lại chúng từ bảng điều khiển khi cần
 - Đường hầm URLs là phù du và thay đổi mỗi khi bạn stop/start đường hầm
@@ -882,8 +882,8 @@ Cấu hình qua** Bảng điều khiển → Cài đặt →** . Bảng điều 
 - `least-used` và `cost-optimized`
 - `auto` — dựa trên điểm số của tất cả các ứng cử viên
 - `lkgp` (Nhà cung cấp dịch vụ tốt được biết đến gần đây nhất) — ghim vào nhà cung cấp thành công cuối cùng, sau đó quay lại quy tắc
-- `context-optimized` — chọn mô hình có cửa sổ ngữ cảnh miễn phí lớn nhất
-- `context-relay` — xâu chuỗi các mô hình ngữ cảnh dài cho các lượt tiếp theo
+- `context-optimized` — thử mô hình với cửa sổ ngữ cảnh lớn nhất đã biết trước tiên
+- thứ tự ưu tiên `context-relay` — cộng với bản tóm tắt chuyển giao khi cuộc hội thoại chuyển sang tài khoản khác
 
 #### Tiêu đề phiên chú ý bên ngoài
 
@@ -1013,7 +1013,7 @@ OmniRoute triển khai khả năng phục hồi cấp nhà cung cấp với năm
 
    Trạng thái thời gian chạy của trình ngắt nhà cung cấp được hiển thị trên** Bảng điều khiển → Sức khỏe** chỉ một.
 
-4. **Chờ thời gian hồi chiêu** — Nếu mọi kết nối ứng viên đã hạ nhiệt, OmniRoute có thể đợi thời gian hồi chiêu sớm nhất và tự động thử lại cùng một yêu cầu của khách hàng.
+4. **Chờ thời gian hồi chiêu** — Nếu mọi kết nối ứng viên đã nguội đi, OmniRoute có thể đợi thời gian hồi chiêu sớm nhất và tự động thử lại cùng một yêu cầu của khách hàng.
 
 5. **Tự động phát hiện giới hạn tỷ lệ** — Khi các nhà cung cấp ngược dòng trả về khoảng thời gian chờ rõ ràng, những gợi ý đó sẽ ghi đè thời gian hồi chiêu kết nối cục bộ khi cài đặt được bật.
 
@@ -1096,7 +1096,7 @@ curl http://localhost:20128/api/usage/budget
 
 ### Phiên âm âm thanh
 
-OmniRoute hỗ trợ phiên âm âm thanh thông qua điểm cuối tương thích với OpenAI:
+OmniRoute hỗ trợ sao chép âm thanh thông qua điểm cuối tương thích với OpenAI:
 
 ```bash
 POST /v1/audio/transcriptions
@@ -1154,7 +1154,7 @@ Các định dạng âm thanh được hỗ trợ để phiên âm: `mp3`, `wav`
 | **Ngẫu nhiên**           | Chọn một mô hình ngẫu nhiên từ combo cho mỗi yêu cầu                        |
 | **Có trọng số**          | Các tuyến đường tương ứng dựa trên trọng số được chỉ định cho mỗi mô hình   |
 | **Ít được sử dụng nhất** | Định tuyến đến mô hình có ít yêu cầu gần đây nhất (sử dụng số liệu kết hợp) |
-| **Tối ưu hóa chi phí**   | Đường đến mô hình có sẵn rẻ nhất (sử dụng bảng giá)                         |
+| **Tối ưu hóa chi phí**   | Lộ trình đến mô hình có sẵn rẻ nhất (sử dụng bảng giá)                      |
 
 Mặc định kết hợp chung có thể được đặt trong** Bảng điều khiển → Cài đặt → Định tuyến → Mặc định kết hợp** . Thời gian chờ của mục tiêu kết hợp kế thừa thời gian chờ của yêu cầu hiện tại theo mặc định. Sử dụng** Thời gian chờ mục tiêu (giây)** trên các mặc định kết hợp hoặc một kết hợp riêng lẻ chỉ khi giới hạn cho mỗi mục tiêu ngắn hơn sẽ kích hoạt dự phòng nhanh hơn.
 
@@ -1332,32 +1332,34 @@ Xem [API_REFERENCE.md](../reference/API_REFERENCE.md) để biết danh mục en
 
 ## 💻 CLI nội bộ
 
-OmniRoute cung cấp một CLI nội bộ (`omniroute …`) để thiết lập, chẩn đoán và kiểm soát thời gian chạy. CLI này **tách biệt với trang "Công cụ CLI" trong bảng điều khiển**, nơi cấu hình các CLI của bên thứ ba (Claude Code, Cursor, Codex, Cline, …) để chúng có thể giao tiếp với OmniRoute.
+OmniRoute gửi một CLI nội bộ (`omniroute …`) để thiết lập, chẩn đoán và kiểm soát thời gian chạy. Đây là** tách biệt với trang "CLI Tools" trong bảng điều khiển** , cấu hình CLIs của bên thứ ba (Claude Code, Cursor, Codex, Cline, …) để họ có thể nói chuyện với OmniRoute.
 
 ```bash
-omniroute setup                    # Trình hướng dẫn tương tác (mật khẩu, nhà cung cấp, tổ hợp)
-omniroute setup --non-interactive  # Phù hợp với CI
-omniroute doctor                   # Chẩn đoán tình trạng (thư mục dữ liệu, DB, nhà cung cấp, cổng)
-omniroute providers available      # Liệt kê các nhà cung cấp được hỗ trợ
-omniroute providers list           # Liệt kê các kết nối đã cấu hình
-omniroute providers test <id>      # Kiểm tra trực tiếp kết nối với nhà cung cấp
-omniroute combos list              # Liệt kê các tổ hợp
-omniroute combos switch <name>     # Đặt tổ hợp mặc định
-omniroute models                   # Liệt kê các mô hình khả dụng (--json, --search)
-omniroute keys add | list | remove # Quản lý khóa API từ terminal
-omniroute backup                   # Tạo bản chụp nhanh cấu hình + DB
-omniroute restore [<timestamp>]    # Khôi phục từ bản chụp nhanh
-omniroute health                   # Tình trạng chi tiết (bộ ngắt mạch, bộ nhớ đệm, bộ nhớ)
-omniroute quota                    # Mức sử dụng hạn ngạch của nhà cung cấp
-omniroute mcp status               # Trạng thái máy chủ MCP
-omniroute a2a status               # Trạng thái máy chủ A2A
-omniroute tunnel list|create|stop  # Đường hầm Cloudflare/Tailscale/ngrok
-omniroute reset-password           # Đặt lại mật khẩu quản trị viên
-omniroute --mcp                    # Khởi động máy chủ MCP qua stdio
-omniroute --port 3000              # Khởi động máy chủ trên một cổng tùy chỉnh
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-Mẹo: kết hợp `omniroute doctor --json` với công cụ giám sát của bạn để cảnh báo khi kết nối với nhà cung cấp gặp sự cố.
+Mẹo: ghép nối `omniroute doctor --json` với công cụ giám sát của bạn để cảnh báo về cài đặt cục bộ bị hỏng. `doctor` không kiểm tra kết nối của nhà cung cấp; sử dụng `omniroute providers test <id>` cho điều đó.
 
 ---
 

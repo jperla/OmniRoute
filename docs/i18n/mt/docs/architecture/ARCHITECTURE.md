@@ -513,11 +513,12 @@ DB tal-Stat tal-Dominju (SQLite):
 - Awtentikazzjoni waqt il-handshake tal-WebSocket: `src/lib/ws/handshake.ts` — tivvalida t-talbiet għall-upgrade tal-WS permezz ta’ ċavetta tal-API jew cookie tas-sessjoni
 - Awtentikazzjoni tal-WebSocket tad-dashboard dirett: `src/server/ws/liveServer.ts` — is-sidecar (port `LIVE_WS_PORT`) jaċċetta cookie tas-sessjoni tad-dashboard jew ċavetta Bearer tal-API li jkollha ambitu ta’ ġestjoni (`manage`/`admin`); ċwievet għall-inferenza biss jiġu rrifjutati. L-endpoint intern tal-pubblikazzjoni `POST /__omniroute_event` jaċċetta peers tal-loopback biss meta ma jkun preżenti l-ebda header ta’ proxy-hop (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`)
 
-## 5) Sinkronizzazzjoni tal-Cloud
+## 5) Cloud Sync
 
-- Tnedija tal-iskedulatur: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
-- Kompitu perjodiku: `src/shared/services/cloudSyncScheduler.ts`
-- Kompitu perjodiku: `src/shared/services/modelSyncScheduler.ts`
+- Scheduler init: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- Xogħol perjodiku: `src/shared/services/cloudSyncScheduler.ts`
+- Xogħol perjodiku: `src/shared/services/modelSyncScheduler.ts`
+- Kompitu perjodiku (opt-in għal kull konnessjoni): `src/shared/services/modelHealthCheckScheduler.ts` — jittestja l-mudelli ta' konnessjoni, jaħbi awtomatikament il-fallimenti u jirrestawra biss dak li ħeba huwa stess (`src/lib/db/modelHealthAutoHidden.ts`)
 - Rotta tal-kontroll: `src/app/api/sync/cloud/route.ts`
 
 ## Ċiklu tal-Ħajja tal-Talba (`/v1/chat/completions`)

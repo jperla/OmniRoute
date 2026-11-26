@@ -35,70 +35,34 @@ npm run test:e2e           # 任意だが推奨
 /capture-release-evidences-cc
 ```
 
-## npm Trusted Publishing（v3.8.51 以降のデフォルト）— 要求に応じてステージング、フォールバックとして直接公開
+## npm Trusted Publishing (v3.8.51 以降のデフォルト) 要求に応じてステージングされる— 、フォールバックとして直接
 
-`npm-publish.yml` はデフォルトで **npm Trusted Publishing（OIDC）**を介して公開します。
-`stage-npm` ジョブ（github-hosted）は、その実行用として GitHub の id-token を有効期間の短い npm
-認証情報と交換します。リポジトリシークレットに有効期間の長い npm トークンを保存する必要がなく、2FA のプロンプトもなく、provenance が付与されます。
-これは、2FA を省略するトークンが廃止されつつある現在、npm が認めているバイパス方法です。
-WS1.3 の保証（漏えいしたトークンだけでは公開できない — そもそもトークンが存在しない）を維持しながら、
-v3.8.48 までプロジェクトで利用していた完全自動フローを復元します。
+`npm-publish.yml`次を通じて発行します**npm 信頼できる公開 (OIDC)**デフォルト: `stage-npm`ジョブ (github でホストされている) は、 GitHubの id トークンを、 —実行するための短期間の npm 認証情報と交換します。リポジトリのシークレットには長期間の npm トークンはなく、2FA プロンプトも添付されません。これは、2FA をスキップするトークンが廃止されつつある現在、npm 制裁をバイパスすることです。これは、 WS1.3 保証を維持しながら、プロジェクトが v3.8.48 まで持っていた完全自動フローを復元します (漏洩したトークンは、トークンがない—だけで公開することはできません)。
 
-**初回のみのセットアップ（オーナー）:** npmjs.com → package `omniroute` → Settings → _Trusted
-Publisher_ → GitHub: owner `diegosouzapw`, repo `OmniRoute`, workflow `npm-publish.yml`
-（environment: none）。これが設定されるまでは、自動ステップが `ENEEDAUTH` で失敗します。
-`publish_mode=staged`（以下を参照）または `direct` を指定して再ディスパッチしてください。
+**ワンタイムセットアップ (所有者):** npmjs.com →パッケージ`omniroute` →設定→ _Trusted Publisher_ → GitHub: 所有者`diegosouzapw`、リポジトリ`OmniRoute`、ワークフロー`npm-publish.yml` (環境: なし)。それが存在するまで、自動ステップは`ENEEDAUTH`: re-dispatch with `publish_mode=staged` (下記) または`direct`で失敗します。
 
-### ステージング公開（要求時 — `publish_mode=staged`）
+### 段階的公開 (リクエストに応じて— `publish_mode=staged`)
 
-npm-publish ワークフローは直接公開を行わなくなりました。パック済み tarball を起動
-（`check:pack-boot`）してから `npm stage publish` を実行します。まったく同一のバイト列が
-レジストリに保管され、オーナーが承認するまで**インストールできません**。人による 2FA ゲートは
-検証前ではなく、検証後に移動しました。
+npm-publish ワークフローは直接公開しなくなりました。パックされた tarball (`check:pack-boot`) を起動してから`npm stage publish` —を実行し、正確なバイトがレジストリに保存されます。**インストールできません**オーナーが承諾するまで。人間の 2FA ゲートは、その前ではなく、 AFTERザ プルーフに移動しました。
 
-**ワークフローが正常に完了した後のオーナーの手順:**
+**ワークフローが緑色になった後の所有者のフロー:**
 
-1. `npm stage list omniroute` — stage id を確認します（ワークフローのサマリーにも表示されます）。
-2. ステージングされたバイト列を検証します（推奨）: `npm stage download <id>` を実行し、ダウンロードした
-   tarball を一時 prefix にインストールして起動します（`npm run check:pack-boot` は
-   CI で同じ pack→install→boot の判定を自動化します）。
-3. `npm stage approve <id>` — 2FA プロンプトが公開そのものです。`npm stage reject <id>` は破棄します。
-4. 公開後のセーフティネット: 公開後ベリファイア（v3.8.49 計画の WS1.4）が、
-   クリーンなコンテナ内で公開バージョンをパブリックレジストリからインストールし、起動します。
+1. `npm stage list omniroute` —ステージ ID を検索します (ワークフローの概要にも出力されます)。
+2. ステージングされたバイト (推奨): `npm stage download <id>`確認し、ダウンロードした tarball を一時プレフィックスにインストールしてブートします (`npm run check:pack-boot`同じパック→ install → boot verdict in CIを自動化します)。
+3. `npm stage approve <id>` — 2FA プロンプトISパブリッシュ。 `npm stage reject <id>`破棄します。
+4. 公開後ネット: 公開後検証ツール (v3.8.49 プランのWS1.4) は、パブリック レジストリから公開されたバージョンをクリーン コンテナーにインストールし、ブートします。
 
-**緊急時のフォールバック:** `publish_mode=direct` を指定した `workflow_dispatch` により、
-従来の即時 `npm publish` を復元できます（ステージング自体が正しく動作しない場合にのみ使用し、理由を記録してください）。
+**緊急フォールバック:** `workflow_dispatch`と`publish_mode=direct` 、従来の即時`npm publish`を復元します (ステージング自体が誤動作する場合にのみ使用し、その理由を記録します)。
 
-**初回のみの強化設定（オーナー、npmjs.com）:** `omniroute` の Trusted Publisher を
-stage-only モードで構成し、漏えいした有効期間の長いトークンを使って、どこからでも直接 `npm publish`
-できないようにします。CI はステージングのみ可能で、公開できるのはオーナーの 2FA を経た場合だけです。
+**ワンタイム強化 (所有者、npmjs.com):** `omniroute`の信頼できるパブリッシャーをステージ専用モードで構成し、漏洩した長期トークンが— CIステージングのみできる場所から直接`npm publish`できないようにします。所有者の 2FA リリースのみ。
 
-**破損アーティファクトへの対応手順（変更なし）:** デフォルトの初動として
-`npm deprecate omniroute@<bad> "<reason> — use <fixed>"` を実行します（数分で完了し、元に戻せます）。
-`npm unpublish` は 72 時間以内かつ依存パッケージが存在しない場合にのみ使用し、最初の対応としては決して使用しません。
-Docker: バージョンタグを上書きしないでください。ロールバックでは、`latest` を最後の正常な digest に付け替えます。
+**壊れたアーティファクト プレイブック (変更なし):**デフォルトの反射としての`npm deprecate omniroute@<bad> "<reason> — use <fixed>"` (分、可逆)。 `npm unpublish` 72h/no-dependentsウィンドウ内でのみ実行され、最初の動きとしては実行されません。 Docker: バージョン タグを決して書き換えない—ロールバックは、 `latest`最後の正常なダイジェストに再ポイントします。
 
-**Docker Hub の `latest`（安定版 SemVer の公開ごとに必須）:**
-`docker-publish` ワークフローでは、`X.Y.Z` と、`should-promote-latest.sh` が
-それを最も高い安定版 SemVer と判定した場合は `:latest` の**両方**に、
-**同一の digest** をタグ付けする必要があります。ジョブ完了後、Hub の `latest` の digest が
-新しい SemVer の digest と一致し、`last_updated` が更新されていることを確認します。
-リリースノートで git にのみ存在する修正について説明している一方で、`:latest` を古い
-ビルドのままにしないでください。Compose のクイックスタートでは `:latest` を使用します。
-GitOps では引き続き `X.Y.Z` を固定指定してください。
-[Docker リリースチャネル](../guides/DOCKER_GUIDE.md#release-channels)および #10317 を参照してください。
+**Dockerハブ`latest` (すべての安定したSemVerパブリッシュで必要):** `docker-publish`ワークフローにはタグを付ける必要があります**両方**`X.Y.Z`であり、 `should-promote-latest.sh`これに同意すると、これが最も安定したSemVer、 `:latest`となります。**同じダイジェスト**。ジョブ後: ハブ`latest`ダイジェストは新しいSemVerダイジェストと等しく、 `last_updated`移動されました。リリースノートで git にのみ存在する修正について説明している間は、 `:latest`古いビルドに残さないでください。 Compose クイックスタートでは`:latest`を使用します。 GitOps `X.Y.Z`を固定し続ける必要があります。 [Dockerリリース チャネル」](../guides/DOCKER_GUIDE.md#release-channels)および#10317を参照してください。
 
-**Docker Hub の組織リポジトリ（`cheaperinference/omniroute`）:** Docker Hub では
-リポジトリを namespace 間で移動できないため、`diegosouzapw/omniroute` は pull 履歴と
-すべてのリリースを保持します。また、`docker-publish` の `mirror-org-dockerhub` ジョブが、
-リリースされた各バージョン（および昇格時の `:latest`）を
-`ghcr.io/cheaper-inference/omniroute` から組織リポジトリへコピーします。
-この処理には `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` シークレットが必要です。
-これらがない場合、ジョブは「Docker Hub org mirror skipped」という警告を表示したまま正常終了し、
-他のレジストリへの公開は通常どおり行われます。リリース済みバージョンを後から公開するには、
-**Actions → Mirror Docker image to the Docker Hub org → Run workflow** で
-`version=X.Y.Z`（最も高い安定版の場合は `promote_latest` も指定）を使用して実行します。
-既存のイメージがコピーされ、再ビルドは行われません。
+**Dockerハブ組織リポジトリ (`cheaperinference/omniroute`):** Docker Hub はネームスペース間でリポジトリを移動できないため、 `diegosouzapw/omniroute`そのプル履歴とすべてのリリースを保持し、 `docker-publish`の`mirror-org-dockerhub`ジョブは各リリース バージョン (および昇格時の`:latest` ) を`ghcr.io/cheaper-inference/omniroute`から組織リポジトリにコピーします。 `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN`シークレットが必要です。これらがないと、ジョブは緑色のままになり、「Docker Hub org Mirror Skipped」という警告が表示され、他のレジストリは正常にパブリッシュされます。リリースされたバージョンを後でそこで公開するには、次を実行します**アクション→ DockerイメージをDocker Hub 組織にミラーリングする→ワークフローを実行する**`version=X.Y.Z` (および最も安定したバージョンの場合は`promote_latest` ) を使用すると、既存のイメージがコピーされ、再構築は行われません。そのリポジトリのDockerハブ概要は手動で設定されます。これを編集するAPIは組織アクセス トークンを拒否します。
+
+また、同じワークフローにより、2027 年 6 月 30 日まで、すべてのリリースが従来のGHCRパッケージ`ghcr.io/diegosouzapw/omniroute`にコピーされるため、そこに固定されたインストールは更新され続けます。そのインデックスには「 `ghcr.io/cheaper-inference/omniroute`に移動」という説明が含まれています。 `GHCR_LEGACY_TOKEN`シークレット ( `write:packages`を使用した`diegosouzapw`の古典的な個人アクセス トークン) が必要です。これがないと、ジョブは「レガシーGHCRミラーがスキップされました」という警告とともにスキップされます。
 
 ## ホットフィックス・ファストレーン（ラベル `hotfix`）
 

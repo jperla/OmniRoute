@@ -431,7 +431,7 @@ Quando você não precisar mais OmniRoute, fornecemos dois scripts rápidos para
 ### Implantação VPS
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -513,8 +513,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -715,14 +715,14 @@ Qualquer gateway que fale o OpenAI API (um proxy auto-hospedado, vLLM, um agrega
 2. **Nome** : um rótulo de exibição para o nó.
 3. **Prefixo** : o nome do roteamento. Os clientes chamam os modelos como `<prefix>/<model>`, portanto, um nó com prefixo `mygw` atende `mygw/gpt-4o-mini`. Obrigatório; não há restrição de caracteres.
 4. **Tipo API** : a família de endpoints que o gateway atende (conclusões de bate-papo, respostas, incorporações, áudio, imagens).
-5. **Base URL** : a raiz API, até `/v1` inclusive (por exemplo `https://gateway.example.com/v1`), não o caminho `/chat/completions` completo. Gateways com caminhos não padrão os definem em** Configurações avançadas** (caminho do bate-papo, caminho dos modelos).
+5. **Base URL** : a raiz API, até e incluindo `/v1` (por exemplo `https://gateway.example.com/v1`), não o caminho `/chat/completions` completo. Gateways com caminhos não padrão os definem em** Configurações avançadas** (caminho do bate-papo, caminho dos modelos).
 6. O** Chave API (para verificação)** campo apenas testa a conexão. Após criar o nó, abra-o e use** Adicionar conexão** para armazenar a chave que as solicitações usarão.
 
 O nó obtém um id interno no formato `openai-compatible-<apiType>-<uuid>`; você nunca precisa digitá-lo, o prefixo é o nome público.
 
 #### Prefixos reservados
 
-Um prefixo não pode ser o id ou alias de um provedor integrado (por exemplo `openai`, `cf`), nem o id de um provedor desativado. O resolvedor de modelo verifica ids e aliases integrados antes dos nós personalizados, de modo que um nó usando um desses prefixos nunca receberia tráfego: `<prefix>/model` iria para o provedor integrado ou falharia no fechamento se esse provedor fosse desativado. A criação ou edição de um nó com esse prefixo é rejeitada com:
+Um prefixo não pode ser o id ou alias de um provedor integrado (por exemplo `openai`, `cf`), nem o id de um provedor retirado. O resolvedor de modelo verifica ids e aliases integrados antes dos nós personalizados, de modo que um nó usando um desses prefixos nunca receberia tráfego: `<prefix>/model` iria para o provedor integrado ou falharia no fechamento se esse provedor fosse desativado. A criação ou edição de um nó com esse prefixo é rejeitada com:
 
 ```text
 prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (reserved ids/aliases cannot be used for custom nodes because requests like <prefix>/model route to a built-in provider or fail closed when retired)
@@ -770,9 +770,9 @@ OMNIROUTE_PEER_URLS=http://gateway-a:20128/v1
 OMNIROUTE_PEER_MAX_HOPS=4
 ```
 
-Somente solicitações enviadas para um peer URL explicitamente incluído na lista de permissões recebem o cabeçalho `X-OmniRoute-Peer-Trace`. Um gateway rejeita uma instância repetida ID ou um orçamento de salto esgotado com HTTP `508 Loop Detected`; provedores upstream comuns não recebem metadados de pares.
+Somente solicitações enviadas para um peer URL explicitamente incluído na lista de permissões recebem o cabeçalho `X-OmniRoute-Peer-Trace`. Um gateway rejeita uma instância repetida ID ou orçamento de salto esgotado com HTTP `508 Loop Detected`; provedores upstream comuns não recebem metadados de pares.
 
-O encadeamento de pares não é replicação de banco de dados ou failover de host. Cada gateway mantém estado SQLite, caches, contadores de taxas e sessões independentes. Use um proxy reverso com verificação de integridade ou failover de cliente para disponibilidade active/passive ou active/active e nunca monte um banco de dados SQLite em várias instâncias OmniRoute em execução.
+O encadeamento de pares não é replicação de banco de dados ou failover de host. Cada gateway mantém estados SQLite, caches, contadores de taxas e sessões independentes. Use um proxy reverso com verificação de integridade ou failover de cliente para disponibilidade active/passive ou active/active e nunca monte um banco de dados SQLite em várias instâncias OmniRoute em execução.
 
 ### Rotas de provedores dedicados
 
@@ -867,10 +867,10 @@ Configurar via** Painel → Configurações Roteamento →** . O dashboard expõ
 | -------------------------------- | ------------------------------------------------------------------------------------------------------------ |
 | **Preencha primeiro**            | Usa contas em ordem de prioridade — conta primária lida com todas as solicitações até ficar indisponível     |
 | **Rodada Robin**                 | Percorre todas as contas com um limite fixo configurável (padrão: 3 chamadas por conta)                      |
-| **P2C (poder de duas escolhas)** | Escolhe 2 contas aleatórias e direciona para a mais saudável — equilibra a carga com consciência de saúde    |
+| **P2C (poder de duas escolhas)** | Escolhe 2 contas aleatórias e direciona para a mais saudável — equilibra a carga com a consciência da saúde  |
 | **Aleatório**                    | Seleciona aleatoriamente uma conta para cada solicitação usando o embaralhamento Fisher-Yates                |
 | **Menos usado**                  | Rotas para a conta com o carimbo de data/hora `lastUsedAt` mais antigo, distribuindo o tráfego uniformemente |
-| **Custo Otimizado**              | Rotas para a conta com o valor de menor prioridade, otimizando para provedores de menor custo                |
+| **Custo Otimizado**              | Rotas para a conta com o valor de prioridade mais baixo, otimizando para provedores de menor custo           |
 
 **Combinações avançadas e estratégias automáticas** (configurável por combo ou via prefixos `auto/*` — veja [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
@@ -881,9 +881,9 @@ Configurar via** Painel → Configurações Roteamento →** . O dashboard expõ
 - `p2c` (poder de duas escolhas)
 - `least-used` e `cost-optimized`
 - `auto` — baseado na pontuação de todos os candidatos
-- `lkgp` (último provedor válido) — fixa o último provedor bem-sucedido e depois volta às regras
-- `context-optimized` — escolhe o modelo com a maior janela de contexto livre
-- `context-relay` — encadeia modelos de contexto longo para turnos de acompanhamento
+- `lkgp` (último provedor válido) — fixa o último provedor bem-sucedido e, em seguida, recorre às regras
+- `context-optimized` — tenta primeiro o modelo com a maior janela de contexto conhecida
+- ordem de prioridade `context-relay` — mais um resumo da transferência quando a conversa passa para outra conta
 
 #### Cabeçalho de sessão fixa externa
 
@@ -996,7 +996,7 @@ OmniRoute implementa resiliência em nível de provedor com cinco componentes:
    - **Máximo de solicitações simultâneas** — Máximo de solicitações simultâneas por conta
 
 2. **Resfriamento da conexão** — Configuração do tipo por autenticação para uma única conexão após falhas repetíveis:
-   - **Recarga básica** Janela de resfriamento padrão — para falhas de upstream repetíveis
+   - **Recarga básica** Janela de resfriamento padrão — para falhas upstream repetíveis
    - **Use dicas de nova tentativa upstream** — homenageia `Retry-After` oficial ou dicas de redefinição quando fornecidas
    - **Etapas máximas de espera** — Nível máximo de espera exponencial para falhas repetidas
 
@@ -1006,7 +1006,7 @@ OmniRoute implementa resiliência em nível de provedor com cinco componentes:
    - **Redefinir tempo limite** — Janela de tempo antes que o provedor seja testado novamente
    - **CLOSED** (Saudável) solicitações — fluem normalmente
    - **DEGRADED** Solicitações — ainda fluem enquanto falhas elevadas são rastreadas
-   - **OPEN** O provedor — é bloqueado temporariamente após falhas repetidas
+   - **OPEN** O provedor — é temporariamente bloqueado após falhas repetidas
    - **HALF_OPEN** — Testando se o provedor se recuperou
 
    Os limites de taxa `429` com escopo de conexão permanecem válidos** Resfriamento da conexão** e não contam para o disjuntor do provedor.
@@ -1330,34 +1330,36 @@ Consulte [API_REFERENCE.md](../reference/API_REFERENCE.md) para ver o catálogo 
 
 ---
 
-## 💻 CLI interna
+## 💻 CLI interno
 
-O OmniRoute inclui uma CLI interna (`omniroute …`) para configuração, diagnóstico e controle em tempo de execução. Ela é **separada da página "Ferramentas de CLI" no painel**, que configura CLIs de terceiros (Claude Code, Cursor, Codex, Cline, …) para que possam se comunicar com o OmniRoute.
+OmniRoute fornece um CLI interno (`omniroute …`) para configuração, diagnóstico e controle de tempo de execução. Isso é** separado da página "CLI Tools" no painel** , que configura CLIs de terceiros (Claude Code, Cursor, Codex, Cline,…) para que eles possam se comunicar com OmniRoute.
 
 ```bash
-omniroute setup                    # Assistente interativo (senha, provedores, combinações)
-omniroute setup --non-interactive  # Adequado para CI
-omniroute doctor                   # Diagnósticos de integridade (diretório de dados, banco de dados, provedores, portas)
-omniroute providers available      # Lista os provedores compatíveis
-omniroute providers list           # Lista as conexões configuradas
-omniroute providers test <id>      # Testa uma conexão de provedor em tempo real
-omniroute combos list              # Lista as combinações
-omniroute combos switch <name>     # Define a combinação padrão
-omniroute models                   # Lista os modelos disponíveis (--json, --search)
-omniroute keys add | list | remove # Gerencia chaves de API pelo terminal
-omniroute backup                   # Cria um snapshot da configuração e do banco de dados
-omniroute restore [<timestamp>]    # Restaura a partir de um snapshot
-omniroute health                   # Integridade detalhada (disjuntores, cache, memória)
-omniroute quota                    # Uso da cota dos provedores
-omniroute mcp status               # Status do servidor MCP
-omniroute a2a status               # Status do servidor A2A
-omniroute tunnel list|create|stop  # Túneis do Cloudflare/Tailscale/ngrok
-omniroute reset-password           # Redefine a senha do administrador
-omniroute --mcp                    # Inicia o servidor MCP via stdio
-omniroute --port 3000              # Inicia o servidor em uma porta personalizada
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-Dica: combine `omniroute doctor --json` com sua ferramenta de monitoramento para emitir alertas sobre conexões de provedores que não estejam íntegras.
+Dica: emparelhe `omniroute doctor --json` com sua ferramenta de monitoramento para alertar sobre uma instalação local quebrada. `doctor` não testa conexões de provedores; use `omniroute providers test <id>` para isso.
 
 ---
 

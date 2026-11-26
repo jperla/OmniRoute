@@ -518,7 +518,8 @@ FSM ट्रान्जिसनले अटो कम्बोको स्�
 - शेड्युलर प्रारम्भ: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
 - आवधिक कार्य: `src/shared/services/cloudSyncScheduler.ts`
 - आवधिक कार्य: `src/shared/services/modelSyncScheduler.ts`
-- नियन्त्रण रुट: `src/app/api/sync/cloud/route.ts`
+- आवधिक कार्य (प्रति जडान अप्ट-इन): `src/shared/services/modelHealthCheckScheduler.ts` — जडानको मोडेलहरू परीक्षण गर्दछ, असफलताहरू स्वतः लुकाउँछ र आफूले लुकाएको कुरा मात्र पुनर्स्थापित गर्दछ (`src/lib/db/modelHealthAutoHidden.ts`)
+- नियन्त्रण मार्ग: `src/app/api/sync/cloud/route.ts`
 
 ## अनुरोध जीवनचक्र (`/v1/chat/completions`)
 

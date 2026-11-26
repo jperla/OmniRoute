@@ -512,12 +512,13 @@ FSM გადასვლები იკვებება Auto Combo-ის �
 - WebSocket-ის საწყისი კავშირის ავთენტიფიკაცია: `src/lib/ws/handshake.ts` — ამოწმებს WS განახლების მოთხოვნებს API გასაღების ან სესიის cookie-ის მეშვეობით
 - მართვის პანელის რეალურ დროში მოქმედი WebSocket-ის ავთენტიფიკაცია: `src/server/ws/liveServer.ts` — დამხმარე სერვისი (პორტი `LIVE_WS_PORT`) იღებს მართვის პანელის სესიის cookie-ს ან Bearer API გასაღებს, რომელსაც მართვის მოქმედების არეალი (`manage`/`admin`) აქვს; მხოლოდ ინფერენციისთვის განკუთვნილი გასაღებები უარყოფილია. მისი შიდა `POST /__omniroute_event` გამომქვეყნებელი საბოლოო წერტილი loopback-კვანძებს მხოლოდ მაშინ იღებს, როდესაც პროქსი-გადასვლის სათაური (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`) არ არის წარმოდგენილი
 
-## 5) ღრუბლოვანი სინქრონიზაცია
+## 5) Cloud Sync
 
-- დამგეგმავის ინიციალიზაცია: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- Scheduler init: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
 - პერიოდული დავალება: `src/shared/services/cloudSyncScheduler.ts`
 - პერიოდული დავალება: `src/shared/services/modelSyncScheduler.ts`
-- მართვის მარშრუტი: `src/app/api/sync/cloud/route.ts`
+- პერიოდული დავალება (ჩართვა თითო კავშირზე): `src/shared/services/modelHealthCheckScheduler.ts` — ამოწმებს კავშირის მოდელებს, ავტომატურად მალავს წარუმატებლობებს და აღადგენს მხოლოდ იმას, რაც დამალულია (`src/lib/db/modelHealthAutoHidden.ts`)
+- კონტროლის მარშრუტი: `src/app/api/sync/cloud/route.ts`
 
 ## მოთხოვნის სასიცოცხლო ციკლი (`/v1/chat/completions`)
 

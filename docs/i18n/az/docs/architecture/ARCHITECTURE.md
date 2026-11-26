@@ -511,12 +511,13 @@ Domen Vəziyyəti Verilənlər Bazası (SQLite):
 - WebSocket ilkin əlaqə autentifikasiyası: `src/lib/ws/handshake.ts` — WS təkmilləşdirmə sorğularını API açarı və ya sessiya kukisi vasitəsilə doğrulayır
 - Canlı idarəetmə panelinin WebSocket autentifikasiyası: `src/server/ws/liveServer.ts` — köməkçi xidmət (`LIVE_WS_PORT` portu) idarəetmə panelinin sessiya kukisini və ya idarəetmə əhatə dairəsinə (`manage`/`admin`) malik Bearer API açarını qəbul edir; yalnız inferensiya üçün nəzərdə tutulmuş açarlar rədd edilir. Onun daxili `POST /__omniroute_event` yayımlayıcı son nöqtəsi yalnız heç bir proksi-keçid başlığı (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`) olmadıqda geri dövrə interfeysindən gələn tərəfdaşları qəbul edir
 
-## 5) Bulud Sinxronizasiyası
+## 5) Cloud Sync
 
-- Planlayıcının başladılması: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- Planlaşdırıcı başlanğıc: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
 - Dövri tapşırıq: `src/shared/services/cloudSyncScheduler.ts`
 - Dövri tapşırıq: `src/shared/services/modelSyncScheduler.ts`
-- İdarəetmə marşrutu: `src/app/api/sync/cloud/route.ts`
+- Dövri tapşırıq (hər əlaqə üçün qoşulma): `src/shared/services/modelHealthCheckScheduler.ts` — əlaqə modellərini sınayır, nasazlıqları avtomatik gizlədir və yalnız gizlətdiyi şeyi bərpa edir (`src/lib/db/modelHealthAutoHidden.ts`)
+- Nəzarət marşrutu: `src/app/api/sync/cloud/route.ts`
 
 ## Sorğunun həyat dövrü (`/v1/chat/completions`)
 

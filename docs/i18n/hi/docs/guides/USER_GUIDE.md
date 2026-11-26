@@ -432,7 +432,7 @@ omniroute autostart disable
 ### VPS परिनियोजन
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -514,8 +514,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -869,9 +869,9 @@ curl http://localhost:20128/api/models/catalog
 | **पहले भरें**                  | प्राथमिकता क्रम में खातों का उपयोग करता है — प्राथमिक खाता अनुपलब्ध होने तक सभी अनुरोधों को संभालता है  |
 | **राउंड रोबिन**                | एक विन्यास योग्य चिपचिपा सीमा के साथ सभी खातों के माध्यम से चक्र (डिफ़ॉल्ट: प्रति खाता 3 कॉल)           |
 | **P2C (दो विकल्पों की शक्ति)** | स्वास्थ्य के बारे में जागरूकता के साथ 2 यादृच्छिक खातों और स्वस्थ एक — संतुलन भार के लिए मार्ग चुनता है |
-| **यादृच्छिक**                  | फिशर-येट्स शफ़ल का उपयोग करके प्रत्येक अनुरोध के लिए यादृच्छिक रूप से एक खाता चुनता है                  |
+| **यादृच्छिक**                  | फिशर-येट्स शफल का उपयोग करके प्रत्येक अनुरोध के लिए यादृच्छिक रूप से एक खाता चुनता है                   |
 | **सबसे कम इस्तेमाल किया गया**  | सबसे पुराने `lastUsedAt` टाइमस्टैम्प के साथ खाते तक रूट, ट्रैफ़िक को समान रूप से वितरित करना            |
-| **लागत अनुकूलित**              | सबसे कम लागत वाले प्रदाताओं के लिए अनुकूलन करते हुए, सबसे कम प्राथमिकता वाले मूल्य वाले खाते तक रूट     |
+| **लागत अनुकूलित**              | सबसे कम लागत वाले प्रदाताओं के लिए अनुकूलन करते हुए, सबसे कम प्राथमिकता मूल्य वाले खाते तक रूट          |
 
 **उन्नत कॉम्बो और ऑटो रणनीतियाँ** (प्रति कॉम्बो या `auto/*` उपसर्गों — के माध्यम से कॉन्फ़िगर करने योग्य [AUTO-COMBO.md](../routing/AUTO-COMBO.md) देखें):
 
@@ -883,8 +883,8 @@ curl http://localhost:20128/api/models/catalog
 - `least-used` और `cost-optimized`
 - सभी उम्मीदवारों के लिए `auto` — स्कोर संचालित
 - `lkgp` (अंतिम ज्ञात अच्छा प्रदाता) — अंतिम सफल प्रदाता को पिन करता है, फिर नियमों पर वापस आ जाता है
-- `context-optimized` — सबसे बड़ी निःशुल्क संदर्भ विंडो वाला मॉडल चुनता है
-- `context-relay` — फॉलो-अप टर्न के लिए लंबे-संदर्भ मॉडल को श्रृंखलाबद्ध करता है
+- `context-optimized` — सबसे पहले सबसे बड़ी ज्ञात संदर्भ विंडो वाले मॉडल को आज़माता है
+- जब वार्तालाप किसी अन्य खाते में चला जाता है तो`context-relay` — प्राथमिकता क्रम और एक हैंडऑफ़ सारांश
 
 #### बाहरी स्टिकी सत्र शीर्षलेख
 
@@ -1062,7 +1062,7 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 | ------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | **सामान्य**  | सिस्टम भंडारण उपकरण, डिफ़ॉल्ट व्यवहार, समापन बिंदु सुरंग दृश्यता                                                                                              |
 | **उपस्थिति** | थीम नियंत्रण (light/dark/system), साइडबार दृश्यता, Cloudflare/Tailscale/ngrok टनल कार्ड के लिए पैनल टॉगल                                                      |
-| **AI**       | सोच बजट (पासथ्रू / ऑटो-स्ट्रिप / कस्टम / एडाप्टिव — देखें [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), ग्लोबल सिस्टम प्रॉम्प्ट, प्रॉम्प्ट कैश आँकड़े         |
+| **AI**       | सोच बजट (पासथ्रू / ऑटो-स्ट्रिप / कस्टम / एडेप्टिव — देखें [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), ग्लोबल सिस्टम प्रॉम्प्ट, प्रॉम्प्ट कैश आँकड़े         |
 | **सुरक्षा**  | Login/Password सेटिंग्स, IP एक्सेस कंट्रोल, `/models` के लिए API प्रमाणीकरण, प्रदाता ब्लॉकिंग, प्रॉम्प्ट-इंजेक्शन गार्ड                                       |
 | **मार्ग**    | वैश्विक रूटिंग रणनीति (पहले भरें / राउंड रॉबिन / P2C / रैंडम / कम से कम उपयोग किया गया / लागत अनुकूलित), वाइल्डकार्ड मॉडल उपनाम, फ़ॉलबैक चेन, कॉम्बो डिफ़ॉल्ट |
 | **लचीलापन**  | अनुरोध कतार, कनेक्शन कूलडाउन, प्रदाता ब्रेकर कॉन्फ़िगरेशन, और कूलडाउन के लिए प्रतीक्षा व्यवहार                                                                |
@@ -1333,32 +1333,34 @@ curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUT
 
 ## 💻 आंतरिक CLI
 
-OmniRoute सेटअप, निदान और रनटाइम नियंत्रण के लिए एक आंतरिक CLI (`omniroute …`) प्रदान करता है। यह **डैशबोर्ड के "CLI टूल्स" पेज से अलग है**, जो तृतीय-पक्ष CLI (Claude Code, Cursor, Codex, Cline, …) को कॉन्फ़िगर करता है, ताकि वे OmniRoute से संचार कर सकें।
+OmniRoute सेटअप, डायग्नोस्टिक्स और रनटाइम नियंत्रण के लिए एक आंतरिक CLI (`omniroute …`) शिप करता है। यह है** डैशबोर्ड में "CLI टूल्स" पेज से अलग करें** , जो तृतीय-पक्ष CLIs (Claude Code, Cursor, Codex, Cline,…) को कॉन्फ़िगर करता है ताकि वे OmniRoute से बात कर सकें।
 
 ```bash
-omniroute setup                    # इंटरैक्टिव विज़ार्ड (पासवर्ड, प्रोवाइडर, कॉम्बो)
-omniroute setup --non-interactive  # CI के अनुकूल
-omniroute doctor                   # स्वास्थ्य निदान (डेटा डायरेक्टरी, DB, प्रोवाइडर, पोर्ट)
-omniroute providers available      # समर्थित प्रोवाइडर सूचीबद्ध करें
-omniroute providers list           # कॉन्फ़िगर किए गए कनेक्शन सूचीबद्ध करें
-omniroute providers test <id>      # प्रोवाइडर कनेक्शन का लाइव परीक्षण करें
-omniroute combos list              # कॉम्बो सूचीबद्ध करें
-omniroute combos switch <name>     # डिफ़ॉल्ट कॉम्बो सेट करें
-omniroute models                   # उपलब्ध मॉडल सूचीबद्ध करें (--json, --search)
-omniroute keys add | list | remove # टर्मिनल से API कुंजियाँ प्रबंधित करें
-omniroute backup                   # कॉन्फ़िगरेशन + DB का स्नैपशॉट बनाएँ
-omniroute restore [<timestamp>]    # स्नैपशॉट से पुनर्स्थापित करें
-omniroute health                   # विस्तृत स्वास्थ्य जानकारी (ब्रेकर, कैश, मेमोरी)
-omniroute quota                    # प्रोवाइडर कोटा उपयोग
-omniroute mcp status               # MCP सर्वर की स्थिति
-omniroute a2a status               # A2A सर्वर की स्थिति
-omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok टनल
-omniroute reset-password           # एडमिन पासवर्ड रीसेट करें
-omniroute --mcp                    # stdio पर MCP सर्वर शुरू करें
-omniroute --port 3000              # कस्टम पोर्ट पर सर्वर शुरू करें
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-सुझाव: अस्वस्थ प्रोवाइडर कनेक्शन के लिए अलर्ट प्राप्त करने हेतु अपने मॉनिटरिंग टूल के साथ `omniroute doctor --json` का उपयोग करें।
+युक्ति: टूटे हुए स्थानीय इंस्टाल पर सचेत करने के लिए `omniroute doctor --json` अपने मॉनिटरिंग टूल के साथ जोड़ें। `doctor` प्रदाता कनेक्शन का परीक्षण नहीं करता है; उसके लिए `omniroute providers test <id>` उपयोग करें।
 
 ---
 

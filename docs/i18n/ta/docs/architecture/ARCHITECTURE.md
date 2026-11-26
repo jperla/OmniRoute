@@ -513,10 +513,11 @@ FSM மாற்றங்கள் ஆட்டோ காம்போவின�
 
 ## 5) கிளவுட் ஒத்திசைவு
 
-- திட்டமிடுபவர் துவக்கம்: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
-- காலமுறைப் பணி: `src/shared/services/cloudSyncScheduler.ts`
-- காலமுறைப் பணி: `src/shared/services/modelSyncScheduler.ts`
-- கட்டுப்பாட்டு route: `src/app/api/sync/cloud/route.ts`
+- திட்டமிடல் init: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- காலப் பணி: `src/shared/services/cloudSyncScheduler.ts`
+- காலப் பணி: `src/shared/services/modelSyncScheduler.ts`
+- குறிப்பிட்ட காலப் பணி (ஒவ்வொரு இணைப்புக்கும் தெரிவு): `src/shared/services/modelHealthCheckScheduler.ts` — இணைப்பின் மாதிரிகளைச் சோதிக்கிறது, தோல்விகளைத் தானாக மறைக்கிறது மற்றும் அது மறைத்ததை மட்டும் மீட்டெடுக்கிறது (`src/lib/db/modelHealthAutoHidden.ts`)
+- கட்டுப்பாட்டு பாதை: `src/app/api/sync/cloud/route.ts`
 
 ## கோரிக்கை வாழ்க்கைச் சுழற்சி (`/v1/chat/completions`)
 

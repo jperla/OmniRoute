@@ -502,12 +502,13 @@ Domēna stāvokļa DB (SQLite):
 - WebSocket savienojuma izveides autentifikācija: `src/lib/ws/handshake.ts` — validē WS jaunināšanas pieprasījumus, izmantojot API atslēgu vai sesijas sīkfailu
 - Informācijas paneļa tiešsaistes WebSocket autentifikācija: `src/server/ws/liveServer.ts` — blakusprocess (ports `LIVE_WS_PORT`) pieņem informācijas paneļa sesijas sīkfailu vai Bearer API atslēgu ar pārvaldības tvērumu (`manage`/`admin`); atslēgas, kas paredzētas tikai inferenču veikšanai, tiek noraidītas. Tā iekšējais `POST /__omniroute_event` publicētāja galapunkts pieņem lokālā atgriezeniskā savienojuma vienādranga mezglus tikai tad, ja nav norādīta neviena starpniekservera posma galvene (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`)
 
-## 5) Mākoņa sinhronizācija
+## 5) Mākoņu sinhronizācija
 
-- Plānotāja inicializācija: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- Plānotāja init: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
 - Periodisks uzdevums: `src/shared/services/cloudSyncScheduler.ts`
 - Periodisks uzdevums: `src/shared/services/modelSyncScheduler.ts`
-- Vadības maršruts: `src/app/api/sync/cloud/route.ts`
+- Periodisks uzdevums (pieteikšanās katram savienojumam): `src/shared/services/modelHealthCheckScheduler.ts` — pārbauda savienojuma modeļus, automātiski paslēpj kļūmes un atjauno tikai to, ko tas pats paslēpis (`src/lib/db/modelHealthAutoHidden.ts`)
+- Kontroles maršruts: `src/app/api/sync/cloud/route.ts`
 
 ## Pieprasījuma dzīves cikls (`/v1/chat/completions`)
 

@@ -431,7 +431,7 @@ Kai jums nebereikia OmniRoute, pateikiame du greitus scenarijus švariam pašali
 ### VPS diegimas
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -513,8 +513,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -600,7 +600,7 @@ post_install() {
 
 | Kintamasis                              | Numatytoji                      | Aprašymas                                                                                                                                                      |
 | --------------------------------------- | ------------------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | _(automatiškai sugeneruota)_    | JWT pasirašymo paslaptis — automatiškai sugeneruota pirmą kartą paleidus ir išliko iki `server.env`; aiškiai nustatyti, kai duomenų katalogas yra trumpalaikis |
+| `JWT_SECRET`                            | _(automatiškai sugeneruotas)_   | JWT pasirašymo paslaptis — automatiškai sugeneruota pirmą kartą paleidus ir išliko iki `server.env`; aiškiai nustatyti, kai duomenų katalogas yra trumpalaikis |
 | `INITIAL_PASSWORD`                      | _(nustatyta)_                   | Pirmasis prisijungimo slaptažodis. npm/source diegimas prasideda `CHANGEME`: pakeiskite jį. Atšaukta: priėmimo vedlys                                          |
 | `DATA_DIR`                              | `~/.omniroute`                  | Duomenų katalogas (db, naudojimas, žurnalai)                                                                                                                   |
 | `PORT`                                  | numatytosios sistemos           | Aptarnavimo prievadas (`20128` pavyzdžiuose)                                                                                                                   |
@@ -608,7 +608,7 @@ post_install() {
 | `NODE_ENV`                              | vykdymo laikas pagal nutylėjimą | Nustatyti `production` diegimui                                                                                                                                |
 | `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128`        | Viešas bazinis URL pateiktas prietaisų skydelyje ir rodomas serveryje (pakeičia seną `BASE_URL`)                                                               |
 | `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`         | Debesų sinchronizavimo pabaigos taško bazė URL (pakeičia seną `CLOUD_URL`)                                                                                     |
-| `API_KEY_SECRET`                        | _(automatiškai sugeneruota)_    | HMAC paslaptis sugeneruotiems API raktams — automatiškai sugeneruojama pirmą kartą ir išliko `server.env`                                                      |
+| `API_KEY_SECRET`                        | _(automatiškai sugeneruotas)_   | HMAC paslaptis sugeneruotiems API raktams — automatiškai sugeneruojama pirmą kartą ir išliko `server.env`                                                      |
 | `REQUIRE_API_KEY`                       | `false`                         | Įgalinkite nešiklio API klavišą `/v1/*`                                                                                                                        |
 | `ALLOW_API_KEY_REVEAL`                  | `false`                         | Leiskite autentifikuotiems prietaisų skydelio naudotojams pareikalavus atskleisti visas išsaugotas API raktų reikšmes                                          |
 | `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                            | Talpykloje saugomų teikėjo apribojimų duomenų atnaujinimo dažnis serverio pusėje; UI atnaujinimo mygtukai vis tiek suaktyvina rankinį sinchronizavimą          |
@@ -752,7 +752,7 @@ Pasirinkite atskirą priešdėlį (`mygw`, `acme-proxy`). Jei užklausos tinkint
 
 ### Grandininis OmniRoute Peers
 
-Kitas OmniRoute šliuzas gali būti pridėtas kaip a** Pasirinktinis su OpenAI suderinamas** teikėjas. Naudokite lygiavertės programos `/v1` bazę URL ir tam skirtą, mažiausių privilegijų API raktą, išduotą to bendraamžio.
+Kitas OmniRoute šliuzas gali būti pridėtas kaip a** Pasirinktinis su OpenAI suderinamas** teikėjas. Naudokite lygiavertės programos `/v1` bazę URL ir tam skirtą, mažiausią privilegiją turintį API raktą, išduotą to bendraamžio.
 
 Abipusėms arba kelių šuolių grandinėms įjunkite pasirinkimo kilpos apsaugą kiekviename šliuze:
 
@@ -820,7 +820,7 @@ Pateikiami modeliai, sugrupuoti pagal teikėją ir tipus (`chat`, `embedding`, `
 
 ### Cloudflare greitasis tunelis
 
-- Galima įsigyti** Prietaisų skydelio → galutiniai taškai** Docker ir kitiems savarankiškai priglobtam diegimui
+- Galima įsigyti** Prietaisų skydelis → galutiniai taškai** Docker ir kitiems savarankiškai priglobtam diegimui
 - Sukuria laikiną `https://*.trycloudflare.com` URL, kuris persiunčia į dabartinį su OpenAI suderinamą `/v1` galinį tašką
 - Pirmiausia įgalinti įdiegia `cloudflared` tik tada, kai reikia; vėliau paleidžiant iš naujo pakartotinai naudoja tą patį valdomą dvejetainį failą
 - Greitieji tuneliai nėra automatiškai atkuriami iš naujo paleidus OmniRoute arba konteinerį; prireikus vėl įjunkite juos iš prietaisų skydelio
@@ -870,7 +870,7 @@ Konfigūruoti per** Prietaisų skydelis → Nustatymai → Maršrutas** . Prieta
 | **P2C (dviejų pasirinkimų galia)** | Pasirenka 2 — paskyras ir maršrutus į sveikesnę                                                             |
 | **Atsitiktinis**                   | Atsitiktinai pasirenka paskyrą kiekvienai užklausai naudodamas Fisher-Yates shuffle                         |
 | **Mažiausiai naudotas**            | Maršrutai į paskyrą su seniausia `lastUsedAt` laiko žyma, tolygiai paskirstant srautą                       |
-| **Optimizuotos išlaidos**          | Maršrutai į paskyrą, kurios prioriteto vertė yra mažiausia, optimizuojama mažiausios kainos teikėjams       |
+| **Optimizuotos išlaidos**          | Maršrutai į paskyrą, kurios prioriteto vertė yra mažiausia, optimizuojama pigiausių paslaugų teikėjams      |
 
 **Išplėstinės kombinuotos ir automatinės strategijos** (konfigūruojama kombinacijoje arba naudojant `auto/*` priešdėlius — žr. [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
 
@@ -882,8 +882,8 @@ Konfigūruoti per** Prietaisų skydelis → Nustatymai → Maršrutas** . Prieta
 - `least-used` ir `cost-optimized`
 - `auto` — rezultatas priklauso nuo visų kandidatų
 - `lkgp` (paskutinis žinomas geras teikėjas) — prisega prie paskutinio sėkmingo teikėjo, tada grįžta prie taisyklių
-- `context-optimized` — pasirenka modelį su didžiausiu laisvo konteksto langu
-- `context-relay` — grandines ilgo konteksto modeliai tolesniems posūkiams
+- `context-optimized` — pirmiausia išbando modelį su didžiausiu žinomu konteksto langu
+- `context-relay` — prioriteto tvarka ir perdavimo suvestinė, kai pokalbis perkeliamas į kitą paskyrą
 
 #### Išorinė lipni seanso antraštė
 
@@ -1000,7 +1000,7 @@ OmniRoute įgyvendina teikėjo lygio atsparumą su penkiais komponentais:
    - **Naudokite prieš srovę bandyti dar kartą patarimus** — Gerbia autoritetingas `Retry-After` arba iš naujo nustatytas užuominas
    - **Maks. atsitraukimo žingsniai** — Maksimalus eksponentinis atsitraukimo lygis pasikartojantiems gedimams
 
-3. **Tiekėjo grandinės pertraukiklis** — seka galutinio tiekėjo triktis, pažymi teikėją, kuris pablogėjo iki sukonfigūruoto įspėjimo slenksčio, ir atidaro pertraukiklį, kai pasiekiamas sukonfigūruotas gedimo slenkstis:
+3. **Tiekėjo grandinės pertraukiklis** — seka galutinio tiekėjo gedimus, pažymi teikėją, kuris pablogėjo iki sukonfigūruoto įspėjimo slenksčio, ir atidaro pertraukiklį, kai pasiekiamas sukonfigūruotas gedimo slenkstis:
    - **Degradacijos slenkstis** — Iš eilės teikėjo gedimai prieš įeinant į `DEGRADED`
    - **Nesėkmės slenkstis** — Iš eilės teikėjo gedimai prieš įeinant į `OPEN`
    - **Iš naujo nustatyti skirtąjį laiką** — Laiko langas, kol teikėjas bus išbandytas dar kartą
@@ -1013,7 +1013,7 @@ OmniRoute įgyvendina teikėjo lygio atsparumą su penkiais komponentais:
 
    Rodoma teikėjo pertraukiklio vykdymo būsena** Prietaisų skydelis → Health** tik.
 
-4. **Palaukite atvėsimo** — Jei kiekvienas potencialus ryšys jau atvėso, OmniRoute gali laukti anksčiausio atšalimo ir automatiškai pakartotinai bandyti tą pačią kliento užklausą.
+4. **Palaukite atvėsimo** — Jei kiekvienas potencialus ryšys jau atvėsęs, OmniRoute gali laukti anksčiausio atšalimo ir automatiškai pakartotinai bandyti tą pačią kliento užklausą.
 
 5. **Normos ribos automatinis aptikimas** — Kai tiekėjai grąžina aiškų laukimo langus, šios užuominos nepaiso vietinio ryšio atvėsimo, kai nustatymas įgalintas.
 
@@ -1057,15 +1057,15 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 
 Nustatymų puslapis suskirstytas į** 7 skirtukai** kad būtų lengviau naršyti:
 
-| Skirtukas      | Turinys                                                                                                                                                                                                                               |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Generolas**  | Sistemos saugojimo įrankiai, numatytasis elgesys, galutinio taško tunelio matomumas                                                                                                                                                   |
-| **Išvaizda**   | Temos valdikliai (light/dark/system), šoninės juostos matomumas, skydelio perjungimai Cloudflare/Tailscale/ngrok tunelinėms kortelėms                                                                                                 |
-| **AI**         | Mąstomas biudžetas (pereinamoji / automatinė juostelė / tinkintas / adaptyvus — žr. [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), pasaulinė sistemos raginimas, greita talpyklos statistika                                           |
-| **Saugumas**   | Login/Password nustatymai, IP prieigos valdymas, API autentifikavimas `/models`, teikėjo blokavimas, greito įpurškimo apsauga                                                                                                         |
-| **Maršrutas**  | Visuotinė maršruto parinkimo strategija (Fill First / Round Robin / P2C / Atsitiktinis / Mažiausiai naudojamas / Optimizuota kaina), pakaitos simbolių modelio slapyvardžiai, atsarginės grandinės, kombinuoti numatytieji nustatymai |
-| **Atsparumas** | Prašyti eilės, ryšio atvėsimo, teikėjo pertraukiklio konfigūracijos ir laukimo, kol atvėsimas                                                                                                                                         |
-| **Išplėstinė** | Visuotinė tarpinio serverio konfigūracija (HTTP/SOCKS5), tarpinio serverio nepaisymas pagal teikėją                                                                                                                                   |
+| Skirtukas      | Turinys                                                                                                                                                                                                                                   |
+| -------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Generolas**  | Sistemos saugojimo įrankiai, numatytasis elgesys, galutinio taško tunelio matomumas                                                                                                                                                       |
+| **Išvaizda**   | Temos valdikliai (light/dark/system), šoninės juostos matomumas, skydelio perjungimai Cloudflare/Tailscale/ngrok tunelinėms kortelėms                                                                                                     |
+| **AI**         | Mąstomas biudžetas (pereinamoji / automatinė juostelė / tinkintas / adaptyvus — žr. [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), pasaulinė sistemos raginimas, greita talpyklos statistika                                               |
+| **Saugumas**   | Login/Password nustatymai, IP prieigos valdymas, API autentifikavimas `/models`, teikėjo blokavimas, greito įpurškimo apsauga                                                                                                             |
+| **Maršrutas**  | Visuotinė maršruto parinkimo strategija (Fill First / Round Robin / P2C / Atsitiktinis / Mažiausiai naudojamas / Optimizuotas sąnaudos), pakaitos simbolių modelio slapyvardžiai, atsarginės grandinės, kombinuoti numatytieji nustatymai |
+| **Atsparumas** | Prašyti eilės, ryšio atvėsimo, teikėjo pertraukiklio konfigūracijos ir laukimo, kol atvėsimas                                                                                                                                             |
+| **Išplėstinė** | Visuotinė tarpinio serverio konfigūracija (HTTP/SOCKS5), tarpinio serverio nepaisymas pagal teikėją                                                                                                                                       |
 
 Bendra nebedubliuoja tik skaitymo registravimo ir talpyklos pastabų. Duomenų bazės saugojimo ir optimizavimo nustatymai išlieka per `/api/settings/database`; rankinis talpyklos išvalymas naudoja `DELETE /api/cache`. Užklausų ir tarpinio serverio žurnalo eilučių viršutines ribas valdo `CALL_LOGS_TABLE_MAX_ROWS` ir `PROXY_LOGS_TABLE_MAX_ROWS`.
 
@@ -1150,7 +1150,7 @@ Konfigūruokite derinį balansavimą** Prietaisų skydelis → Combos → Create
 | strategija                | Aprašymas                                                                          |
 | ------------------------- | ---------------------------------------------------------------------------------- |
 | **Round-Robin**           | Paeiliui sukasi per modelius                                                       |
-| **Pirmenybė**             | Visada bando pirmąjį modelį; grįžta tik dėl klaidos                                |
+| **Pirmenybė**             | Visada bando pirmąjį modelį; grįžta tik klaidos atveju                             |
 | **Atsitiktinis**          | Kiekvienai užklausai iš derinio pasirenka atsitiktinį modelį                       |
 | **Svertinis**             | Maršrutai proporcingai pagrįsti priskirtais svoriais kiekvienam modeliui           |
 | **Mažiausiai naudotas**   | Maršrutai į modelį su mažiausiai naujausių užklausų (naudojama kombinuota metrika) |
@@ -1173,7 +1173,7 @@ Prieiga per** Prietaisų skydelis → Health** . Sistemos būklės apžvalga rea
 | **Sistemos būsena**        | Veikimo laikas, versija, atminties naudojimas, duomenų katalogas     |
 | **Teikėjo sveikata**       | Pasaulinio teikėjo grandinės pertraukiklio vykdymo būsena            |
 | **Kainos ribos**           | Aktyvūs ryšio atvėsimai vienoje paskyroje su likusiu laiku           |
-| **Aktyvūs užraktai**       | Aktyvūs modelio blokavimai ir laikini išskyrimai                     |
+| **Aktyvūs blokavimai**     | Aktyvūs modelio blokavimai ir laikini išskyrimai                     |
 | **Parašo talpykla**        | Dubliavimo talpyklos statistika (aktyvūs raktai, pataikymo rodiklis) |
 | **Latencijos telemetrija** | p50/p95/p99 delsos agregacija vienam teikėjui                        |
 
@@ -1330,34 +1330,36 @@ Visą galinių taškų katalogą ir užklausų bei atsakymų schemas rasite [API
 
 ---
 
-## 💻 Vidinė CLI
+## 💻 Vidinis CLI
 
-„OmniRoute“ pateikiama su vidine CLI (`omniroute …`), skirta konfigūravimui, diagnostikai ir veikimo valdymui. Ji yra **atskira nuo valdymo skydelio puslapio „CLI įrankiai“**, kuriame konfigūruojamos trečiųjų šalių CLI („Claude Code“, „Cursor“, „Codex“, „Cline“, …), kad jos galėtų palaikyti ryšį su „OmniRoute“.
+OmniRoute pristato vidinį CLI (`omniroute …`), skirtą sąrankai, diagnostikai ir vykdymo laikui valdyti. Tai yra** atskirti nuo „CLI Tools“ puslapio prietaisų skydelyje** , kuri sukonfigūruoja trečiosios šalies CLIs (Claude Code, Cursor, Codex, Cline, …), kad jie galėtų kalbėtis su OmniRoute.
 
 ```bash
-omniroute setup                    # Interaktyvus vediklis (slaptažodis, teikėjai, deriniai)
-omniroute setup --non-interactive  # Tinka CI aplinkai
-omniroute doctor                   # Būklės diagnostika (duomenų katalogas, DB, teikėjai, prievadai)
-omniroute providers available      # Rodyti palaikomus teikėjus
-omniroute providers list           # Rodyti sukonfigūruotus ryšius
-omniroute providers test <id>      # Realiuoju laiku patikrinti ryšį su teikėju
-omniroute combos list              # Rodyti derinius
-omniroute combos switch <name>     # Nustatyti numatytąjį derinį
-omniroute models                   # Rodyti galimus modelius (--json, --search)
-omniroute keys add | list | remove # Tvarkyti API raktus terminale
-omniroute backup                   # Sukurti konfigūracijos ir DB momentinę kopiją
-omniroute restore [<timestamp>]    # Atkurti iš momentinės kopijos
-omniroute health                   # Išsami būklė (grandinės pertraukikliai, podėlis, atmintis)
-omniroute quota                    # Teikėjų kvotų naudojimas
-omniroute mcp status               # MCP serverio būsena
-omniroute a2a status               # A2A serverio būsena
-omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tuneliai
-omniroute reset-password           # Iš naujo nustatyti administratoriaus slaptažodį
-omniroute --mcp                    # Paleisti MCP serverį per stdio
-omniroute --port 3000              # Paleisti serverį naudojant pasirinktinį prievadą
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-Patarimas: naudokite `omniroute doctor --json` kartu su savo stebėjimo įrankiu, kad gautumėte įspėjimus apie sutrikusius ryšius su teikėjais.
+Patarimas: susiekite `omniroute doctor --json` su stebėjimo įrankiu, kad įspėtumėte apie sugedusį vietinį diegimą. `doctor` netikrina tiekėjo ryšių; tam naudokite `omniroute providers test <id>`.
 
 ---
 

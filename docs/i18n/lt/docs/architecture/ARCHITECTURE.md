@@ -512,11 +512,12 @@ Domeno būsenos DB (SQLite):
 - WebSocket pradinio ryšio autentifikavimas: `src/lib/ws/handshake.ts` — tikrina WS protokolo atnaujinimo užklausas naudodamas API raktą arba seanso slapuką
 - Tiesioginio valdymo skydelio WebSocket autentifikavimas: `src/server/ws/liveServer.ts` — pagalbinis procesas (prievadas `LIVE_WS_PORT`) priima valdymo skydelio seanso slapuką arba Bearer API raktą, turintį valdymo aprėptį (`manage`/`admin`); tik išvedimui skirti raktai atmetami. Jo vidinis `POST /__omniroute_event` publikavimo galinis taškas priima vietinio grįžtamojo ryšio mazgus tik tada, kai nėra tarpinio serverio perėjimo antraštės (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`)
 
-## 5) Sinchronizavimas su debesija
+## 5) Debesų sinchronizavimas
 
-- Planuoklio inicijavimas: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- Planuoklio įvedimas: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
 - Periodinė užduotis: `src/shared/services/cloudSyncScheduler.ts`
 - Periodinė užduotis: `src/shared/services/modelSyncScheduler.ts`
+- Periodinė užduotis (pasirinkimas kiekvienam ryšiui): `src/shared/services/modelHealthCheckScheduler.ts` — išbando ryšio modelius, automatiškai paslepia gedimus ir atkuria tik tai, ką paslėpė pats (`src/lib/db/modelHealthAutoHidden.ts`)
 - Valdymo maršrutas: `src/app/api/sync/cloud/route.ts`
 
 ## Užklausos gyvavimo ciklas (`/v1/chat/completions`)

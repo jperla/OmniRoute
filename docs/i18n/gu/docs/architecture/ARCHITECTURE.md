@@ -513,10 +513,11 @@ FSM સંક્રમણો ઓટો કોમ્બોના સ્કોર�
 
 ## 5) ક્લાઉડ સિંક
 
-- શેડ્યુલર ઇનિશિયલાઇઝેશન: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
-- સમયાંતરે ચાલતું કાર્ય: `src/shared/services/cloudSyncScheduler.ts`
-- સમયાંતરે ચાલતું કાર્ય: `src/shared/services/modelSyncScheduler.ts`
-- કંટ્રોલ રૂટ: `src/app/api/sync/cloud/route.ts`
+- શેડ્યૂલર પ્રારંભ: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- સામયિક કાર્ય: `src/shared/services/cloudSyncScheduler.ts`
+- સામયિક કાર્ય: `src/shared/services/modelSyncScheduler.ts`
+- સામયિક કાર્ય (કનેક્શન દીઠ પસંદ કરો): `src/shared/services/modelHealthCheckScheduler.ts` — કનેક્શનના મોડલનું પરીક્ષણ કરે છે, નિષ્ફળતાને સ્વતઃ-છુપાવે છે અને તે પોતે જે છુપાવે છે તે જ પુનઃસ્થાપિત કરે છે (`src/lib/db/modelHealthAutoHidden.ts`)
+- નિયંત્રણ માર્ગ: `src/app/api/sync/cloud/route.ts`
 
 ## વિનંતી જીવનચક્ર (`/v1/chat/completions`)
 

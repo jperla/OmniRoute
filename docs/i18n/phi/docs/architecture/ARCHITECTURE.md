@@ -514,10 +514,11 @@ Domain State DB (SQLite):
 
 ## 5) Cloud Sync
 
-- Pagsisimula ng scheduler: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
-- Pana-panahong task: `src/shared/services/cloudSyncScheduler.ts`
-- Pana-panahong task: `src/shared/services/modelSyncScheduler.ts`
-- Route ng kontrol: `src/app/api/sync/cloud/route.ts`
+- Taga-iskedyul init: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- Pana-panahong gawain: `src/shared/services/cloudSyncScheduler.ts`
+- Pana-panahong gawain: `src/shared/services/modelSyncScheduler.ts`
+- Pana-panahong gawain (pag-opt-in sa bawat koneksyon): sinusubok `src/shared/services/modelHealthCheckScheduler.ts` — ang mga modelo ng koneksyon, awtomatikong nagtatago ng mga pagkabigo at nire-restore lang ang itinago nito mismo (`src/lib/db/modelHealthAutoHidden.ts`)
+- Ruta ng kontrol: `src/app/api/sync/cloud/route.ts`
 
 ## Lifecycle ng Request (`/v1/chat/completions`)
 

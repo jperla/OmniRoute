@@ -428,7 +428,7 @@ omniroute autostart disable
 ### VPS જમાવટ
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -495,7 +495,7 @@ CLI દ્વિસંગી સાથે હોસ્ટ-ઇન્ટિગ્�
 
 ### રદબાતલ Linux (xbps-src)
 
-Void Linux વપરાશકર્તાઓ `xbps-src` ક્રોસ-કમ્પાઇલેશન ફ્રેમવર્કનો ઉપયોગ કરીને OmniRoute પૅકેજ અને ઇન્સ્ટોલ કરી શકે છે. આ જરૂરી `better-sqlite3` નેટિવ બાઈન્ડિંગ્સ સાથે Node.js સ્ટેન્ડઅલોન બિલ્ડને સ્વચાલિત કરે છે.
+Void Linux વપરાશકર્તાઓ `xbps-src` ક્રોસ-કમ્પાઇલેશન ફ્રેમવર્કનો ઉપયોગ કરીને OmniRoute મૂળ રીતે પેકેજ અને ઇન્સ્ટોલ કરી શકે છે. આ જરૂરી `better-sqlite3` નેટિવ બાઈન્ડિંગ્સ સાથે Node.js સ્ટેન્ડઅલોન બિલ્ડને સ્વચાલિત કરે છે.
 
 <details>
 <summary><b>xbps-src ટેમ્પલેટ જુઓ</b></summary>
@@ -510,8 +510,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -595,28 +595,28 @@ post_install() {
 
 ### પર્યાવરણ ચલો
 
-| ચલ                                      | ડિફૉલ્ટ                  | વર્ણન                                                                                                                                                       |
-| --------------------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `JWT_SECRET`                            | _(ઓટો-જનરેટ)_            | JWT હસ્તાક્ષર કરતી ગુપ્ત — પ્રથમ રન પર સ્વતઃ જનરેટ થાય છે અને `server.env` પર ચાલુ રહે છે; જ્યારે ડેટા ડિરેક્ટરી ક્ષણિક હોય ત્યારે તેને સ્પષ્ટ રીતે સેટ કરો |
-| `INITIAL_PASSWORD`                      | _(અનસેટ)_                | પ્રથમ લોગિન પાસવર્ડ. npm/source ઇન્સ્ટોલ `CHANGEME` થી શરૂ થાય છે: તેને બદલો. અનસેટ: ઓનબોર્ડિંગ વિઝાર્ડ                                                     |
-| `DATA_DIR`                              | `~/.omniroute`           | ડેટા ડિરેક્ટરી (ડીબી, ઉપયોગ, લોગ)                                                                                                                           |
-| `PORT`                                  | ફ્રેમવર્ક ડિફૉલ્ટ        | સર્વિસ પોર્ટ (ઉદાહરણોમાં`20128` )                                                                                                                           |
-| `HOSTNAME`                              | ફ્રેમવર્ક ડિફૉલ્ટ        | યજમાનને બાંધો (Docker `0.0.0.0` માટે ડિફોલ્ટ )                                                                                                              |
-| `NODE_ENV`                              | રનટાઇમ ડિફોલ્ટ           | જમાવટ માટે `production` સેટ કરો                                                                                                                             |
-| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | સાર્વજનિક આધાર URL ડેશબોર્ડ પર સપાટી પર આવ્યો અને સર્વર સામે આવ્યો (લેગસી `BASE_URL` ને બદલે છે)                                                            |
-| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | ક્લાઉડ સિંક એન્ડપોઇન્ટ બેઝ URL (લેગસી `CLOUD_URL` ને બદલે છે)                                                                                               |
-| `API_KEY_SECRET`                        | _(ઓટો-જનરેટ)_            | જનરેટ કરેલ API કી માટેHMAC સિક્રેટ — પ્રથમ રન પર સ્વતઃ જનરેટ થયેલ અને `server.env` પર ચાલુ રહે છે                                                           |
-| `REQUIRE_API_KEY`                       | `false`                  | `/v1/*` પર Bearer API કી લાગુ કરો                                                                                                                           |
-| `ALLOW_API_KEY_REVEAL`                  | `false`                  | પ્રમાણિત ડેશબોર્ડ વપરાશકર્તાઓને માંગ પર સંપૂર્ણ સંગ્રહિત API કી મૂલ્યો જાહેર કરવાની મંજૂરી આપો                                                              |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | કેશ્ડ પ્રદાતા મર્યાદા ડેટા માટે સર્વર-સાઇડ રિફ્રેશ કેડન્સ; UI રિફ્રેશ બટનો હજુ પણ મેન્યુઅલ સિંકને ટ્રિગર કરે છે                                             |
-| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | writes/import/restore પહેલા સ્વચાલિત SQLite સ્નેપશોટને અક્ષમ કરો; મેન્યુઅલ બેકઅપ હજુ પણ કામ કરે છે                                                          |
-| `APP_LOG_TO_FILE`                       | `true`                   | ડિસ્ક પર એપ્લિકેશન અને ઓડિટ લોગ આઉટપુટને સક્ષમ કરે છે                                                                                                       |
-| `AUTH_COOKIE_SECURE`                    | `false`                  | `Secure` auth કૂકી પર દબાણ કરો ( HTTPS રિવર્સ પ્રોક્સી પાછળ)                                                                                                |
-| `CLOUDFLARED_BIN`                       | અનસેટ                    | સંચાલિત ડાઉનલોડને બદલે હાલની `cloudflared` બાઈનરીનો ઉપયોગ કરો                                                                                               |
-| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | વ્યવસ્થાપિત ક્વિક ટનલ (`http2`, `quic`, અથવા `auto`) માટે પરિવહન                                                                                            |
-| `OMNIROUTE_MEMORY_MB`                   | `512`                    | MB માંNode.js હીપ મર્યાદા                                                                                                                                   |
-| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | મહત્તમ પ્રોમ્પ્ટ કેશ એન્ટ્રીઓ                                                                                                                               |
-| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | મહત્તમ સિમેન્ટીક કેશ એન્ટ્રીઓ                                                                                                                               |
+| ચલ                                      | ડિફૉલ્ટ                  | વર્ણન                                                                                                                                                |
+| --------------------------------------- | ------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `JWT_SECRET`                            | _(ઓટો-જનરેટ)_            | JWT હસ્તાક્ષર ગુપ્ત — પ્રથમ રન પર સ્વતઃ જનરેટ થયું અને `server.env` પર ચાલુ રહે છે; જ્યારે ડેટા ડિરેક્ટરી ક્ષણિક હોય ત્યારે તેને સ્પષ્ટ રીતે સેટ કરો |
+| `INITIAL_PASSWORD`                      | _(અનસેટ)_                | પ્રથમ લોગિન પાસવર્ડ. npm/source ઇન્સ્ટોલ `CHANGEME` થી શરૂ થાય છે: તેને બદલો. અનસેટ: ઓનબોર્ડિંગ વિઝાર્ડ                                              |
+| `DATA_DIR`                              | `~/.omniroute`           | ડેટા ડિરેક્ટરી (ડીબી, ઉપયોગ, લોગ)                                                                                                                    |
+| `PORT`                                  | ફ્રેમવર્ક ડિફૉલ્ટ        | સર્વિસ પોર્ટ (ઉદાહરણોમાં`20128` )                                                                                                                    |
+| `HOSTNAME`                              | ફ્રેમવર્ક ડિફૉલ્ટ        | યજમાનને બાંધો (Docker `0.0.0.0` માટે ડિફોલ્ટ )                                                                                                       |
+| `NODE_ENV`                              | રનટાઇમ ડિફોલ્ટ           | જમાવટ માટે `production` સેટ કરો                                                                                                                      |
+| `NEXT_PUBLIC_BASE_URL`                  | `http://localhost:20128` | સાર્વજનિક આધાર URL ડેશબોર્ડ પર સપાટી પર આવ્યો અને સર્વર સામે આવ્યો (લેગસી `BASE_URL` ને બદલે છે)                                                     |
+| `NEXT_PUBLIC_CLOUD_URL`                 | `https://omniroute.dev`  | ક્લાઉડ સિંક એન્ડપોઇન્ટ બેઝ URL (લેગસી `CLOUD_URL` ને બદલે છે)                                                                                        |
+| `API_KEY_SECRET`                        | _(ઓટો-જનરેટ)_            | જનરેટ કરેલ API કી માટેHMAC સિક્રેટ — પ્રથમ રન પર સ્વતઃ જનરેટ થાય છે અને `server.env` પર ચાલુ રહે છે                                                  |
+| `REQUIRE_API_KEY`                       | `false`                  | `/v1/*` પર Bearer API કી લાગુ કરો                                                                                                                    |
+| `ALLOW_API_KEY_REVEAL`                  | `false`                  | અધિકૃત ડેશબોર્ડ વપરાશકર્તાઓને માંગ પર સંપૂર્ણ સંગ્રહિત API કી મૂલ્યો જાહેર કરવાની મંજૂરી આપો                                                         |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                     | કેશ્ડ પ્રદાતા મર્યાદા ડેટા માટે સર્વર-સાઇડ રિફ્રેશ કેડન્સ; UI રિફ્રેશ બટનો હજુ પણ મેન્યુઅલ સિંકને ટ્રિગર કરે છે                                      |
+| `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                  | writes/import/restore પહેલા સ્વચાલિત SQLite સ્નેપશોટને અક્ષમ કરો; મેન્યુઅલ બેકઅપ હજુ પણ કામ કરે છે                                                   |
+| `APP_LOG_TO_FILE`                       | `true`                   | ડિસ્ક પર એપ્લિકેશન અને ઓડિટ લોગ આઉટપુટને સક્ષમ કરે છે                                                                                                |
+| `AUTH_COOKIE_SECURE`                    | `false`                  | `Secure` auth કૂકી પર દબાણ કરો ( HTTPS રિવર્સ પ્રોક્સી પાછળ)                                                                                         |
+| `CLOUDFLARED_BIN`                       | અનસેટ                    | સંચાલિત ડાઉનલોડને બદલે હાલની `cloudflared` બાઈનરીનો ઉપયોગ કરો                                                                                        |
+| `CLOUDFLARED_PROTOCOL`                  | `http2`                  | વ્યવસ્થાપિત ક્વિક ટનલ (`http2`, `quic`, અથવા `auto`) માટે પરિવહન                                                                                     |
+| `OMNIROUTE_MEMORY_MB`                   | `512`                    | MB માંNode.js હીપ મર્યાદા                                                                                                                            |
+| `PROMPT_CACHE_MAX_SIZE`                 | `50`                     | મહત્તમ પ્રોમ્પ્ટ કેશ એન્ટ્રીઓ                                                                                                                        |
+| `SEMANTIC_CACHE_MAX_SIZE`               | `100`                    | મહત્તમ સિમેન્ટીક કેશ એન્ટ્રીઓ                                                                                                                        |
 
 સંપૂર્ણ પર્યાવરણ ચલ સંદર્ભ માટે, [README](../README.md) જુઓ.
 
@@ -863,10 +863,10 @@ curl http://localhost:20128/api/models/catalog
 | વ્યૂહરચના                   | વર્ણન                                                                                                                 |
 | --------------------------- | --------------------------------------------------------------------------------------------------------------------- |
 | **પ્રથમ ભરો**               | પ્રાધાન્યતા ક્રમમાં એકાઉન્ટ્સનો ઉપયોગ કરે છે — પ્રાથમિક એકાઉન્ટ અનુપલબ્ધ થાય ત્યાં સુધી તમામ વિનંતીઓનું સંચાલન કરે છે |
-| **રાઉન્ડ રોબિન**            | રૂપરેખાંકિત સ્ટીકી મર્યાદા સાથે તમામ એકાઉન્ટ્સ દ્વારા ચક્ર (ડિફોલ્ટ: એકાઉન્ટ દીઠ 3 કૉલ)                               |
+| **રાઉન્ડ રોબિન**            | રૂપરેખાંકિત સ્ટીકી મર્યાદા સાથે તમામ એકાઉન્ટ્સ દ્વારા ચક્ર (ડિફોલ્ટ: એકાઉન્ટ દીઠ 3 કૉલ્સ)                             |
 | **P2C (બે પસંદગીની શક્તિ)** | 2 અવ્યવસ્થિત એકાઉન્ટ્સ અને તંદુરસ્ત એક — માટેના માર્ગો પસંદ કરે છે જે આરોગ્યની જાગૃતિ સાથે ભારને સંતુલિત કરે છે       |
 | **રેન્ડમ**                  | Fisher-Yates શફલનો ઉપયોગ કરીને દરેક વિનંતી માટે રેન્ડમલી એક એકાઉન્ટ પસંદ કરે છે                                       |
-| **સૌથી ઓછો ઉપયોગ**          | સૌથી જૂના `lastUsedAt` ટાઈમસ્ટેમ્પ સાથેના ખાતાના રૂટ, ટ્રાફિકને સમાનરૂપે વિતરિત કરે છે                                |
+| **સૌથી ઓછો ઉપયોગ**          | સૌથી જૂના `lastUsedAt` ટાઈમસ્ટેમ્પ સાથેના એકાઉન્ટના રૂટ, ટ્રાફિકને સમાનરૂપે વિતરિત કરે છે                             |
 | **કિંમત ઑપ્ટિમાઇઝ**         | સૌથી ઓછી કિંમતના પ્રદાતાઓ માટે ઑપ્ટિમાઇઝ કરીને, સૌથી નીચી પ્રાધાન્યતાવાળા એકાઉન્ટના રૂટ                               |
 
 **અદ્યતન કોમ્બો અને ઓટો વ્યૂહરચના** (કોમ્બો દીઠ અથવા `auto/*` ઉપસર્ગ દ્વારા રૂપરેખાંકિત કરી શકાય તેવું — જુઓ [AUTO-COMBO.md](../routing/AUTO-COMBO.md) ):
@@ -879,8 +879,8 @@ curl http://localhost:20128/api/models/catalog
 - `least-used` અને `cost-optimized`
 - તમામ ઉમેદવારોમાં`auto` — સ્કોર-આધારિત
 - `lkgp` (છેલ્લું જાણીતું સારું પ્રદાતા) — છેલ્લા સફળ પ્રદાતાને પિન કરે છે, પછી નિયમો પર પાછા આવે છે
-- `context-optimized` — સૌથી મોટી મુક્ત સંદર્ભ વિન્ડો સાથે મોડેલ પસંદ કરે છે
-- `context-relay` — ફોલો-અપ ટર્ન માટે લાંબા-સંદર્ભ મોડલ્સને સાંકળે છે
+- `context-optimized` — સૌપ્રથમ સૌથી મોટી જાણીતી સંદર્ભ વિન્ડો સાથે મોડેલનો પ્રયાસ કરે છે
+- `context-relay` — પ્રાયોરિટી ઓર્ડર વત્તા હેન્ડઓફ સારાંશ જ્યારે વાતચીત બીજા ખાતામાં જાય છે
 
 #### બાહ્ય સ્ટીકી સત્ર હેડર
 
@@ -992,9 +992,9 @@ OmniRoute પાંચ ઘટકો સાથે પ્રદાતા-સ્ત
    - **વિનંતીઓ વચ્ચેનો ન્યૂનતમ સમય** — વિનંતીઓ વચ્ચે મિલિસેકન્ડમાં ન્યૂનતમ અંતર
    - **મહત્તમ સમવર્તી વિનંતીઓ** — એકાઉન્ટ દીઠ મહત્તમ એક સાથે વિનંતીઓ
 
-2. **કનેક્શન કૂલડાઉન** ફરી પ્રયાસ કરી શકાય તેવી નિષ્ફળતાઓ પછી એક કનેક્શન માટે — પ્રતિ-અધિકૃત પ્રકારનું રૂપરેખાંકન:
+2. **કનેક્શન કૂલડાઉન** ફરી પ્રયાસ કરી શકાય તેવી નિષ્ફળતાઓ પછી એક જોડાણ માટે — પ્રતિ-અધિકૃત પ્રકારનું રૂપરેખાંકન:
    - **બેઝ કૂલડાઉન** ફરી પ્રયાસ કરી શકાય તેવી અપસ્ટ્રીમ નિષ્ફળતાઓ માટે — ડિફોલ્ટ કૂલડાઉન વિન્ડો
-   - **અપસ્ટ્રીમ ફરી પ્રયાસ સંકેતોનો ઉપયોગ કરો** — ઓનર્સ અધિકૃત `Retry-After` અથવા રીસેટ સંકેતો પ્રદાન કરવામાં આવે ત્યારે
+   - **અપસ્ટ્રીમ ફરી પ્રયાસ સંકેતોનો ઉપયોગ કરો** — ઓનર્સ અધિકૃત `Retry-After` અથવા રીસેટ સંકેતો પ્રદાન કરે છે
    - **મેક્સ બેકઓફ પગલાં** — પુનરાવર્તિત નિષ્ફળતાઓ માટે મહત્તમ ઘાતાંકીય બેકઓફ સ્તર
 
 3. **પ્રદાતા સર્કિટ બ્રેકર** — એન્ડ-ટુ-એન્ડ પ્રદાતાની નિષ્ફળતાઓને ટ્રૅક કરે છે, રૂપરેખાંકિત ચેતવણી થ્રેશોલ્ડ પર અધોગતિ પામેલા પ્રદાતાને ચિહ્નિત કરે છે અને જ્યારે રૂપરેખાંકિત નિષ્ફળતા થ્રેશોલ્ડ પર પહોંચી જાય ત્યારે બ્રેકર ખોલે છે:
@@ -1012,7 +1012,7 @@ OmniRoute પાંચ ઘટકો સાથે પ્રદાતા-સ્ત
 
 4. **કૂલડાઉન માટે રાહ જુઓ** — જો દરેક ઉમેદવાર કનેક્શન પહેલાથી જ ઠંડુ થઈ રહ્યું હોય, તો OmniRoute સૌથી વહેલા કૂલડાઉન માટે રાહ જોઈ શકે છે અને તે જ ક્લાયન્ટ વિનંતીને આપમેળે ફરીથી પ્રયાસ કરી શકે છે.
 
-5. **રેટ મર્યાદા સ્વતઃ-શોધ** — જ્યારે અપસ્ટ્રીમ પ્રદાતાઓ સ્પષ્ટ રાહ વિન્ડો પરત કરે છે, ત્યારે સેટિંગ સક્ષમ હોય ત્યારે તે સંકેતો સ્થાનિક કનેક્શન કૂલડાઉનને ઓવરરાઇડ કરે છે.
+5. **રેટ મર્યાદા સ્વતઃ-શોધ** — જ્યારે અપસ્ટ્રીમ પ્રદાતાઓ સ્પષ્ટ રાહ વિન્ડો પરત કરે છે, ત્યારે તે સંકેતો સ્થાનિક કનેક્શન કૂલડાઉનને ઓવરરાઇડ કરે છે જ્યારે સેટિંગ સક્ષમ હોય.
 
 **પ્રો ટીપ:** નો ઉપયોગ કરો** આરોગ્ય** આઉટેજ પછી લાઇવ પ્રદાતા બ્રેકર્સનું નિરીક્ષણ અને રીસેટ કરવા માટેનું પૃષ્ઠ. સ્થિતિસ્થાપકતા પૃષ્ઠ ફક્ત રૂપરેખાંકનને બદલે છે.
 
@@ -1025,7 +1025,7 @@ OmniRoute પાંચ ઘટકો સાથે પ્રદાતા-સ્ત
 | ક્રિયા                      | વર્ણન                                                                                                                                   |
 | --------------------------- | --------------------------------------------------------------------------------------------------------------------------------------- |
 | **ડેટાબેઝ નિકાસ કરો**       | વર્તમાન SQLite ડેટાબેઝને `.sqlite` ફાઇલ તરીકે ડાઉનલોડ કરે છે                                                                            |
-| **બધા નિકાસ કરો (.tar.gz)** | આ સહિતનો સંપૂર્ણ બેકઅપ આર્કાઇવ ડાઉનલોડ કરે છે: ડેટાબેઝ, સેટિંગ્સ, કોમ્બોઝ, પ્રદાતા કનેક્શન્સ (કોઈ ઓળખપત્ર નથી), API કી મેટાડેટા         |
+| **બધા નિકાસ કરો (.tar.gz)** | ડેટાબેઝ, સેટિંગ્સ, કોમ્બોઝ, પ્રદાતા કનેક્શન્સ (કોઈ ઓળખપત્ર નથી), API કી મેટાડેટા સહિત સંપૂર્ણ બેકઅપ આર્કાઇવ ડાઉનલોડ કરે છે              |
 | **ડેટાબેઝ આયાત કરો**        | વર્તમાન ડેટાબેઝને બદલવા માટે `.sqlite` ફાઇલ અપલોડ કરો. `DISABLE_SQLITE_AUTO_BACKUP=true` સિવાય પૂર્વ-આયાત બેકઅપ આપમેળે બનાવવામાં આવે છે |
 
 ```bash
@@ -1061,7 +1061,7 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 | **AI**             | વિચારણા બજેટ (પાસથ્રુ / ઓટો-સ્ટ્રીપ / કસ્ટમ / અનુકૂલનશીલ — જુઓ [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), વૈશ્વિક સિસ્ટમ પ્રોમ્પ્ટ, પ્રોમ્પ્ટ કેશ આંકડા     |
 | **સુરક્ષા**        | Login/Password સેટિંગ્સ, IP એક્સેસ કંટ્રોલ, `/models` માટે API auth, પ્રદાતા અવરોધિત, પ્રોમ્પ્ટ-ઇન્જેક્શન ગાર્ડ                                                |
 | **રૂટીંગ**         | વૈશ્વિક રૂટીંગ વ્યૂહરચના (પ્રથમ ભરો / રાઉન્ડ રોબિન / P2C / રેન્ડમ / સૌથી ઓછો ઉપયોગ / કિંમત ઑપ્ટિમાઇઝ), વાઇલ્ડકાર્ડ મોડેલ ઉપનામો, ફોલબેક ચેઇન્સ, કોમ્બો ડિફોલ્ટ |
-| **સ્થિતિસ્થાપકતા** | વિનંતી કતાર, કનેક્શન કૂલડાઉન, પ્રદાતા બ્રેકર રૂપરેખા અને કૂલડાઉન માટે રાહ જુઓ                                                                                  |
+| **સ્થિતિસ્થાપકતા** | વિનંતી કતાર, કનેક્શન કૂલડાઉન, પ્રદાતા બ્રેકર રૂપરેખા અને ઠંડક માટે રાહ જુઓ                                                                                     |
 | **ઉન્નત**          | વૈશ્વિક પ્રોક્સી રૂપરેખાંકન (HTTP/SOCKS5), પ્રતિ-પ્રદાતા પ્રોક્સી ઓવરરાઇડ્સ                                                                                    |
 
 સામાન્ય હવે ફક્ત વાંચવા માટેના લોગીંગ અને કેશ નોંધોની નકલ કરતું નથી. ડેટાબેઝ રીટેન્શન અને ઓપ્ટિમાઇઝેશન સેટિંગ્સ `/api/settings/database` દ્વારા ચાલુ રહે છે; મેન્યુઅલ કેશ ક્લિયરિંગ `DELETE /api/cache` ઉપયોગ કરે છે. વિનંતી અને પ્રોક્સી લોગ રો કેપ્સ `CALL_LOGS_TABLE_MAX_ROWS` અને `PROXY_LOGS_TABLE_MAX_ROWS` દ્વારા નિયંત્રિત થાય છે.
@@ -1329,32 +1329,34 @@ curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUT
 
 ## 💻 આંતરિક CLI
 
-OmniRoute સેટઅપ, નિદાન અને રનટાઇમ નિયંત્રણ માટે આંતરિક CLI (`omniroute …`) સાથે આવે છે. આ **ડૅશબોર્ડમાંના "CLI Tools" પૃષ્ઠથી અલગ છે**, જે તૃતીય-પક્ષ CLI (Claude Code, Cursor, Codex, Cline, …) ને ગોઠવે છે જેથી તેઓ OmniRoute સાથે સંચાર કરી શકે.
+OmniRoute સેટઅપ, ડાયગ્નોસ્ટિક્સ અને રનટાઇમ નિયંત્રણ માટે આંતરિક CLI (`omniroute …`) મોકલે છે. આ છે** ડેશબોર્ડમાં "CLI ટૂલ્સ" પૃષ્ઠથી અલગ** , જે તૃતીય-પક્ષ CLIs (Claude કોડ, Cursor, Codex, Cline, …) ને ગોઠવે છે જેથી તેઓ OmniRoute સાથે વાત કરી શકે.
 
 ```bash
-omniroute setup                    # ઇન્ટરેક્ટિવ વિઝાર્ડ (પાસવર્ડ, પ્રોવાઇડર્સ, કોમ્બોઝ)
-omniroute setup --non-interactive  # CI માટે અનુકૂળ
-omniroute doctor                   # સ્વાસ્થ્ય નિદાન (ડેટા ડિરેક્ટરી, DB, પ્રોવાઇડર્સ, પોર્ટ્સ)
-omniroute providers available      # સપોર્ટેડ પ્રોવાઇડર્સની યાદી
-omniroute providers list           # ગોઠવેલા કનેક્શન્સની યાદી
-omniroute providers test <id>      # પ્રોવાઇડર કનેક્શનનું લાઇવ પરીક્ષણ
-omniroute combos list              # કોમ્બોઝની યાદી
-omniroute combos switch <name>     # ડિફૉલ્ટ કોમ્બો સેટ કરો
-omniroute models                   # ઉપલબ્ધ મોડલ્સની યાદી (--json, --search)
-omniroute keys add | list | remove # ટર્મિનલમાંથી API કીઝનું સંચાલન કરો
-omniroute backup                   # કન્ફિગ + DBનો સ્નૅપશૉટ
-omniroute restore [<timestamp>]    # સ્નૅપશૉટમાંથી પુનઃસ્થાપિત કરો
-omniroute health                   # વિગતવાર સ્વાસ્થ્ય (બ્રેકર્સ, કૅશ, મેમરી)
-omniroute quota                    # પ્રોવાઇડર ક્વોટાનો વપરાશ
-omniroute mcp status               # MCP સર્વરની સ્થિતિ
-omniroute a2a status               # A2A સર્વરની સ્થિતિ
-omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok ટનલ્સ
-omniroute reset-password           # એડમિન પાસવર્ડ રીસેટ કરો
-omniroute --mcp                    # stdio પર MCP સર્વર શરૂ કરો
-omniroute --port 3000              # કસ્ટમ પોર્ટ પર સર્વર શરૂ કરો
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-સૂચન: અસ્વસ્થ પ્રોવાઇડર કનેક્શન્સ વિશે ચેતવણી મેળવવા માટે `omniroute doctor --json` ને તમારા મોનિટરિંગ ટૂલ સાથે જોડો.
+ટીપ: તૂટેલા સ્થાનિક ઇન્સ્ટોલ પર ચેતવણી આપવા માટે તમારા મોનિટરિંગ ટૂલ સાથે `omniroute doctor --json` જોડી દો. `doctor` પ્રદાતા કનેક્શન્સનું પરીક્ષણ કરતું નથી; તે માટે `omniroute providers test <id>` ઉપયોગ કરો.
 
 ---
 

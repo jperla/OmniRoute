@@ -60,7 +60,9 @@ npm-publish 工作流程不再直接发布：它启动打包的 tarball (`check:
 
 **Docker Hub `latest` （每个稳定的SemVer发布都需要）：** `docker-publish`工作流程必须标记**两个都**`X.Y.Z`和，当`should-promote-latest.sh`同意时，这是最高稳定的SemVer， `:latest`与**相同的摘要**。作业完成后：Hub `latest`摘要等于新的SemVer摘要，并且`last_updated`已移动。当发行说明谈论仅存在于 git 上的修复时，不要将`:latest`保留在较旧的版本上。使用`:latest`编写快速入门； GitOps应该继续固定`X.Y.Z`。参见[Docker发布渠道](../guides/DOCKER_GUIDE.md#release-channels)和#10317。
 
-**Docker Hub组织存储库（`cheaperinference/omniroute`）：** Docker Hub 无法在命名空间之间移动存储库，因此`diegosouzapw/omniroute`保留其拉取历史记录和每个版本，并且`docker-publish`的`mirror-org-dockerhub`作业将每个发布版本（以及升级时的`:latest` ）从`ghcr.io/cheaper-inference/omniroute`到组织存储库。它需要`DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN`秘密；如果没有它们，作业将保持绿色，并显示“Docker Hub org 镜像已跳过”警告，并且其他注册表正常发布。要稍后在那里发布发布版本，请运行**操作→将Docker映像镜像到Docker Hub org →运行工作流程**使用`version=X.Y.Z` （和`promote_latest`表示最高稳定版本）：它复制现有映像，无需重建。
+**Docker Hub组织存储库（`cheaperinference/omniroute`）：** Docker Hub 无法在命名空间之间移动存储库，因此`diegosouzapw/omniroute`保留其拉取历史记录和每个版本，并且`docker-publish`的`mirror-org-dockerhub`作业将每个发布版本（以及升级时的`:latest` ）从`ghcr.io/cheaper-inference/omniroute`到组织存储库。它需要`DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN`秘密；如果没有它们，作业将保持绿色，并显示“Docker Hub org 镜像已跳过”警告，并且其他注册表正常发布。要稍后在那里发布发布版本，请运行**操作→将Docker映像镜像到Docker Hub org →运行工作流程**使用`version=X.Y.Z` （和`promote_latest`为最高稳定版本）：它复制现有映像，无需重建。该存储库的Docker中心概述是手动设置的：编辑它的API拒绝组织访问令牌。
+
+相同的工作流程还将每个版本复制到旧版GHCR包`ghcr.io/diegosouzapw/omniroute`直到 2027 年 6 月 30 日，因此安装仍然固定在它不断更新；其索引带有“移至`ghcr.io/cheaper-inference/omniroute`”的描述。它需要`GHCR_LEGACY_TOKEN`秘密（ `diegosouzapw`和`write:packages`的经典个人访问令牌）；如果没有它，该作业将跳过并显示“Legacy GHCR ”警告。
 
 ## 热修复快速通道（标签 `hotfix`）
 

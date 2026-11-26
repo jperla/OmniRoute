@@ -337,7 +337,7 @@ PORT=20128 DASHBOARD_PORT=20129 omniroute
 
 ## Linux (xbps-src) Template ကို ပျက်ပြယ်စေပါသည်။
 
-Void Linux အသုံးပြုသူများအတွက်၊ သင်သည် `xbps-src` အသုံးပြု၍ မူလပက်ကေ့ခ်ျတစ်ခုကို တည်ဆောက်နိုင်သည်။ ဤဘလောက်ကို `srcpkgs/omniroute/template` အဖြစ်သိမ်းဆည်းပါ။
+Void Linux အသုံးပြုသူများအတွက်၊ သင်သည် `xbps-src` အသုံးပြု၍ မူရင်းပက်ကေ့ခ်ျကို တည်ဆောက်နိုင်သည်။ ဤဘလောက်ကို `srcpkgs/omniroute/template` အဖြစ်သိမ်းဆည်းပါ။
 
 ```bash
 # Template file for 'omniroute'
@@ -349,10 +349,10 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 # Regenerate the checksum for each release with:
-#   curl -L -o /tmp/omniroute.tar.gz "https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
+#   curl -L -o /tmp/omniroute.tar.gz "https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz" && sha256sum /tmp/omniroute.tar.gz
 checksum=PLACEHOLDER_REGENERATE_PER_RELEASE
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"

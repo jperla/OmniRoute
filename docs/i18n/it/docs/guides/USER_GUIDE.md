@@ -431,7 +431,7 @@ Quando non hai più bisogno OmniRoute, forniamo due script rapidi per una rimozi
 ### VPS Distribuzione
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -513,8 +513,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -882,8 +882,8 @@ Configura tramite** Dashboard → Impostazioni → Routing** . La dashboard espo
 - `least-used` e `cost-optimized`
 - `auto` — basato sul punteggio di tutti i candidati
 - `lkgp` (Last Known Good Provider) — si fissa all'ultimo fornitore di successo, quindi ritorna alle regole
-- `context-optimized` — sceglie il modello con la finestra di contesto libero più grande
-- `context-relay` — concatena modelli a contesto lungo per i turni successivi
+- `context-optimized` — prova prima il modello con la finestra di contesto più grande conosciuta
+- `context-relay` — ordine di priorità più un riepilogo del trasferimento quando la conversazione si sposta su un altro account
 
 #### Intestazione sessione permanente esterna
 
@@ -931,7 +931,7 @@ Ecco alcuni modelli di esempio per combinare più fornitori e instradarli tra lo
 
 #### 1. Combo agente di codifica: ragionamento di fascia alta con fallback Cost/Speed
 
-Ideale per agenti di codifica (OpenCode, Claude Code, Cursor, Cline). Percorsi inizialmente verso modelli di ragionamento di frontiera, per ricadere verso modelli di codifica rapida sull'esaurimento delle quote o sugli errori.
+Ideale per agenti di codifica (OpenCode, Claude Code, Cursor, Cline). Percorsi inizialmente verso modelli di ragionamento di frontiera, per ricadere verso modelli di codifica veloce sull'esaurimento delle quote o sugli errori.
 
 - **Pannello di controllo** : Combo → Nuova combo → Nome: `agent-coding` → Strategia: `Priority`
 - **Modelli** :
@@ -1000,7 +1000,7 @@ OmniRoute implementa la resilienza a livello di fornitore con cinque componenti:
    - **Utilizza suggerimenti per i tentativi upstream** — Rispetta `Retry-After` autorevole o reimposta i suggerimenti quando forniti
    - **Numero massimo di passaggi di backoff** — Livello massimo di backoff esponenziale per errori ripetuti
 
-3. **Interruttore automatico del fornitore** — Tiene traccia degli errori end-to-end del provider, contrassegna un provider come degradato alla soglia di avviso configurata e apre l'interruttore quando viene raggiunta la soglia di errore configurata:
+3. **Interruttore automatico del fornitore** — Tiene traccia degli errori end-to-end del provider, contrassegna un provider degradato alla soglia di avviso configurata e apre l'interruttore quando viene raggiunta la soglia di errore configurata:
    - **Soglia di degrado** — Errori consecutivi del provider prima di accedere `DEGRADED`
    - **Soglia di fallimento** — Errori consecutivi del provider prima di accedere `OPEN`
    - **Reimposta il timeout** — Finestra temporale prima che il provider venga nuovamente testato
@@ -1057,15 +1057,15 @@ curl -X POST http://localhost:20128/api/db-backups/import \
 
 La pagina delle impostazioni è organizzata in** 7 schede** per una facile navigazione:
 
-| Tab               | Contenuto                                                                                                                                                                                                                  |
-| ----------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| **Generale**      | Strumenti di archiviazione del sistema, comportamento predefinito, visibilità del tunnel dell'endpoint                                                                                                                     |
-| **Aspetto**       | Controlli del tema (light/dark/system), visibilità della barra laterale, pannello di attivazione/disattivazione per le schede tunnel Cloudflare/Tailscale/ngrok                                                            |
-| **AI**            | Pensare al budget (passthrough/auto-strip/personalizzato/adattivo — vedi [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), prompt di sistema globale, statistiche della cache dei prompt                                       |
-| **Sicurezza**     | Impostazioni Login/Password, controllo accessi IP, autenticazione API per `/models`, blocco provider, protezione prompt-injection                                                                                          |
-| **Instradamento** | Strategia di routing globale (Fill First / Round Robin / P2C / Casuale / Meno utilizzato / Ottimizzato in termini di costi), alias del modello con caratteri jolly, catene di fallback, impostazioni predefinite combinate |
-| **Resilienza**    | Coda delle richieste, tempo di attesa della connessione, configurazione dell'interruzione del provider e comportamento di attesa del tempo di attesa                                                                       |
-| **Avanzato**      | Configurazione proxy globale (HTTP/SOCKS5), override del proxy per provider                                                                                                                                                |
+| Tab               | Contenuto                                                                                                                                                                                                                 |
+| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| **Generale**      | Strumenti di archiviazione del sistema, comportamento predefinito, visibilità del tunnel dell'endpoint                                                                                                                    |
+| **Aspetto**       | Controlli del tema (light/dark/system), visibilità della barra laterale, pannello di attivazione/disattivazione per le schede tunnel Cloudflare/Tailscale/ngrok                                                           |
+| **AI**            | Pensare al budget (passthrough/auto-strip/personalizzato/adattivo — vedi [THINKING_BUDGET.md](./THINKING_BUDGET.md) ), prompt di sistema globale, statistiche della cache dei prompt                                      |
+| **Sicurezza**     | Impostazioni Login/Password, controllo accessi IP, autenticazione API per `/models`, blocco provider, protezione prompt-injection                                                                                         |
+| **Instradamento** | Strategia di routing globale (Fill First / Round Robin / P2C / Casuale / Meno utilizzato / Ottimizzato in termini di costi), alias di modelli con caratteri jolly, catene di fallback, impostazioni predefinite combinate |
+| **Resilienza**    | Coda delle richieste, tempo di attesa della connessione, configurazione dell'interruzione del provider e comportamento di attesa del tempo di attesa                                                                      |
+| **Avanzato**      | Configurazione proxy globale (HTTP/SOCKS5), override del proxy per provider                                                                                                                                               |
 
 Generale non duplica più la registrazione di sola lettura e le note della cache. Le impostazioni di conservazione e ottimizzazione del database vengono mantenute tramite `/api/settings/database`; la cancellazione manuale della cache utilizza `DELETE /api/cache`. I limiti delle righe di log delle richieste e dei proxy sono controllati da `CALL_LOGS_TABLE_MAX_ROWS` e `PROXY_LOGS_TABLE_MAX_ROWS`.
 
@@ -1145,7 +1145,7 @@ Formati audio supportati per la trascrizione: `mp3`, `wav`, `m4a`, `flac`, `ogg`
 
 ### Strategie di bilanciamento combo
 
-Configura il bilanciamento per combo in** Cruscotto → Combo → Create/Edit → Strategia** .
+Configura il bilanciamento per combo in** Dashboard → Combo → Create/Edit → Strategia** .
 
 | Strategia                    | Descrizione                                                                                 |
 | ---------------------------- | ------------------------------------------------------------------------------------------- |
@@ -1160,7 +1160,7 @@ Configura il bilanciamento per combo in** Cruscotto → Combo → Create/Edit �
 
 Le ottimizzazioni combinate a latenza zero sono attivabili. Partire** Ottimizzazioni a latenza zero** disabilitato per impedire a queste funzionalità di latenza di eseguire target di fallback, saltare target in base alla cronologia TTFT o comprimere richieste di fallback; abilitandolo consente la copertura configurata, i salti TTFT predittivi e la compressione fallback proattiva per scambiare la fedeltà routing/request con una latenza della coda inferiore.
 
-Disabilita** Buffer del token di ragionamento** quando i fornitori a monte richiedono rigidi limiti `max_tokens` / `maxOutputTokens`. Quando abilitato, il routing combinato aggiunge margine del modello di ragionamento solo per i modelli con un limite di output noto e lascia invariato il limite del token client quando il valore bufferizzato sicuro supera tale limite. Se il limite del client è già superiore a un limite noto, OmniRoute lo fissa a quel limite prima di inviare la richiesta upstream.
+Disabilita** Buffer del token di ragionamento** quando i fornitori a monte richiedono rigidi limiti `max_tokens` / `maxOutputTokens`. Quando abilitato, il routing combinato aggiunge margine al modello di ragionamento solo per i modelli con un limite di output noto e lascia invariato il limite del token client quando il valore bufferizzato sicuro supera tale limite. Se il limite del client è già superiore a un limite noto, OmniRoute lo fissa a quel limite prima di inviare la richiesta upstream.
 
 ---
 
@@ -1330,34 +1330,36 @@ Consulta [API_REFERENCE.md](../reference/API_REFERENCE.md) per il catalogo compl
 
 ---
 
-## 💻 CLI interna
+## 💻 Interno CLI
 
-OmniRoute include una CLI interna (`omniroute …`) per la configurazione, la diagnostica e il controllo in fase di esecuzione. Questa è **separata dalla pagina "Strumenti CLI" della dashboard**, che configura CLI di terze parti (Claude Code, Cursor, Codex, Cline, …) affinché possano comunicare con OmniRoute.
+OmniRoute fornisce uno CLI interno (`omniroute …`) per la configurazione, la diagnostica e il controllo del runtime. Questo è** separato dalla pagina "Strumenti CLI " nella dashboard** , che configura CLIs di terze parti (Claude Code, Cursor, Codex, Cline, ...) in modo che possano comunicare con OmniRoute.
 
 ```bash
-omniroute setup                    # Procedura guidata interattiva (password, provider, combinazioni)
-omniroute setup --non-interactive  # Adatto alla CI
-omniroute doctor                   # Diagnostica dello stato (directory dati, DB, provider, porte)
-omniroute providers available      # Elenca i provider supportati
-omniroute providers list           # Elenca le connessioni configurate
-omniroute providers test <id>      # Testa in tempo reale una connessione a un provider
-omniroute combos list              # Elenca le combinazioni
-omniroute combos switch <name>     # Imposta la combinazione predefinita
-omniroute models                   # Elenca i modelli disponibili (--json, --search)
-omniroute keys add | list | remove # Gestisce le chiavi API dal terminale
-omniroute backup                   # Crea uno snapshot della configurazione e del DB
-omniroute restore [<timestamp>]    # Ripristina da uno snapshot
-omniroute health                   # Stato dettagliato (circuit breaker, cache, memoria)
-omniroute quota                    # Utilizzo delle quote dei provider
-omniroute mcp status               # Stato del server MCP
-omniroute a2a status               # Stato del server A2A
-omniroute tunnel list|create|stop  # Tunnel Cloudflare/Tailscale/ngrok
-omniroute reset-password           # Reimposta la password di amministrazione
-omniroute --mcp                    # Avvia il server MCP tramite stdio
-omniroute --port 3000              # Avvia il server su una porta personalizzata
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-Suggerimento: abbina `omniroute doctor --json` al tuo strumento di monitoraggio per ricevere avvisi sulle connessioni non funzionanti ai provider.
+Suggerimento: abbina `omniroute doctor --json` al tuo strumento di monitoraggio per avvisare in caso di installazione locale non funzionante. `doctor` non verifica le connessioni del provider; usa `omniroute providers test <id>` per quello.
 
 ---
 

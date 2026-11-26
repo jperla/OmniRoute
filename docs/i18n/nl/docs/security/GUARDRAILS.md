@@ -27,16 +27,17 @@ vertrouwt als beveiligingscontrole.
 
 ## Ingebouwde leuningen
 
-Het register laadt bij het importeren automatisch zes vangrails in prioriteitsvolgorde (zie `registry.ts` → `registerDefaultGuardrails()`):
+Het register laadt deze vangrails automatisch in prioriteitsvolgorde bij het importeren (zie `registry.ts` → `registerDefaultGuardrails()`):
 
-| Prioriteit | Naam                | Fase(n)        | Bestand               |
-| ---------- | ------------------- | -------------- | --------------------- |
-| `5`        | `vision-bridge`     | `preCall`      | `visionBridge.ts`     |
-| `6`        | `audio-bridge`      | `preCall`      | `audioBridge.ts`      |
-| `7`        | `video-bridge`      | `preCall`      | `videoBridge.ts`      |
-| `10`       | `pii-masker`        | `pre` + `post` | `piiMasker.ts`        |
-| `20`       | `prompt-injection`  | `preCall`      | `promptInjection.ts`  |
-| `95`       | `credential-masker` | `pre` + `post` | `credentialMasker.ts` |
+| Prioriteit | Naam                | Fase(n)        | Bestand                   |
+| ---------- | ------------------- | -------------- | ------------------------- |
+| `1`        | `agent-guard`       | `preCall`      | `agentGuard/guardrail.ts` |
+| `5`        | `vision-bridge`     | `preCall`      | `visionBridge.ts`         |
+| `6`        | `audio-bridge`      | `preCall`      | `audioBridge.ts`          |
+| `7`        | `video-bridge`      | `preCall`      | `videoBridge.ts`          |
+| `10`       | `pii-masker`        | `pre` + `post` | `piiMasker.ts`            |
+| `20`       | `prompt-injection`  | `preCall`      | `promptInjection.ts`      |
+| `95`       | `credential-masker` | `pre` + `post` | `credentialMasker.ts`     |
 
 Nummers met een lagere prioriteit worden uitgevoerd** Eerst** .
 
@@ -164,7 +165,7 @@ De structurele waarden zijn deterministisch steekproefbewijs en geen semantisch 
 
 Ontbrekende filters, malformed/empty -bewijsmateriaal, een detectorfout of de begrensde time-out vóór de analyse mislukken bij het exacte uniforme middelpuntbeleid. Een caller abort of broker deadline faalt niet bij het openen: het beëindigt het in-flight subproces, voorkomt latere frame-extractie en de persoonlijke tijdelijke boom wordt verwijderd in `finally`.
 
-`scripts/perf/video-bridge-fu07-eval.ts` genereert deterministische reële FFmpeg regelingen voor post-dedup caption-call-besparingen, budgettoewijzing met hoge resolutie, blur/exposure/SI-TI bewijsmateriaal, snelle bezuinigingen met een lange staart en geleidelijk vervagende valse positieven. Het registreert de pre-analyse wandtijd en, waar `/usr/bin/time` beschikbaar is, kind CPU en piek RSS. De kwaliteitscontroles zijn slechts structurele orakels. De echte kwaliteit van het onderschriftmodel blijft `HOLD` omdat dit harnas geen geautoriseerd eindpunt of bevroren rechter heeft. De monetaire besparingen blijven ook `HOLD` tenzij `--caption-cost-per-call-usd` een expliciete positieve schatting per oproep geeft; het script verzint geen van beide resultaten.
+`scripts/perf/video-bridge-fu07-eval.ts` genereert deterministische reële FFmpeg regelingen voor post-dedup caption-call-besparingen, budgettoewijzing met hoge resolutie, blur/exposure/SI-TI bewijsmateriaal, snelle bezuinigingen met een lange staart en geleidelijk vervagende valse positieven. Het registreert de pre-analyse wandtijd en, waar `/usr/bin/time` beschikbaar is, kind CPU en piek RSS. De kwaliteitscontroles zijn slechts structurele orakels. De echte kwaliteit van het onderschriftmodel blijft `HOLD` omdat dit harnas geen geautoriseerd eindpunt of bevroren rechter heeft. De monetaire besparingen blijven eveneens `HOLD` tenzij `--caption-cost-per-call-usd` een expliciete positieve schatting per oproep geeft; het script verzint geen van beide resultaten.
 
 Elk frame is beperkt tot 4 MiB, alle onbewerkte frames samen tot 23 MiB, en de geserialiseerde brokerreactie tot 32 MiB. Een persoonlijke tijdelijke map wordt verwijderd in `finally`. OmniRoute bundelt FFmpeg niet en accepteert geen aangepast uitvoerbaar pad. Vóór de ondertiteling past de bridge een conservatieve visuele deduplicatiepas toe: elke JPEG wordt gereduceerd tot een 16 × 16 grijswaardenbuffer en wordt alleen vergeleken met het laatste behouden frame. Voor een aangevraagd ondertitelingsbudget boven één frame levert extractie een begrensde kandidatenpool op van maximaal tweemaal dat budget en nooit meer dan 16 frames. Het gevraagde plafond wordt pas toegepast na deduplicatie, waarbij de eerste en de laatste geselecteerde kandidaten behouden blijven tijdens de definitieve uitdunning wanneer het budget minimaal twee bedraagt. Het `grayscale-16x16-mean-cells-v2` beleid met versiebeheer gebruikt de grootste van de gemiddelde luma-delta en de verhouding van miniatuurcellen waarvan de genormaliseerde delta ten minste 0,05 is. De duplicaatdrempel is de constante 0,04, gekozen vanwege voorspelbaarheid in plaats van weergegeven als runtime-instelling. Dit secundaire signaal met hoog contrast behoudt kleine bewegingen en zichtbare tekstveranderingen die bij een gemiddelde vergelijking verborgen kunnen blijven. Comparator- of decoderfouten kunnen niet worden geopend en de dekking blijft behouden. Uitvoermetadata scheidt geëxtraheerde kandidaten, succesvol gebruikte frames en verwijderde visuele duplicaten.
 
@@ -176,7 +177,7 @@ De afzonderlijke `scripts/perf/video-bridge-promotion-eval.ts` verbruikt FU-07 o
 
 FU-07 vereist ten minste 98% kwaliteitsbehoud en een p95-latentie van niet meer dan 1,2x de basislijn, plus ofwel een absolute case-balanced gemiddelde verbetering van de herinnering van 0,05 bij gelijkwaardige gemiddelde ondertitelingsoproepen, of ten minste 10% minder gemiddelde post-dedup ondertitelingsoproepen. FU-09 vereist minimaal 0,85 kwaliteit, 95% retentie, 20% mediane latentiereductie en 10% tokenreductie. Verlies van cruciale feiten, naleving van de injectievoorschriften of ontbrekend gebruik verhinderen promotie. Eén uitvoering kan niets bevorderen: `--previous-report` bevestigt twee verschillende, niet-overlappende, opeenvolgend in aanmerking komende uitvoeringen van dezelfde policy/model revision/candidate/corpus. Een bemonsteringsexperiment kan een contactbladexperiment niet bevestigen.
 
-Verzamelaars moeten antwoorden in het geheugen scoren en `responseDigest` plus statistieken en observatiebindingen opslaan, nooit antwoordtekst. De consument leest ook oude, ruwe observaties, maar kopieert die tekst nooit in zijn rapporten. Voor elke waarneming wordt precies één `responseDigest` of `rawResponseText` geaccepteerd. De goedgekeurde versielijst blijft leeg met een onveranderlijke `hold` standaard. Voor een in aanmerking komende inzending zijn bewijsreferentie, beleid, modelrevisie, exacte kandidaat SHA, manifest digest en twee afzonderlijke runs IDs vereist; conflicterende contexten worden afgewezen. Deze metadata vormen een auditcontract en vormen geen bewijs dat een bestand waarnaar wordt verwezen echte metingen bevat. Controleer de daadwerkelijke bonnen voordat u een item toevoegt. Het eindpunt voor beheerstatistieken en het videodashboard laten conservatieve paraatheid zien. Een geconfigureerde modelalias alleen brengt de revisie ervan of de lopende kandidaat SHA niet tot stand, dus rapporteert het huidige dashboard `HOLD` in plaats van de geschiktheid vanuit een andere uitvoeringscontext opnieuw te gebruiken. Expliciete experimentele selectie blijft gescheiden van promotie; geen enkele standaard wordt automatisch gewijzigd.
+Verzamelaars moeten antwoorden in het geheugen scoren en `responseDigest` plus statistieken en observatiebindingen opslaan, nooit antwoordtekst. De consument leest ook oude, ruwe observaties, maar kopieert die tekst nooit in zijn rapporten. Voor elke waarneming wordt precies één van `responseDigest` of `rawResponseText` geaccepteerd. De goedgekeurde versielijst blijft leeg met een onveranderlijke `hold` standaard. Voor een in aanmerking komende inzending zijn bewijsreferentie, beleid, modelrevisie, exacte kandidaat SHA, manifest digest en twee afzonderlijke runs IDs vereist; conflicterende contexten worden afgewezen. Deze metadata vormen een auditcontract en vormen geen bewijs dat een bestand waarnaar wordt verwezen echte metingen bevat. Controleer de daadwerkelijke bonnen voordat u een item toevoegt. Het eindpunt voor beheerstatistieken en het videodashboard laten conservatieve paraatheid zien. Een geconfigureerde modelalias alleen brengt de revisie ervan of de lopende kandidaat SHA niet tot stand, dus rapporteert het huidige dashboard `HOLD` in plaats van de geschiktheid vanuit een andere uitvoeringscontext opnieuw te gebruiken. Expliciete experimentele selectie blijft gescheiden van promotie; geen enkele standaard wordt automatisch gewijzigd.
 
 Bellers kunnen een optionele `transcript.cues` array aan een ondersteund videogedeelte koppelen als ze al over uitgelijnde tekst beschikken. Elke cue moet `text` bevatten, een eindig `start`/`end` -interval binnen de onderzochte duur, en een op de witte lijst geplaatste `source` (`client`, `embedded` of `audio-bridge`); `confidence` is standaard `1` en moet tussen `0` en `1` blijven. Exacte dubbele aanwijzingen zijn samengevouwen. OmniRoute start nooit de transcriptie van deze metagegevens: gevalideerde aanwijzingen worden gekopieerd naar het beschreven resultaat met bron, betrouwbaarheid en interval, en worden weergegeven als niet-vertrouwde observaties naast de framebijschriften. Ongeldige, buiten het bereik vallende of herkomstvrije tekst wordt afgewezen in plaats van gemengd in de ondertitelingsstroom. Beide transcriptiekanalen voor de verzoektekst normaliseren de geleverde herkomst naar `client`, inclusief zelfbevestigde `embedded` of `audio-bridge` labels. Alleen een adapter die eigendom is van een server kan deze vertrouwde labels toewijzen via het `trustedSource` -argument; een verzoek JSON veld kan dat argument niet bereiken. Transcriptietekst blijft onbetrouwbare, uit de media afkomstige inhoud, ongeacht de herkomst ervan, en mag nooit bepalend zijn voor autorisatie.
 
@@ -236,7 +237,7 @@ De vangrail blokkeert nooit; het annoteert alleen (`meta.detections`, `meta.reda
 **Omkeerbare kluis (`PII_REVERSIBLE_VAULT_ENABLED`, standaard `false`).** Wanneer zowel `PII_REDACTION_ENABLED` als `PII_REVERSIBLE_VAULT_ENABLED` zijn ingeschakeld (DB overschrijft > env > standaard, één keer per verzoek gelezen), opent `handleChat` één kluis per clientverzoek (`src/lib/pii/requestTokenVaultScope.ts`) en geeft deze door aan de pre-call pass als `GuardrailContext.tokenVault`. De masker schrijft vervolgens surrogaattokens zoals `<<PII_EMAIL_QWERTYUI_1>>` in plaats van `[EMAIL_REDACTED]`, voor zowel ingebouwde, gevalideerde (GDPR/POPIA) als aangepaste regels. De nonce bestaat uit 8 willekeurige hoofdletters per verzoek, en dezelfde waarde krijgt hetzelfde token binnen het verzoek. Alleen de maskermuntjes: de prompt-injectiebeschermer en `/api/guardrails/test` draaien zonder kluis en behouden de tijdelijke aanduidingen.
 
 - De aanbieder, elke combo-leg, nieuwe poging, het lid van het fusiepanel en de fusierechter zien alleen tokens. De tokens worden één keer hersteld, op het 2xx-antwoord dat `handleChat` verlaat: per veld op de geparseerde SSE (een token verdeeld over gebeurtenissen wordt nog steeds opgelost; tool-call-argumenten zijn JSON-escaped) of per veld op een JSON body, met een opnieuw berekende `Content-Length`. Inhoud, redenering, tekst en tool-call-argumenten worden hersteld. Error bodies (4xx/5xx) behouden de tokens.
-- Mislukkingen blijven privé: als het minten mislukt of de kluis een waarde weigert (1000 vermeldingen, 256 tekens per waarde, 64 KB in totaal), wordt in plaats daarvan de tijdelijke aanduiding geschreven; een token dat de kluis niet kan oplossen, of een herstel dat mislukt, blijft letterlijk en er wordt alleen een telling geregistreerd. De kluis bevat geen timers en geen mondiale status; het wordt gewist als de responsstroom eindigt, wordt geannuleerd of als er fouten optreden.
+- Mislukkingen blijven privé: als het minten mislukt of de kluis een waarde weigert (1000 vermeldingen, 256 tekens per waarde, 64 KB in totaal), wordt in plaats daarvan de tijdelijke aanduiding geschreven; een token dat de kluis niet kan oplossen, of een herstel dat mislukt, blijft letterlijk en er wordt alleen een telling geregistreerd. De kluis bevat geen timers en geen mondiale status; het wordt gewist wanneer de antwoordstroom eindigt, wordt geannuleerd of als er fouten optreden.
 - Wanneer een verzoek tokens aanmaakt, worden de geheugenextractie, de idempotentie-opslag en beide semantische-cache-schrijfbewerkingen overgeslagen, omdat geen enkel later verzoek deze tokens kon omzetten. In gesprekslogboeken bevatten het verzoek en het antwoord van de provider tokens; de hoofdtekst van het geregistreerde clientverzoek is nog steeds de onbewerkte clientinvoer, net als bij gewone redactie.
 - Tokens gebruiken een willekeurige nonce per verzoek, dus het promptvoorvoegsel verandert bij elke beurt: promptcaching aan de providerzijde geldt niet voor gemaskerde beurten, en een token dat in een latere beurt terugkomt (bijvoorbeeld via `previous_response_id`) behoort tot een oud verzoek en blijft letterlijk.
 
@@ -257,7 +258,7 @@ De instellingen bevinden zich in de `key_value` tabel (naamruimte `pii_settings`
 | `PUT`   | `/api/settings/pii`      | Vervang `enabledTypes` (`null` = alles) and/or `customPatterns`                         |
 | `POST`  | `/api/settings/pii/test` | Eén patroon droogdraaien tegen een monster van maximaal 8 KB; er wordt niets opgeslagen |
 
-Alle drie vereisen beheerauthenticatie en valideren de hoofdtekst met Zod (`src/shared/validation/schemas/piiSettings.ts`). Met inloggen uitgeschakeld (`requireLogin=false`) zijn `GET` en het testeindpunt open, maar `PUT` heeft nog steeds een dashboardsessie nodig, een `manage` -scope API sleutel, een `oma_` toegangstoken met schrijfbereik of hoger, of het CLI token of het interne servicetoken verzonden vanuit loopback.
+Alle drie vereisen managementauthenticatie en valideren de hoofdtekst met Zod (`src/shared/validation/schemas/piiSettings.ts`). Met inloggen uitgeschakeld (`requireLogin=false`) zijn `GET` en het testeindpunt open, maar `PUT` heeft nog steeds een dashboardsessie nodig, een `manage` -scope API sleutel, een `oma_` toegangstoken met schrijfbereik of hoger, of het CLI token of het interne servicetoken verzonden vanuit loopback.
 
 #### GDPR (EU) en POPIA (Zuid-Afrika) identificatiegegevens
 
@@ -307,9 +308,83 @@ Loopt door** beide** fasen, laatste in de standaardketen (prioriteit `95`). Redi
 - **Alleen aanmelden** , dezelfde conventie als PII -redactie (harde regel #20-aangrenzend): uitgeschakeld tenzij `settings.credentialRedactionEnabled === true`** of** `CREDENTIAL_REDACTION_ENABLED=true`. Als deze is uitgeschakeld, is de vangrail een no-op- — die hij nooit blokkeert en nooit herschrijft.
 - `redactCredentials()` doorloopt de volledige payload/response boom (`walkValue()`, prototype-pollution-safe, cycle-safe via `WeakSet`) en vervangt overeenkomsten door een `[REDACTED:<type>]` placeholder, waarbij alleen de takken worden gekloond die daadwerkelijk zijn veranderd.
 - `CREDENTIAL_PATTERNS` omvat LLM -providersleutels (OpenAI, OpenAI-proj, Anthropic, Google, Knuffelgezicht, Repliceren), VCS/SaaS tokens (GitHub, Slack, Lineair, Notion, npm, Postman, Discord), betalingssleutels (Stripe, Square), cloudsleutels (AWS toegangssleutel, Twilio, SendGrid, Mailgun), privésleutels / JWTs, verbinding met inloggegevens strings (`mongodb://user:pass@...`, etc.), en een generiek `Authorization`/`x-api-key`/`api-key`/`apikey` header-waardepatroon. Kopvormige sleutels (`authorization`, `x-api-key`, `api-key`, `apikey`) worden structureel geredigeerd (alleen waarde, schemavoorvoegsel zoals `Bearer `/`Basic ` behouden) in plaats van via de generieke tekstregex.
+- Een waarde achter een label wordt gemaskeerd, zelfs als deze geen providervoorvoegsel heeft: `DB_PASSWORD=…`, `AWS_SECRET_ACCESS_KEY=…`, `client_secret: …`, `?api_key=…` (labels: `password`, `passwd`, `secret`, `secret_key`, `secret_access_key`, `api_key`, `access_token`, `refresh_token`, `auth_token`, met een willekeurig voorvoegsel zoals `DB_`). Het label en het scheidingsteken blijven staan en de waarde wordt `[REDACTED:secret]`. De waarde heeft 12 of meer tekens nodig, zodat proza zoals `password: required` leesbaar blijft; een waarde die begint met `$` of `%` (een variabele referentie) wordt met rust gelaten.
 - De vangrail blokkeert nooit; het herschrijft alleen (`modifiedPayload` / `modifiedResponse`) en annoteert (`meta.credentialsRedacted`, `meta.count`).
 
 Regressiewacht: `tests/unit/credential-masker-guardrail.test.ts`.
+
+### Agent Guard (`agentGuard/`)
+
+De agentguard classificeert de client achter een verzoek aan de `claude` of `anthropic` provider op basis van de headers. `AGENT_GUARD_MODE` heeft drie waarden: `off` (standaard), `monitor` en `block`. Met `off` wordt er geen header gelezen en niets gelogd.
+
+Officiële agenten worden herkend aan deze headers (hoofdletterongevoelig vergeleken):
+
+- Claude Code: een `User-Agent` die begint met `claude-cli/` of `claude-code/`, of `x-app: cli` samen met een `anthropic-beta` header of een `User-Agent` die `claude` bevat.
+- Anthropic SDKs: een `User-Agent` die begint met `Anthropic/`, `AsyncAnthropic/`, `anthropic-typescript/` of `anthropic-python/`.
+
+Het standaard productieniveau van de logger (`info`) toont beide soorten lijnen. Bij `APP_LOG_LEVEL=warn` blijven alleen de bekende lijnen van derden over.
+
+Logvelden: `agent`, `thirdParty`, `provider`, `model`, `apiKeyId`, `userAgent`, `xApp`, `anthropicBeta`, `xTitle`, `referer`, `stainless`. Kopwaarden en de modeltekenreeks mogen maximaal 200 tekens bevatten. De verwijzende persoon wordt geregistreerd zonder zijn queryreeks, fragment en gebruikersinfo. De API sleutel, `Authorization`, `x-api-key` en cookies worden nooit gelezen.
+
+Bestanden: `src/lib/guardrails/agentGuard/classifier.ts`, `src/lib/guardrails/agentGuard/policy.ts`, `src/lib/guardrails/agentGuard/guardrail.ts`, `src/lib/guardrails/agentGuard/settings.ts`, `src/lib/guardrails/agentGuard/logLine.ts`, `src/lib/guardrails/agentGuard/enforcement.ts`, `src/sse/handlers/chat/agentGuardGate.ts`.
+
+**Classificatielimieten (beide modi):**
+
+- Een agent gebouwd op een officiële SDK die geen `X-Title`, `HTTP-Referer` of eigen `User-Agent` verzendt, lijkt op de SDK. `x-stainless-*` headers alleen maken een client nog niet officieel.
+- Agenten van derden worden gekoppeld aan tokens van hele woorden in `User-Agent`, `X-Title` en `HTTP-Referer` (of `Referer`). Niet-genoteerde klanten worden weergegeven als `unknown`.
+- Verzoeken van browsergebaseerde clients dragen de eigen `User-Agent` van de browser en worden als niet-geïdentificeerd weergegeven, tenzij `X-Title` of de verwijzende gebruiker een bekend token van een derde partij draagt.
+- Eén logregel per waargenomen verzoek: verwacht volume bij drukke instanties.
+
+#### Monitor
+
+Met `AGENT_GUARD_MODE=monitor` worden verzoeken waarvan de modeltekenreeks de `claude` of `anthropic` provider noemt, geclassificeerd op basis van hun clientheaders. Wanneer de cliënt geen officiële agent is, wordt één logregel met `tag: "AGENT_GUARD"` geschreven. Het is `warn` voor een bekende externe agent en `info` voor een niet-geïdentificeerde klant. Prioriteit `1`: de vangrail leest alleen headers en verandert nooit de payload, dus hij loopt vóór de mediabruggen. `monitor` blokkeert nooit.
+
+**Grenzen van `monitor`:**
+
+- Elk signaal is een clientgestuurde header. Dit is observatie, geen toegangscontrole.
+- De provider wordt uit de modeltekenreeks gelezen voordat het model wordt omgezet: `provider/model`, een provideralias zoals `cc/…` en quota-share-ID's (`qtSd/<group>/<provider>/<model>`). Kale model-ID's, modelaliassen, combo's en latere routeringsnormalisatie worden niet gevolgd. Deze verzoeken worden niet gehonoreerd.
+- Een beller kan dit per verzoek overslaan via de kanalen voor het uitschakelen van het register (zie [Guardrails per verzoek uitschakelen](#disabling-guardrails-per-request) ). Overgeslagen verzoeken worden niet in acht genomen.
+- Het werkt alleen waar `runPreCallHooks` draait (zie [Dekking en limieten](#coverage-and-limits) ).
+
+#### Blok
+
+Bij `AGENT_GUARD_MODE=block` doet de vooroproepvangrail niets. De chat-handler neemt in plaats daarvan de beslissing:
+
+1. De beslissing wordt genomen wanneer een doelwit op het punt staat te worden verzonden, op basis van de provider aan wie het verzoek is beantwoord. Provideraliassen, kale model-ID's, quota-share-ID's en elk combinatiedoel komen aan bod.
+2. Het wordt niet uitgevoerd in het vangrailregister, dus de uitschakelkanalen per verzoek zijn er niet op van toepassing.
+3. Een bekende externe agent wordt geweigerd. Een ongeïdentificeerde cliënt wordt ingelogd zoals in `monitor`, en wordt alleen geweigerd met `AGENT_GUARD_STRICT=true`. Claude -code en de officiële Anthropic SDKs worden nooit geweigerd.
+4. De weigering is HTTP 403 met `error.type` `permission_error` en `error.code` `client_agent_not_allowed`. De body is een fout in OpenAI-stijl. Op verzoeken in Anthropic-formaat bevat het ook `type: "error"` op het hoogste niveau. Er is geen `Retry-After` header en de weigering wordt geretourneerd voordat een stream begint.
+5. Een weigering is geen falen van de aanbieder. Het raakt de stroomonderbreker van de provider, cooldowns van verbindingen of modelvergrendelingen niet.
+6. Bij een combo wordt een geweigerd doelwit overgeslagen en rennen de overige doelwitten. Het verzoek mislukt met de beleidsfout wanneer ten minste één doelwit is geweigerd en geen enkel doelwit voorbij de bewaker is gekomen. De combo behoudt zijn eigen fout wanneer een item op het hoogste niveau een andere bekende provider noemt, met een voorvoegsel of met de provider-ID van de stap. Een geweigerd prioriteitsdoel met `fallbackOnlyOnQuotaExhaustion` wordt op dezelfde manier overgeslagen en stopt de combo niet. Een schaduwdoel wordt gecontroleerd en geregistreerd, maar telt nooit als een doelwit dat voorbij de bewaker is gekomen.
+7. Een `fusion` combo mislukt voordat het panel loopt terwijl de rechter de fusiedienst gaat gebruiken zou worden geweigerd. Die beoordeling komt van de combo-configuratie of van de algemene combo-standaardinstellingen. Dezelfde controle wordt uitgevoerd wanneer een fusiecombo wordt bereikt via de omleiding van het vangnet.
+8. Eén logregel per aanvraag en provider, met `tag: "AGENT_GUARD"`, `warn` voor een weigering en dezelfde velden als `monitor`.
+9. Bij een interne fout gaat de beveiliging niet open. Het verzoek wordt voortgezet en één `warn` -regel `agent guard failed open` wordt geregistreerd.
+
+**Grenzen van `block`:**
+
+- Elk signaal is een clientgestuurde header. Een client die `User-Agent: claude-cli/…` verzendt, wordt behandeld als Claude code. `block` schrikt ongewijzigde externe agenten af. Het is geen toegangscontrole.
+- Een proxy die de identificerende headers verwijdert, verandert elke client in een ongeïdentificeerde client. Zo’n cliënt wordt zonder `AGENT_GUARD_STRICT` bediend en daarmee geweigerd. Voer de bewaker uit op de instantie die naar de clients kijkt. Een tweede OmniRoute instantie achter de eerste ziet de headers van de eerste.
+- `AGENT_GUARD_STRICT` weigert elke klant bij aanbieders die geen Claude code of een officiële SDK zijn. Dat omvat browsergebaseerde clients en de dashboardspeeltuin. De dashboardcombo-livetest is vrijgesteld, ook via de vangnet-omleiding.
+- Sommige functies bouwen hun eigen chatverzoek op in plaats van het verzoek van de klant door te geven. Vier van hen sturen het terug via de `/v1/...` -routes van OmniRoute:
+  - batchtaken (`src/lib/batches/dispatch.ts`)
+  - de MCP -inferentietools (`open-sse/mcp-server/tools/inferenceTools.ts`)
+  - A2A slimme routering (`src/lib/a2a/skills/smartRouting.ts`)
+  - de visiebrug wanneer deze een beeld beschrijft via OmniRoute (`src/lib/guardrails/visionBridgeHelpers.ts`)
+- De Telegram -chatproxy (`src/lib/telegram/chatProxy.ts`) bouwt zijn verzoek op en belt de chat-handler rechtstreeks.
+- Deze innerlijke verzoeken bevatten OmniRoute's eigen headers, niet de headers van de client die ze heeft gestart. De bewaker classificeert hen als niet-geïdentificeerde klanten.
+- Zonder `AGENT_GUARD_STRICT` worden die innerlijke verzoeken geserveerd aan de bewaakte aanbieders, wie de oorspronkelijke klant ook was. Een derde-agent die via hen Claude bereikt, wordt niet geweigerd.
+- Met `AGENT_GUARD_STRICT` worden die innerlijke verzoeken geweigerd bij de bewaakte providers, degene die ze heeft gestart, inclusief Claude code.
+- Alleen verzoeken die via de chathandler gaan, worden afgesloten. Modelvalidatie (`src/lib/modelValidation/runner.ts`) roept de verzoekkern rechtstreeks aan en is niet beveiligd.
+- Alleen de `claude` en `anthropic` aanbieders vallen onder de dekking. Claude modellen die door een andere aanbieder worden aangeboden, vallen niet onder de dekking, en de `claude-web` aanbieder ook niet.
+- Sommige combo's noemen hun resterende doelen zonder een providervoorvoegsel, als kale model-ID's of geneste combo's. Wanneer deze doelen om een niet-gerelateerde reden (open breaker, cooldown, lockout) niet beschikbaar zijn, mislukt het verzoek met de beleidsfout.
+- Een overgeslagen combodoel wist de laatst bekende goede pin van dat doelwit, zoals elk overgeslagen doel dat doet.
+- Een fusierechter met een bewaakt providervoorvoegsel wordt geweigerd voordat het panel deelneemt. Dat omvat `anthropic/…`, `claude/…`, een alias zoals `cc/…`, een contextachtervoegsel zoals `[1m]` en quota-share-namen op die providers.
+- Een fusierechter die is geschreven als een kale model-ID, of als een modelalias die verwijst naar een bewaakte provider, wordt alleen geweigerd wanneer deze wordt verzonden. Het panel is dan al actief. Door de rechter te benoemen met het voorvoegsel van de aanbieder wordt dit vermeden. Geen enkele rechter-spelling bereikt een bewaakte aanbieder zonder te weigeren.
+- De pre-check weigert een geconfigureerde Claude rechter, zelfs als de fusiedienst die rechter tijdens runtime zou laten vallen. De dienst laat een rechter vallen die de operator heeft verborgen, en een rechter die de media van het verzoek niet kan aannemen. De tweede zaak heeft betrekking op onbevestigde visieondersteuning en andere media die de rechter niet accepteert. Beide combopaden gedragen zich op deze manier.
+- Bij de vangnetomleiding ontvangt de comboservice lege instellingen. Een rechter die alleen in de algemene combo-standaardwaarden is ingesteld, wordt daar nooit gebruikt.
+- Terwijl `block` aanstaat, gebruikt een cliënt die de bewaker zou weigeren bij een bewaakte aanbieder voor geen enkel model het snelle zijspanpad. Onder `AGENT_GUARD_STRICT` is dat iedere onbekende cliënt. Na de relay-tokencontrole beantwoordt `POST /v1/relay/chat/completions/bifrost` deze verzoeken met een 503 en de `X-Bifrost-Fallback` header.
+- `POST /v1/messages/count_tokens` geeft de lokale schatting aan een klant die de bewaker zou weigeren bij de aanbieder waar het model naar toe besluit.
+- Er is geen vrijstelling per sleutel.
 
 ## Basiscontract (`base.ts`)
 
@@ -469,16 +544,18 @@ Op het niet-streamingpad is de volgorde: geheugenextractie → uitvoering van in
 
 Omgevingsvariabelen gelezen door de ingebouwde vangrails:
 
-| Variabel                              | Gebruikt door                 | Effect                                                                                                  |
-| ------------------------------------- | ----------------------------- | ------------------------------------------------------------------------------------------------------- |
-| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`            | Stel `false` in om detectie volledig uit te schakelen.                                                  |
-| `INPUT_SANITIZER_MODE`                | `prompt-injection`            | Injectiebeleid: `warn`, `block` of `log`. Verouderde waarde `redact` herschrijft de injectietekst niet. |
-| `INJECTION_GUARD_MODE`                | `prompt-injection`            | Modus voor de injectiebeschermer; ook een DB functievlag die** overschrijft** de env vars (DB > ENV).   |
-| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`            | Minimale ernst die `MODE=block` afwijst: `high` (standaard), `medium` of `low`.                         |
-| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`            | Verouderde alias voor `INPUT_SANITIZER_BLOCK_THRESHOLD`.                                                |
-| `PII_REDACTION_ENABLED`               | `pii-masker`                  | Wanneer `true` wordt verzoek PII geredigeerd (onafhankelijk van de injectiemodus).                      |
-| `PII_REVERSIBLE_VAULT_ENABLED`        | `pii-masker`, `handleChat`    | Met `PII_REDACTION_ENABLED` kun je omkeerbare tokens maken en deze herstellen in 2xx-reacties.          |
-| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` (stroomafwaarts) | Beheert het maskeergedrag aan de responszijde.                                                          |
+| Variabel                              | Gebruikt door                 | Effect                                                                                                                 |
+| ------------------------------------- | ----------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| `INPUT_SANITIZER_ENABLED`             | `prompt-injection`            | Stel `false` in om detectie volledig uit te schakelen.                                                                 |
+| `INPUT_SANITIZER_MODE`                | `prompt-injection`            | Injectiebeleid: `warn`, `block` of `log`. Verouderde waarde `redact` herschrijft de injectietekst niet.                |
+| `INJECTION_GUARD_MODE`                | `prompt-injection`            | Modus voor de injectiebeschermer; ook een DB functievlag die** overschrijft** de env vars (DB > ENV).                  |
+| `INPUT_SANITIZER_BLOCK_THRESHOLD`     | `prompt-injection`            | Minimale ernst die `MODE=block` afwijst: `high` (standaard), `medium` of `low`.                                        |
+| `INJECTION_GUARD_BLOCK_THRESHOLD`     | `prompt-injection`            | Verouderde alias voor `INPUT_SANITIZER_BLOCK_THRESHOLD`.                                                               |
+| `PII_REDACTION_ENABLED`               | `pii-masker`                  | Wanneer `true` wordt verzoek PII geredigeerd (onafhankelijk van de injectiemodus).                                     |
+| `PII_REVERSIBLE_VAULT_ENABLED`        | `pii-masker`, `handleChat`    | Met `PII_REDACTION_ENABLED` kun je omkeerbare tokens maken en deze herstellen in 2xx-reacties.                         |
+| `PII_RESPONSE_SANITIZATION` / `_MODE` | `pii-masker` (stroomafwaarts) | Beheert het maskeergedrag aan de responszijde.                                                                         |
+| `AGENT_GUARD_MODE`                    | `agent-guard`                 | `off` (standaard), `monitor` of `block`. Ook een DB -functievlag (DB > ENV).                                           |
+| `AGENT_GUARD_STRICT`                  | `agent-guard`                 | `false` (standaard) of `true`. Met `block` weigert ook ongeïdentificeerde klanten. Ook een DB -functievlag (DB > ENV). |
 
 De Modality Bridge-guardrails lezen de runtime-configuratie uit het door DB ondersteunde instellingenarchief (`getSettings()`), niet uit env vars. De primaire sleutels van Vision zijn `modalityBridgeVisionEnabled`, `modalityBridgeVisionMode`, `modalityBridgeVisionModel`, `modalityBridgeVisionTaskAware`, `modalityBridgeVisionPrompt`, `modalityBridgeVisionTimeout`, `modalityBridgeVisionMaxImages`, `modalityBridgeVisionMaxChars`, `modalityBridgeCacheEnabled`, `modalityBridgeCacheTtlMinutes` en `modalityBridgeCacheMaxEntries`. De oudere `visionBridge*` sleutels worden alleen geaccepteerd als de gedocumenteerde leesfallback van één cyclus; dashboardschrijfbewerkingen gebruiken de primaire sleutels. Standaardwaarden en de fallback-resolver bevinden zich in `src/shared/constants/modalityBridgeDefaults.ts`, terwijl de oude constanten behouden blijven in `src/shared/constants/visionBridgeDefaults.ts`.
 

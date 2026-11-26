@@ -513,10 +513,11 @@ Domeenioleku andmebaas (SQLite):
 
 ## 5) Pilvesünkroonimine
 
-- Ajastaja lähtestamine: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- Planeerija algseade: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
 - Perioodiline ülesanne: `src/shared/services/cloudSyncScheduler.ts`
 - Perioodiline ülesanne: `src/shared/services/modelSyncScheduler.ts`
-- Juhtimise marsruut: `src/app/api/sync/cloud/route.ts`
+- Perioodiline ülesanne (lubamine ühenduse kohta): `src/shared/services/modelHealthCheckScheduler.ts` — testib ühenduse mudeleid, peidab tõrked automaatselt ja taastab ainult selle, mille ta ise peitis (`src/lib/db/modelHealthAutoHidden.ts`)
+- Juhttee: `src/app/api/sync/cloud/route.ts`
 
 ## Päringu elutsükkel (`/v1/chat/completions`)
 

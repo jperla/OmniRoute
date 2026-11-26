@@ -209,7 +209,7 @@ Regras para o formato do timestamp (aplicado por `npm run check:migration-number
 
 **O carimbo de data/hora é a ordem de criação, não a ordem de fusão.** Se a sua migração depender de uma tabela ou coluna criada por uma migração com um** mais recente** timestamp (por exemplo, um de outro PR que foi fundido primeiro), uma nova base de dados executaria a sua primeira e falharia. Enquanto o seu PR ainda estiver aberto, gere novamente o nome do ficheiro com `npm run db:new-migration` para obter um carimbo de data/hora mais recente ou torne-o independente. `npm run test:migrations:fresh` aplica todas as migrações a uma base de dados vazia e captura isso.
 
-### Uma migração fundida nunca é eliminada ou renomeada
+### Uma migração combinada nunca é eliminada ou renomeada
 
 Uma vez que um ficheiro de migração está numa ramificação de lançamento ou `main`, já foi executado em bases de dados homólogas e de programador, em instalações VPS e na sincronização empresarial. A partir daí:
 
@@ -307,7 +307,7 @@ Utilize as cláusulas `IF NOT EXISTS`, `IF EXISTS` e `OR IGNORE` / `OR REPLACE` 
 1. **Crie o ficheiro com o gerador** : `npm run db:new-migration -- <description>` (por exemplo `npm run db:new-migration -- add combo priority`). Escreve `src/lib/db/migrations/<YYYYMMDDHHMMSS>_<description>.sql` com a hora UTC atual e um cabeçalho de comentário, avança um segundo se esse carimbo de data e hora for obtido e nunca sobrescreve um ficheiro. Não escolha um número manualmente.
 2. **Use DDL seguro** : `CREATE TABLE IF NOT EXISTS`, `CREATE INDEX IF NOT EXISTS`, `ALTER TABLE ... ADD COLUMN`
 3. **Preencha os dados com cuidado** : utilizar `UPDATE ... WHERE ...` para lidar com linhas existentes
-4. **Verifique a ordem e a nomenclatura** : `npm run test:migrations:fresh` (todas as migrações numa base de dados vazia) e `npm run check:migration-numbering`
+4. **Verifique a ordem e a nomenclatura** : `npm run test:migrations:fresh` (todas as migrações numa base de dados vazia) e `npm run check:migration-numbering`. O gancho de pré-confirmação husky executa `check:migration-numbering` por si só quando o commit prepara um ficheiro em `src/lib/db/migrations/`, pelo que um nome escolhido a dedo ou mal formado (por exemplo `242_x.sql`) falha o commit localmente com a mesma mensagem CI impressa. O gancho verifica nomes, duplicados e apenas as séries `001`–`241` congeladas; a comparação com a base PR (migrações removidas, renomeadas ou fora de ordem) ainda é executada em CI
 5. **Teste numa cópia** : nunca execute migrações não testadas em produção
 6. **Uma tabela criada a partir de código também necessita de migração** : se um módulo também cria a tabela de forma preguiçosa (`CREATE TABLE IF NOT EXISTS`, mantida como um caminho de auto-correcção), uma migração deve criá-la com o mesmo DDL. Caso contrário, uma instalação limpa e uma instalação atualizada resultarão em esquemas diferentes, dependendo se o caminho do código foi executado. `tests/unit/db/lazy-table-migration-guard.test.ts` verifica `src/` e `open-sse/` e falha um `CREATE` preguiçoso sem migração (#20557). Exemplo: `src/lib/db/migrations/20261118120853_compression_run_telemetry.sql`.
 

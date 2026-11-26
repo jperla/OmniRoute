@@ -519,12 +519,13 @@ Stan domeny DB (SQLite):
 - Uwierzytelnianie uzgadniania WebSocket: `src/lib/ws/handshake.ts` — weryfikuje żądania uaktualnienia do WS przy użyciu klucza API lub pliku cookie sesji
 - Uwierzytelnianie WebSocket panelu na żywo: `src/server/ws/liveServer.ts` — proces pomocniczy (port `LIVE_WS_PORT`) akceptuje plik cookie sesji panelu lub klucz API typu Bearer z zakresem zarządzania (`manage`/`admin`); klucze przeznaczone wyłącznie do inferencji są odrzucane. Jego wewnętrzny punkt końcowy publikowania `POST /__omniroute_event` akceptuje połączenia z interfejsu pętli zwrotnej tylko wtedy, gdy nie występuje nagłówek wskazujący przejście przez serwer proxy (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`)
 
-## 5) Synchronizacja chmurowa
+## 5) Synchronizacja w chmurze
 
-- Inicjalizacja schedulera: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- Inicjacja harmonogramu: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
 - Zadanie okresowe: `src/shared/services/cloudSyncScheduler.ts`
 - Zadanie okresowe: `src/shared/services/modelSyncScheduler.ts`
-- Trasa sterująca: `src/app/api/sync/cloud/route.ts`
+- Zadanie okresowe (opt-in na połączenie): `src/shared/services/modelHealthCheckScheduler.ts` — testuje modele połączenia, automatycznie ukrywa awarie i przywraca tylko to, co samo ukryło (`src/lib/db/modelHealthAutoHidden.ts`)
+- Droga kontrolna: `src/app/api/sync/cloud/route.ts`
 
 ## Cykl obsługi żądania (`/v1/chat/completions`)
 

@@ -12,6 +12,12 @@ Neytral `config/cli-tools-manifest.json` shartnomasi kanonik IDs, taxalluslar, i
 
 To'xtatish va tugatish signallari bolaga uzatiladi. Vaqtinchalik konfiguratsiyani olib tashlashdan oldin ishga tushirgich bolaning yaqin hodisasini kutadi. `OMNIROUTE_CHILD_SIGNAL_TIMEOUT_MS` majburiy tugatishdan oldingi imtiyozli davrni nazorat qiladi (standart 5000 millisekund).
 
+`omniroute launch <tool>` (qarang: [LAUNCH.md](./LAUNCH.md) ) bir xil muhit qoidalariga va signal uzatishga amal qiladi va quyidagilarni qo'shadi:
+
+- **Gateway avtomatik ishga tushirish.** Mahalliy maqsad uchun portda hech qanday shlyuz javob bermasa, ishga tushirish moslamasi ajratilgan o'roq jarayoni ostida `127.0.0.1` ga bog'langan `omniroute serve --headless --no-open` boshlaydi. Har bir ishga tushirish `DATA_DIR/launch/leases/` da ijaraga oladi (yurak urishi har 15 soniyada, 45 soniyadan keyin eskiradi yoki jarayon tugashi bilanoq). Oʻroqchi ishga tushirilgan shlyuzni toʻxtatib qoʻyadi (`OMNIROUTE_LAUNCH_IDLE_GRACE_MS`, sukut boʻyicha 10000 millisekund). Foydalanuvchi boshlagan, lekin hech qachon to'xtamaydigan shlyuzdan foydalaniladi. `--keep-gateway` yoki `omniroute gateway keep` ishga tushirish shlyuzini oddiy shlyuzga aylantiradi; `--no-start` eski muvaffaqiyatsizlik holatini tiklaydi. Faqat uzoqdagi nishonlar tekshiriladi.
+- **Seanslarni ishga tushirish.** Har bir ishga tushirish ota-ona hisob ma'lumotlaridan (`POST /api/launch/sessions`) qisqa muddatli `olx_` seansi tokenini chiqaradi, asbob ishlayotganda uni yurak urishi, foydalanish xulosasini o'qiydi va asbob chiqqandan keyin uni bekor qiladi. Token ota-onasining qat'iy quyi to'plamidir: bir xil ruxsatlar, bir xil yoki torroq katalog, qisqaroq xizmat muddati va u asboblar panelidagi hisob ma'lumotlari emas. Asbob seans tokenini oladi, hech qachon ota-ona hisob ma'lumotlarini olmaydi va agar `--tag` berilmasa, so'rovlar `launch:<tool>:<sessionId>` belgilanadi. API sessiyasi bo'lmagan shlyuz `GatewayTooOld` bilan ishlamay qoladi, o'rniga yopilmagan ishga tushiriladi.
+- **Har bir ishga tushirish konfiguratsiyasi.** Asbob konfiguratsiyasi fayllari shaxsiy vaqtinchalik katalogga yoziladi (rejim 0700, prefiks `omnirouter-`) va bola chiqqandan keyin o'chiriladi. Launcherning `SIGKILL` katalogni ortda qoldiradi; `omniroute launch --cleanup` bunday kataloglarni bir kundan oshganidan keyin olib tashlaydi.
+
 ## Gemini doimiy sozlash
 
 ```bash

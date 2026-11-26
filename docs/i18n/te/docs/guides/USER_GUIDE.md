@@ -374,7 +374,7 @@ omniroute
 omniroute --port 3000
 ```
 
-CLI స్వయంచాలకంగా `~/.omniroute/.env` లేదా `./.env` నుండి `.env` ని లోడ్ చేస్తుంది. వర్కింగ్ డైరెక్టరీలోని `./.env` కీల యొక్క చిన్న అనుమతి జాబితాను మాత్రమే సెట్ చేయవచ్చు (`REQUIRE_API_KEY`, లొకేల్, టైమ్ జోన్ మరియు కలర్ సెట్టింగ్లు, పోర్ట్లు కాదు); మిగతావన్నీ `~/.omniroute/.env` లో ఉంచండి. [CLI ప్రయోగ ఒప్పందాలను](CLI-LAUNCH-CONTRACTS.md#working-directory-env) చూడండి.
+CLI స్వయంచాలకంగా `~/.omniroute/.env` లేదా `./.env` నుండి `.env` ని లోడ్ చేస్తుంది. వర్కింగ్ డైరెక్టరీలోని `./.env` కీల యొక్క చిన్న అనుమతి జాబితాను మాత్రమే సెట్ చేయవచ్చు (`REQUIRE_API_KEY`, లొకేల్, టైమ్ జోన్ మరియు రంగు సెట్టింగ్లు, పోర్ట్లు కాదు); మిగతావన్నీ `~/.omniroute/.env` లో ఉంచండి. [CLI ప్రయోగ ఒప్పందాలను](CLI-LAUNCH-CONTRACTS.md#working-directory-env) చూడండి.
 
 ### ట్రే మోడ్
 
@@ -433,7 +433,7 @@ omniroute autostart disable
 ### VPS విస్తరణ
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -515,8 +515,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -613,7 +613,7 @@ post_install() {
 | `API_KEY_SECRET`                        | _(స్వయంచాలకంగా రూపొందించబడింది)_ | ఉత్పత్తి చేయబడిన API కీల కోసంHMAC రహస్యం — మొదటి రన్లో స్వయంచాలకంగా రూపొందించబడింది మరియు `server.env` వరకు కొనసాగుతుంది                                         |
 | `REQUIRE_API_KEY`                       | `false`                          | `/v1/*` లో బేరర్ API కీని అమలు చేయండి                                                                                                                            |
 | `ALLOW_API_KEY_REVEAL`                  | `false`                          | ప్రామాణీకరించబడిన డాష్బోర్డ్ వినియోగదారులను డిమాండ్పై పూర్తి నిల్వ చేసిన API కీ విలువలను బహిర్గతం చేయడానికి అనుమతించండి                                          |
-| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                             | కాష్ చేసిన ప్రొవైడర్ పరిమితుల డేటా కోసం సర్వర్ వైపు రిఫ్రెష్ కాడెన్స్; UI రిఫ్రెష్ బటన్లు ఇప్పటికీ మాన్యువల్ సమకాలీకరణను ట్రిగ్గర్ చేస్తాయి                      |
+| `PROVIDER_LIMITS_SYNC_INTERVAL_MINUTES` | `70`                             | కాష్ చేయబడిన ప్రొవైడర్ పరిమితుల డేటా కోసం సర్వర్ వైపు రిఫ్రెష్ కాడెన్స్; UI రిఫ్రెష్ బటన్లు ఇప్పటికీ మాన్యువల్ సమకాలీకరణను ట్రిగ్గర్ చేస్తాయి                    |
 | `DISABLE_SQLITE_AUTO_BACKUP`            | `false`                          | writes/import/restore కంటే ముందు ఆటోమేటిక్ SQLite స్నాప్షాట్లను నిలిపివేయండి; మాన్యువల్ బ్యాకప్ ఇప్పటికీ పని చేస్తుంది                                           |
 | `APP_LOG_TO_FILE`                       | `true`                           | డిస్క్కి అప్లికేషన్ మరియు ఆడిట్ లాగ్ అవుట్పుట్ను ప్రారంభిస్తుంది                                                                                                 |
 | `AUTH_COOKIE_SECURE`                    | `false`                          | ఫోర్స్ `Secure` auth కుక్కీ ( HTTPS రివర్స్ ప్రాక్సీ వెనుక)                                                                                                      |
@@ -706,7 +706,7 @@ curl -X POST http://localhost:20128/api/provider-models \
 
 గమనికలు:
 
-- OpenRouter మరియు OpenAI/Anthropic-compatible ప్రొవైడర్లు నుండి నిర్వహించబడుతున్నాయి** అందుబాటులో ఉన్న నమూనాలు** మాత్రమే. మాన్యువల్ యాడ్, దిగుమతి మరియు స్వయంచాలకంగా ఒకే అందుబాటులో ఉన్న మోడల్ జాబితాలో మొత్తం భూమిని సమకాలీకరించండి, కాబట్టి ఆ ప్రొవైడర్ల కోసం ప్రత్యేక కస్టమ్ మోడల్ల విభాగం లేదు.
+- OpenRouter మరియు OpenAI/Anthropic-compatible ప్రొవైడర్లు నుండి నిర్వహించబడుతున్నాయి** అందుబాటులో ఉన్న నమూనాలు** మాత్రమే. మాన్యువల్ యాడ్, దిగుమతి మరియు స్వయంచాలకంగా ఒకే అందుబాటులో ఉన్న-మోడల్ జాబితాలో మొత్తం భూమిని సమకాలీకరించండి, కాబట్టి ఆ ప్రొవైడర్ల కోసం ప్రత్యేక కస్టమ్ మోడల్స్ విభాగం లేదు.
 - ది** అనుకూల నమూనాలు** విభాగం నిర్వహించబడే అందుబాటులో ఉన్న-మోడల్ దిగుమతులను బహిర్గతం చేయని ప్రొవైడర్ల కోసం ఉద్దేశించబడింది.
 
 ### అనుకూల OpenAI-అనుకూల ప్రొవైడర్లు
@@ -715,12 +715,12 @@ OpenAI API (స్వీయ-హోస్ట్ చేసిన ప్రాక�
 
 1. **ప్రొవైడర్లు → OpenAI అనుకూలతను జోడించండి** .
 2. **పేరు** : నోడ్ కోసం ఒక ప్రదర్శన లేబుల్.
-3. **ఉపసర్గ** : రూటింగ్ పేరు. క్లయింట్లు మోడల్లను `<prefix>/<model>` అని పిలుస్తారు, కాబట్టి `mygw` ఉపసర్గతో కూడిన నోడ్ `mygw/gpt-4o-mini` ఉపయోగపడుతుంది. అవసరం; పాత్ర పరిమితి లేదు.
+3. **ఉపసర్గ** : రూటింగ్ పేరు. క్లయింట్లు మోడల్లను `<prefix>/<model>` అని పిలుస్తారు, కాబట్టి `mygw` ఉపసర్గతో కూడిన నోడ్ `mygw/gpt-4o-mini` ని అందజేస్తుంది. అవసరం; పాత్ర పరిమితి లేదు.
 4. **API రకం** : గేట్వే అందించే ఎండ్పాయింట్ కుటుంబం (చాట్ పూర్తిలు, ప్రతిస్పందనలు, ఎంబెడ్డింగ్లు, ఆడియో, చిత్రాలు).
 5. **బేస్ URL** : API రూట్, `/v1` వరకు మరియు సహా (ఉదాహరణకు `https://gateway.example.com/v1`), పూర్తి `/chat/completions` మార్గం కాదు. ప్రామాణికం కాని మార్గాలతో గేట్వేలు వాటిని కింద ఉంచాయి** అధునాతన సెట్టింగ్లు** (చాట్ పాత్, మోడల్స్ పాత్).
 6. ది**API కీ (తనిఖీ కోసం)** ఫీల్డ్ కనెక్షన్ని మాత్రమే పరీక్షిస్తుంది. నోడ్ను సృష్టించిన తర్వాత, దాన్ని తెరిచి ఉపయోగించండి** కనెక్షన్ జోడించండి** అభ్యర్థనలు ఉపయోగించే కీని నిల్వ చేయడానికి.
 
-నోడ్ రూపం `openai-compatible-<apiType>-<uuid>` యొక్క అంతర్గత idని పొందుతుంది; మీరు దీన్ని ఎప్పటికీ టైప్ చేయవలసిన అవసరం లేదు, ఉపసర్గ అనేది పబ్లిక్ పేరు.
+నోడ్ రూపం `openai-compatible-<apiType>-<uuid>` యొక్క అంతర్గత idని పొందుతుంది; మీరు దీన్ని ఎప్పుడూ టైప్ చేయవలసిన అవసరం లేదు, ఉపసర్గ అనేది పబ్లిక్ పేరు.
 
 #### రిజర్వు చేయబడిన ఉపసర్గలు
 
@@ -827,7 +827,7 @@ curl http://localhost:20128/api/models/catalog
 - ముందుగా అవసరమైనప్పుడు మాత్రమే `cloudflared` ఇన్స్టాల్లను ప్రారంభించండి; తర్వాత పునఃప్రారంభించబడిన అదే నిర్వహించబడే బైనరీని మళ్లీ ఉపయోగిస్తుంది
 - OmniRoute లేదా కంటైనర్ రీస్టార్ట్ తర్వాత త్వరిత సొరంగాలు స్వయంచాలకంగా పునరుద్ధరించబడవు; అవసరమైనప్పుడు వాటిని డాష్బోర్డ్ నుండి మళ్లీ ప్రారంభించండి
 - టన్నెల్ URLs అశాశ్వతమైనవి మరియు మీరు టన్నెల్ను stop/start ప్రతిసారీ మారుతాయి
-- నిర్బంధ కంటైనర్లలో ధ్వనించే QUIC UDP బఫర్ హెచ్చరికలను నివారించడానికి HTTP/2 రవాణాకు డిఫాల్ట్గా నిర్వహించబడే త్వరిత సొరంగాలు
+- నిర్బంధ కంటైనర్లలో ధ్వనించే QUIC UDP బఫర్ హెచ్చరికలను నివారించడానికి HTTP/2 రవాణాకు డిఫాల్ట్గా నిర్వహించబడే క్విక్ టన్నెల్స్
 - మీరు నిర్వహించబడే రవాణా ఎంపికను భర్తీ చేయాలనుకుంటే `CLOUDFLARED_PROTOCOL=quic` లేదా `auto` సెట్ చేయండి
 - మీరు నిర్వహించబడే డౌన్లోడ్కు బదులుగా ప్రీఇన్స్టాల్ చేసిన `cloudflared` బైనరీని ఉపయోగించాలనుకుంటే `CLOUDFLARED_BIN` సెట్ చేయండి
 - Cloudflare క్విక్ టన్నెల్, Tailscale ఫన్నెల్ మరియు ngrok టన్నెల్ ప్యానెల్లను ఇందులో చూపవచ్చు లేదా దాచవచ్చు** సెట్టింగులు → స్వరూపం** . ప్యానెల్ను దాచడం వల్ల నడుస్తున్న సొరంగం ఆగదు.
@@ -842,7 +842,7 @@ curl http://localhost:20128/api/models/catalog
 
 ### అనువాదకుని ప్లేగ్రౌండ్
 
-ద్వారా యాక్సెస్** డాష్బోర్డ్ → అనువాదకుడు** . ప్రొవైడర్ల మధ్య API అభ్యర్థనలను OmniRoute ఎలా అనువదిస్తుందో డీబగ్ చేయండి మరియు దృశ్యమానం చేయండి.
+ద్వారా యాక్సెస్** డాష్బోర్డ్ → అనువాదకుడు** . OmniRoute ప్రొవైడర్ల మధ్య API అభ్యర్థనలను ఎలా అనువదిస్తుందో డీబగ్ చేయండి మరియు దృశ్యమానం చేయండి.
 
 | మోడ్                  | ప్రయోజనం                                                                                                 |
 | --------------------- | -------------------------------------------------------------------------------------------------------- |
@@ -868,7 +868,7 @@ curl http://localhost:20128/api/models/catalog
 | వ్యూహం                        | వివరణ                                                                                                          |
 | ----------------------------- | -------------------------------------------------------------------------------------------------------------- |
 | **ముందుగా పూరించండి**         | ప్రాధాన్యత క్రమంలో ఖాతాలను ఉపయోగిస్తుంది — ప్రాథమిక ఖాతా అందుబాటులో లేని వరకు అన్ని అభ్యర్థనలను నిర్వహిస్తుంది |
-| **రౌండ్ రాబిన్**              | కాన్ఫిగర్ చేయగల స్టిక్కీ పరిమితితో అన్ని ఖాతాల ద్వారా సైకిల్లు (డిఫాల్ట్: ప్రతి ఖాతాకు 3 కాల్లు)               |
+| **రౌండ్ రాబిన్**              | కాన్ఫిగర్ చేయగల స్టిక్కీ పరిమితితో అన్ని ఖాతాల ద్వారా సైకిల్లు (డిఫాల్ట్: ఒక్కో ఖాతాకు 3 కాల్లు)               |
 | **P2C (రెండు ఎంపికల శక్తి)**  | 2 యాదృచ్ఛిక ఖాతాలను ఎంచుకుంటుంది మరియు ఆరోగ్యకరమైన ఒక — ఆరోగ్యంపై అవగాహనతో లోడ్ను బ్యాలెన్స్ చేస్తుంది         |
 | **యాదృచ్ఛికంగా**              | ఫిషర్-యేట్స్ షఫుల్ ఉపయోగించి ప్రతి అభ్యర్థన కోసం యాదృచ్ఛికంగా ఖాతాను ఎంచుకుంటుంది                              |
 | **తక్కువగా ఉపయోగించబడింది**   | పాత `lastUsedAt` టైమ్స్టాంప్తో ఖాతాకు మార్గాలు, ట్రాఫిక్ను సమానంగా పంపిణీ చేస్తుంది                            |
@@ -884,8 +884,8 @@ curl http://localhost:20128/api/models/catalog
 - `least-used` మరియు `cost-optimized`
 - అభ్యర్థులందరిలో`auto` — స్కోర్-నడపబడుతుంది
 - `lkgp` (చివరిగా తెలిసిన మంచి ప్రొవైడర్) — చివరి విజయవంతమైన ప్రొవైడర్కు పిన్స్ చేసి, ఆపై నిబంధనలకు తిరిగి వస్తుంది
-- `context-optimized` — అతిపెద్ద ఉచిత సందర్భ విండోతో మోడల్ను ఎంచుకుంటుంది
-- తదుపరి మలుపుల కోసం`context-relay` — గొలుసు దీర్ఘ-సందర్భ నమూనాలు
+- `context-optimized` — ముందుగా తెలిసిన అతిపెద్ద సందర్భ విండోతో మోడల్ను ప్రయత్నిస్తుంది
+- సంభాషణ మరొక ఖాతాకు మారినప్పుడు`context-relay` — ప్రాధాన్యతా క్రమం మరియు హ్యాండ్ఆఫ్ సారాంశం
 
 #### బాహ్య అంటుకునే సెషన్ హెడర్
 
@@ -997,7 +997,7 @@ OmniRoute ఐదు భాగాలతో ప్రొవైడర్-స్థ�
    - **అభ్యర్థనల మధ్య కనీస సమయం** — అభ్యర్థనల మధ్య మిల్లీసెకన్లలో కనీస గ్యాప్
    - **గరిష్ట ఏకకాల అభ్యర్థనలు** — ఒక్కో ఖాతాకు గరిష్ట ఏకకాల అభ్యర్థనలు
 
-2. **కనెక్షన్ కూల్డౌన్** మళ్లీ ప్రయత్నించదగిన వైఫల్యాల తర్వాత ఒకే కనెక్షన్ కోసం — పర్-ఆత్-టైప్ కాన్ఫిగరేషన్:
+2. **కనెక్షన్ కూల్డౌన్** మళ్లీ ప్రయత్నించదగిన వైఫల్యాల తర్వాత ఒకే కనెక్షన్ కోసం — పర్-ఆత్-రకం కాన్ఫిగరేషన్:
    - **బేస్ కూల్డౌన్** మళ్లీ ప్రయత్నించదగిన అప్స్ట్రీమ్ వైఫల్యాల కోసం — డిఫాల్ట్ కూల్డౌన్ విండో
    - **అప్స్ట్రీమ్ మళ్లీ ప్రయత్నించు సూచనలను ఉపయోగించండి** — అధికారిక `Retry-After` ని గౌరవిస్తుంది లేదా అందించినప్పుడు సూచనలను రీసెట్ చేస్తుంది
    - **గరిష్ట బ్యాక్ఆఫ్ దశలు** — పునరావృత వైఫల్యాల కోసం గరిష్ట ఎక్స్పోనెన్షియల్ బ్యాక్ఆఫ్ స్థాయి
@@ -1334,32 +1334,34 @@ curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUT
 
 ## 💻 అంతర్గత CLI
 
-సెటప్, డయాగ్నస్టిక్స్ మరియు రన్టైమ్ నియంత్రణ కోసం OmniRoute అంతర్గత CLI (`omniroute …`)తో వస్తుంది. ఇది **డ్యాష్బోర్డ్లోని "CLI సాధనాలు" పేజీకి భిన్నమైనది**; ఆ పేజీ మూడవ పక్ష CLIలను (Claude Code, Cursor, Codex, Cline, …) కాన్ఫిగర్ చేసి, అవి OmniRouteతో కమ్యూనికేట్ చేయగలిగేలా చేస్తుంది.
+OmniRoute సెటప్, డయాగ్నస్టిక్స్ మరియు రన్టైమ్ నియంత్రణ కోసం అంతర్గత CLI (`omniroute …`)ని పంపుతుంది. ఇది** డాష్బోర్డ్లోని "CLI సాధనాలు" పేజీ నుండి వేరు చేయండి** , ఇది మూడవ పక్షం CLIs (Claude కోడ్, Cursor, Codex, Cline, …)ని కాన్ఫిగర్ చేస్తుంది కాబట్టి వారు OmniRoute తో మాట్లాడగలరు.
 
 ```bash
-omniroute setup                    # ఇంటరాక్టివ్ విజార్డ్ (పాస్వర్డ్, ప్రొవైడర్లు, కాంబోలు)
-omniroute setup --non-interactive  # CIకి అనుకూలమైనది
-omniroute doctor                   # ఆరోగ్య డయాగ్నస్టిక్స్ (డేటా డైరెక్టరీ, DB, ప్రొవైడర్లు, పోర్టులు)
-omniroute providers available      # మద్దతు ఉన్న ప్రొవైడర్లను జాబితా చేయండి
-omniroute providers list           # కాన్ఫిగర్ చేసిన కనెక్షన్లను జాబితా చేయండి
-omniroute providers test <id>      # ప్రొవైడర్ కనెక్షన్ను ప్రత్యక్షంగా పరీక్షించండి
-omniroute combos list              # కాంబోలను జాబితా చేయండి
-omniroute combos switch <name>     # డిఫాల్ట్ కాంబోను సెట్ చేయండి
-omniroute models                   # అందుబాటులో ఉన్న మోడళ్లను జాబితా చేయండి (--json, --search)
-omniroute keys add | list | remove # టెర్మినల్ నుండి API కీలను నిర్వహించండి
-omniroute backup                   # కాన్ఫిగరేషన్ + DB స్నాప్షాట్
-omniroute restore [<timestamp>]    # స్నాప్షాట్ నుండి పునరుద్ధరించండి
-omniroute health                   # వివరణాత్మక ఆరోగ్య స్థితి (బ్రేకర్లు, కాష్, మెమరీ)
-omniroute quota                    # ప్రొవైడర్ కోటా వినియోగం
-omniroute mcp status               # MCP సర్వర్ స్థితి
-omniroute a2a status               # A2A సర్వర్ స్థితి
-omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok టన్నెల్లు
-omniroute reset-password           # అడ్మిన్ పాస్వర్డ్ను రీసెట్ చేయండి
-omniroute --mcp                    # stdio ద్వారా MCP సర్వర్ను ప్రారంభించండి
-omniroute --port 3000              # అనుకూల పోర్టులో సర్వర్ను ప్రారంభించండి
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-చిట్కా: అనారోగ్యకరమైన ప్రొవైడర్ కనెక్షన్లపై హెచ్చరికలు పొందడానికి `omniroute doctor --json`ను మీ మానిటరింగ్ సాధనంతో జత చేయండి.
+చిట్కా: విరిగిన స్థానిక ఇన్స్టాల్పై అప్రమత్తం చేయడానికి మీ పర్యవేక్షణ సాధనంతో `omniroute doctor --json` జత చేయండి. `doctor` ప్రొవైడర్ కనెక్షన్లను పరీక్షించదు; దాని కోసం `omniroute providers test <id>` ఉపయోగించండి.
 
 ---
 

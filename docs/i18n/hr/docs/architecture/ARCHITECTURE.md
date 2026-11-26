@@ -516,10 +516,11 @@ Baza podataka stanja domene (SQLite):
 
 ## 5) Sinkronizacija u oblaku
 
-- Inicijalizacija planera: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- Pokretanje planera: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
 - Periodični zadatak: `src/shared/services/cloudSyncScheduler.ts`
 - Periodični zadatak: `src/shared/services/modelSyncScheduler.ts`
-- Kontrolna ruta: `src/app/api/sync/cloud/route.ts`
+- Periodični zadatak (opt-in po vezi): `src/shared/services/modelHealthCheckScheduler.ts` — testira modele veze, automatski skriva greške i vraća samo ono što je sama sakrila (`src/lib/db/modelHealthAutoHidden.ts`)
+- Kontrolni put: `src/app/api/sync/cloud/route.ts`
 
 ## Životni ciklus zahtjeva (`/v1/chat/completions`)
 

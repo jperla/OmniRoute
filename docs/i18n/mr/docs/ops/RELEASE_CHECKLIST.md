@@ -35,75 +35,34 @@ npm run test:e2e           # पर्यायी, परंतु शिफा
 /capture-release-evidences-cc
 ```
 
-## npm Trusted Publishing (v3.8.51 पासून डीफॉल्ट) — विनंतीनुसार staged, fallback म्हणून direct
+## npm विश्वसनीय प्रकाशन (v3.8.51 पासून डीफॉल्ट) — विनंतीवर स्टेज केले, थेट फॉलबॅक म्हणून
 
-`npm-publish.yml` डीफॉल्टनुसार **npm Trusted Publishing (OIDC)** द्वारे प्रकाशित करते:
-`stage-npm` job (github-hosted) त्या रनसाठी GitHub चे id-token अल्पकालीन npm
-credential मध्ये रूपांतरित करते — repository secrets मध्ये दीर्घकालीन npm token नाही,
-2FA prompt नाही आणि provenance जोडलेले असते.
-2FA वगळणारे tokens आता निवृत्त केले जात असल्याने npm sanctions टाळण्याचा हा मार्ग आहे;
-तो v3.8.48 पर्यंत प्रकल्पात असलेला पूर्णपणे स्वयंचलित प्रवाह पुनर्संचयित करतो आणि
-WS1.3 ची हमी कायम ठेवतो (गळती झालेला token एकट्याने publish करू शकत नाही — tokenच नाही).
+`npm-publish.yml` द्वारे प्रकाशित करते** एनपीएम विश्वसनीय प्रकाशन (OIDC)** डीफॉल्टनुसार: `stage-npm` जॉब (github-होस्टेड) GitHub च्या id-टोकनची देवाणघेवाण करते अल्पकालीन npm क्रेडेंशियलसाठी — रिपॉजिटरी सिक्रेट्समध्ये दीर्घकालीन npm टोकन नाही, 2FA प्रॉम्प्ट नाही, प्रोव्हन्स संलग्न आहे. ते म्हणजे बायपास एनपीएम मंजूरी आता 2FA वगळणारे टोकन निवृत्त केले जात आहेत; हे WS1.3 गॅरंटी ठेवताना प्रकल्पाचा v3.8.48 पर्यंत पूर्ण स्वयंचलित प्रवाह पुनर्संचयित करते (लीक केलेले टोकन एकटे — प्रकाशित करू शकत नाही तेथे कोणतेही टोकन नाही).
 
-**एकदाच करायची सेटअप प्रक्रिया (मालक):** npmjs.com → package `omniroute` → Settings → _Trusted
-Publisher_ → GitHub: owner `diegosouzapw`, repo `OmniRoute`, workflow `npm-publish.yml`
-(environment: none). हे अस्तित्वात येईपर्यंत स्वयंचलित step `ENEEDAUTH` सह अयशस्वी होतो:
-`publish_mode=staged` (खाली) किंवा `direct` वापरून पुन्हा dispatch करा.
+**एक-वेळ सेटअप (मालक):** npmjs.com → पॅकेज `omniroute` → सेटिंग्ज → _Trusted Publisher_ → GitHub: मालक `diegosouzapw`, रेपो `OmniRoute`, वर्कफ्लो `npm-publish.yml` (पर्यावरण: काहीही नाही). ते अस्तित्वात येईपर्यंत, स्वयंचलित पायरी `ENEEDAUTH` सह अयशस्वी होते : `publish_mode=staged` (खाली) किंवा `direct` सह री-डिस्पॅच.
 
-### Staged publishing (विनंतीनुसार — `publish_mode=staged`)
+### स्टेज्ड प्रकाशन ( — `publish_mode=staged` विनंतीनुसार)
 
-npm-publish workflow आता थेट publish करत नाही: तो packed tarball
-(`check:pack-boot`) boot करतो आणि त्यानंतर `npm stage publish` चालवतो — अचूक bytes
-registry वर ठेवले जातात, **मालकाची मंजुरी मिळेपर्यंत install करता येत नाहीत**. मानवी
-2FA gate proof नंतर हलवण्यात आला आहे, त्यापूर्वी नाही.
+npm-publish वर्कफ्लो यापुढे थेट प्रकाशित करत नाही: ते पॅक केलेले टारबॉल बूट करते (`check:pack-boot`) आणि नंतर `npm stage publish` — चालवते जे अचूक बाइट्स रेजिस्ट्रीमध्ये पार्क केले जातात,** स्थापित करण्यायोग्य नाही** मालक मंजूर होईपर्यंत. मानवी 2FA गेट पुरावा AFTER वर हलवले, त्याच्या आधी नाही.
 
-**Workflow green झाल्यानंतर मालकाची प्रक्रिया:**
+**वर्कफ्लो हिरवा झाल्यानंतर मालकाचा प्रवाह:**
 
-1. `npm stage list omniroute` — stage id शोधा (तो workflow summary मध्येही छापला जातो).
-2. Staged bytes पडताळा (शिफारसीय): `npm stage download <id>` चालवा, त्यानंतर
-   डाउनलोड केलेला tarball तात्पुरत्या prefix मध्ये install करून boot करा
-   (`npm run check:pack-boot` CI मध्ये pack→install→boot verdict स्वयंचलितपणे करतो).
-3. `npm stage approve <id>` — 2FA prompt हाच publish आहे. `npm stage reject <id>` केल्यास तो टाकून दिला जातो.
-4. Publish नंतरची तपासणी: post-publish verifier (v3.8.49 plan मधील WS1.4)
-   public registry मधून प्रकाशित आवृत्ती स्वच्छ container मध्ये install करून boot करतो.
+1. `npm stage list omniroute` — स्टेज आयडी शोधा (वर्कफ्लो सारांशमध्ये देखील छापलेले).
+2. स्टेज केलेले बाइट्स सत्यापित करा (शिफारस केलेले): `npm stage download <id>`, नंतर डाउनलोड केलेले टारबॉल तात्पुरते उपसर्ग मध्ये स्थापित करा आणि बूट करा (`npm run check:pack-boot` समान पॅक →CI मध्ये→ बूट निर्णय स्थापित करते ).
+3. `npm stage approve <id>` — 2FA प्रॉम्प्ट IS प्रकाशित करा. `npm stage reject <id>` टाकून देतो.
+4. पोस्ट-पब्लिश नेट: पोस्ट-पब्लिश व्हेरिफायर ( v3.8.49 प्लॅनचाWS1.4) सार्वजनिक रजिस्ट्रीमधून प्रकाशित आवृत्ती स्वच्छ कंटेनरमध्ये स्थापित करतो आणि बूट करतो.
 
-**आपत्कालीन fallback:** `publish_mode=direct` सह `workflow_dispatch` केल्यास
-legacy तात्काळ `npm publish` पुनर्संचयित होते (staging मध्येच समस्या असल्यास वापरा;
-का वापरले ते नोंदवा).
+**आणीबाणी फॉलबॅक:** `workflow_dispatch` सह `publish_mode=direct` वारसा तात्काळ `npm publish` पुनर्संचयित करते (स्टेजिंगनेच गैरवर्तन केले तरच वापरा; का रेकॉर्ड करा).
 
-**एकदाच करायचे hardening (मालक, npmjs.com):** `omniroute` साठी Trusted Publisher
-stage-only mode मध्ये configure करा, जेणेकरून गळती झालेला दीर्घकालीन token कुठूनही
-थेट `npm publish` करू शकणार नाही — CI फक्त stage करू शकते; केवळ मालकाचे 2FA releases
-करते.
+**वन-टाइम हार्डनिंग (मालक, npmjs.com):** केवळ-स्टेज मोडमध्ये `omniroute` साठी विश्वसनीय प्रकाशक कॉन्फिगर करा जेणेकरून लीक केलेले दीर्घकाळ टिकणारे टोकन कोठूनही थेट `npm publish` करू शकत नाही — CI फक्त स्टेज करू शकते; फक्त मालकाचे 2FA रिलीझ.
 
-**Broken-artifact playbook (अपरिवर्तित):** डीफॉल्ट उपाय म्हणून
-`npm deprecate omniroute@<bad> "<reason> — use <fixed>"` वापरा (काही मिनिटांत,
-परत करता येण्यासारखे); `npm unpublish` केवळ 72 तासांच्या/no-dependents
-window मध्ये वापरा आणि कधीही पहिली कृती म्हणून करू नका. Docker: आवृत्ती tag
-कधीही पुन्हा लिहू नका — rollback म्हणजे `latest` ला शेवटच्या चांगल्या digest कडे
-पुन्हा निर्देशित करणे.
+**तुटलेली आर्टिफॅक्ट प्लेबुक (अपरिवर्तित):** डीफॉल्ट रिफ्लेक्स म्हणून `npm deprecate omniroute@<bad> "<reason> — use <fixed>"` (मिनिटे, उलट करता येण्याजोगे); `npm unpublish` फक्त 72h/no-dependents विंडोच्या आत आणि कधीही प्रथम चाल म्हणून नाही. Docker: आवृत्ती टॅग कधीही पुन्हा लिहू नका — रोलबॅक `latest` ला शेवटच्या चांगल्या डायजेस्टवर पुन्हा निर्देशित करत आहे.
 
-**Docker Hub `latest` (प्रत्येक stable SemVer publish साठी आवश्यक):**
-`docker-publish` workflow ने **दोन्ही** `X.Y.Z` tag करणे आवश्यक आहे आणि,
-`should-promote-latest.sh` ही ही सर्वाधिक stable SemVer असल्याचे मान्य करत असल्यास,
-`:latest` देखील **त्याच digest** सह tag करणे आवश्यक आहे. Job नंतर: Hub वरील
-`latest` digest नवीन SemVer digest इतकाच असावा आणि `last_updated` बदललेले असावे.
-Release notes मध्ये केवळ git वर अस्तित्वात असलेल्या दुरुस्त्यांचा उल्लेख असताना
-जुन्या build वर `:latest` ठेवू नका. Compose quickstarts `:latest` वापरतात;
-GitOps ने `X.Y.Z` pin करणे सुरू ठेवावे. [Docker release channels](../guides/DOCKER_GUIDE.md#release-channels)
-आणि #10317 पहा.
+**Docker हब `latest` (प्रत्येक स्थिर SemVer प्रकाशनासाठी आवश्यक):** `docker-publish` कार्यप्रवाह टॅग करणे आवश्यक आहे** दोन्ही** `X.Y.Z` आणि, जेव्हा `should-promote-latest.sh` सहमत असेल तेव्हा हे सर्वोच्च स्थिर SemVer आहे, `:latest` सह** समान पचन** . नोकरीनंतर: हब `latest` डायजेस्ट नवीन SemVer डायजेस्ट आणि `last_updated` हलवलेल्या बरोबर आहे. रिलीझ नोट्स फक्त git वर अस्तित्वात असलेल्या फिक्सेसबद्दल बोलत असताना जुन्या बिल्डवर `:latest` सोडू नका. कंपोझ क्विकस्टार्ट्स `:latest` वापरतात; GitOps `X.Y.Z` पिन करत रहावे. [Docker रिलीझ चॅनेल](../guides/DOCKER_GUIDE.md#release-channels) आणि #10317 पहा.
 
-**Docker Hub organization repository (`cheaperinference/omniroute`):** Docker Hub
-repository ला namespaces मध्ये हलवू शकत नाही, त्यामुळे `diegosouzapw/omniroute`
-आपला pull history आणि प्रत्येक release कायम ठेवतो आणि `docker-publish` मधील
-`mirror-org-dockerhub` job प्रत्येक released version (आणि promote झाल्यावर `:latest`)
-`ghcr.io/cheaper-inference/omniroute` मधून organization repository मध्ये copy करते.
-यासाठी `DOCKERHUB_ORG_USERNAME` /
-`DOCKERHUB_ORG_TOKEN` secrets आवश्यक आहेत; ते नसल्यास job "Docker Hub org
-mirror skipped" warning सह green राहतो आणि इतर registries मध्ये नेहमीप्रमाणे publish होते.
-नंतर तेथे released version publish करण्यासाठी **Actions → Mirror Docker image to the Docker Hub org → Run
-workflow** चालवा आणि `version=X.Y.Z` (तसेच सर्वाधिक stable version साठी
-`promote_latest`) द्या: यामुळे existing images copy होतात, rebuild होत नाही.
+**Docker हब संस्था भांडार (`cheaperinference/omniroute`):** Docker हब नेमस्पेसेसमध्ये रेपॉजिटरी हलवू शकत नाही, म्हणून `diegosouzapw/omniroute` त्याचा पुल इतिहास आणि प्रत्येक रिलीझ ठेवतो आणि `docker-publish` चे `mirror-org-dockerhub` जॉब प्रत्येक रिलीझ केलेली आवृत्ती (आणि `:latest` प्रमोट केल्यावर) `ghcr.io/cheaper-inference/omniroute` वरून संस्थेच्या भांडारात कॉपी करते. त्याला `DOCKERHUB_ORG_USERNAME` / `DOCKERHUB_ORG_TOKEN` रहस्ये आवश्यक आहेत; त्यांच्याशिवाय नोकरी "Docker Hub org मिरर वगळली" चेतावणीसह हिरवी राहते आणि इतर नोंदणी सामान्यपणे प्रकाशित होतात. तेथे नंतर रिलीझ केलेली आवृत्ती प्रकाशित करण्यासाठी, चालवा** क्रिया → मिरर Docker प्रतिमा Docker हब org → रन वर्कफ्लोवर** `version=X.Y.Z` सह (आणि सर्वोच्च स्थिर आवृत्तीसाठी `promote_latest` ): ते विद्यमान प्रतिमा कॉपी करते, पुनर्बांधणी नाही. त्या भांडाराचे Docker हब विहंगावलोकन हाताने सेट केले आहे: ते संपादित करणारे API ऑर्गनायझेशन ऍक्सेस टोकन नाकारतात.
+
+हाच वर्कफ्लो 2027-06-30 पर्यंत प्रत्येक रिलीझ GHCR पॅकेज `ghcr.io/diegosouzapw/omniroute` वर कॉपी करतो, त्यामुळे त्यावर पिन केलेले इन्स्टॉल्स अपडेट होत राहतात; त्याच्या निर्देशांकात " `ghcr.io/cheaper-inference/omniroute` वर हलविले" वर्णन आहे. त्याला `GHCR_LEGACY_TOKEN` गुप्त ( `write:packages` सह `diegosouzapw` चे क्लासिक वैयक्तिक प्रवेश टोकन) आवश्यक आहे; त्याशिवाय "लेगेसी GHCR मिरर वगळले" चेतावणी देऊन नोकरी वगळली जाते.
 
 ## हॉटफिक्स जलद मार्ग (लेबल `hotfix`)
 

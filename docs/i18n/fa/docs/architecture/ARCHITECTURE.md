@@ -512,11 +512,12 @@ Cloud Agents پلتفرمهای عامل کد میزبان شخص ثالث (Code
 - احراز هویت دستدهی WebSocket: `src/lib/ws/handshake.ts` — درخواستهای ارتقای WS را با استفاده از کلید API یا کوکی نشست اعتبارسنجی میکند
 - احراز هویت WebSocket زنده داشبورد: `src/server/ws/liveServer.ts` — سرویس جانبی (درگاه `LIVE_WS_PORT`) یک کوکی نشست داشبورد یا کلید Bearer API دارای دامنه مدیریتی (`manage`/`admin`) را میپذیرد؛ کلیدهایی که فقط برای استنتاج هستند رد میشوند. نقطه پایانی انتشار داخلی `POST /__omniroute_event` تنها زمانی همتایان loopback را میپذیرد که هیچ سرآیند عبور از پراکسی (`x-forwarded-*`، `x-real-ip`، `forwarded`، `via`) وجود نداشته باشد
 
-## 5) همگامسازی ابری
+## 5) Cloud Sync
 
-- مقداردهی اولیهٔ زمانبند: `src/lib/initCloudSync.ts`، `src/shared/services/initializeCloudSync.ts`، `src/shared/services/modelSyncScheduler.ts`
-- وظیفهٔ دورهای: `src/shared/services/cloudSyncScheduler.ts`
-- وظیفهٔ دورهای: `src/shared/services/modelSyncScheduler.ts`
+- زمانبندی شروع: `src/lib/initCloudSync.ts`، `src/shared/services/initializeCloudSync.ts`، `src/shared/services/modelSyncScheduler.ts`
+- تکلیف ادواری: `src/shared/services/cloudSyncScheduler.ts`
+- تکلیف ادواری: `src/shared/services/modelSyncScheduler.ts`
+- کار دورهای (انتخاب در هر اتصال): `src/shared/services/modelHealthCheckScheduler.ts` — مدلهای یک اتصال را آزمایش میکند، خرابیها را بهطور خودکار پنهان میکند و فقط مواردی را که خودش پنهان کرده بود بازیابی میکند (`src/lib/db/modelHealthAutoHidden.ts`)
 - مسیر کنترل: `src/app/api/sync/cloud/route.ts`
 
 ## چرخهٔ حیات درخواست (`/v1/chat/completions`)

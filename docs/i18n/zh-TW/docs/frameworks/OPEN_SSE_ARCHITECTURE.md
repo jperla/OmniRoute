@@ -236,19 +236,19 @@ export async function handleComboChat(body, comboId): Promise<ChatResult> {
 | `context-relay`     | 跨目標傳遞上下文                                           |
 | `fill-first`        | 在進入下一步之前先填滿配額                                 |
 | `p2c`               | 兩種選擇的力量                                             |
-| `random`            | 均勻隨機                                                   |
-| `least-used`        | 選擇最近使用次數最少的一個                                 |
-| `cost-optimized`    | 最便宜的健康目標優先                                       |
-| `reset-aware`       | 了解提供者重置窗口                                         |
-| `reset-window`      | 重置基於視窗的路由                                         |
+| `random`            | 依需求進行新鮮洗牌                                         |
+| `least-used`        | 選擇記錄請求最少的一個                                     |
+| `cost-optimized`    | 最低目錄輸入價格優先                                       |
+| `reset-aware`       | 剩餘配額+重設緊急                                          |
+| `reset-window`      | 首先重置最快的配額窗口                                     |
 | `expiry-first`      | 先使用額度到期未使用的帳戶                                 |
 | `headroom`          | 最剩餘的配額空間優先                                       |
 | `quota-weighted`    | 跳過耗盡的帳戶，然後按剩餘配額提取÷飛行負載                |
-| `strict-random`     | 真正統一（無品質加權）                                     |
+| `strict-random`     | 洗牌牌組：每個目標重複一次                                 |
 | `auto`              | 使用 16 個因素評分 (`autoCombo/`)                          |
 | `lkgp`              | 最後已知的良好提供者優先                                   |
-| `context-optimized` | 最適合長上下文請求                                         |
-| `cache-optimized`   | 將每個可重複使用的提示前綴固定到同一帳戶（提示快取命中）   |
+| `context-optimized` | 首先是已知最大的上下文窗口                                 |
+| `cache-optimized`   | 首選可能在快取中保存提示前綴的帳戶                         |
 | `fusion`            | 並行扇出到面板，然後透過法官進行合成（`fusion.ts`）        |
 | `pipeline`          | 鍊式步驟—每個目標的輸出都會饋送到下一個目標                |
 | `jev`               | 選擇加入： TypeSafe Jev 承認哪些排名條目運行；否則你的訂單 |

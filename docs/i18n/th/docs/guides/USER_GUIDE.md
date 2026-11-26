@@ -430,7 +430,7 @@ omniroute autostart disable
 ### การปรับใช้VPS
 
 ```bash
-git clone https://github.com/diegosouzapw/OmniRoute.git
+git clone https://github.com/cheaper-inference/OmniRoute.git
 cd OmniRoute && npm install && npm run build
 
 export JWT_SECRET="your-secure-secret-change-this"
@@ -512,8 +512,8 @@ depends="openssl"
 short_desc="Universal AI gateway with smart routing for multiple LLM providers"
 maintainer="zenobit <zenobit@disroot.org>"
 license="MIT"
-homepage="https://github.com/diegosouzapw/OmniRoute"
-distfiles="https://github.com/diegosouzapw/OmniRoute/archive/refs/tags/v${version}.tar.gz"
+homepage="https://github.com/cheaper-inference/OmniRoute"
+distfiles="https://github.com/cheaper-inference/OmniRoute/archive/refs/tags/v${version}.tar.gz"
 checksum=009400afee90a9f32599d8fe734145cfd84098140b7287990183dde45ae2245b
 system_accounts="_omniroute"
 omniroute_homedir="/var/lib/omniroute"
@@ -733,7 +733,7 @@ prefix: "<prefix>" is a reserved provider prefix — choose a different prefix (
 
 คีย์เหล่านี้อยู่ใน `providerSpecificData` ของการเชื่อมต่อ (เช่นผ่าน `PUT /api/providers/{id}`):
 
-- `toolNameMaxLength` (จำนวนเต็ม 1–1024) — สำหรับการเชื่อมต่อที่รองรับรูปแบบแชท OpenAI ซึ่งเกตเวย์ปฏิเสธชื่อเครื่องมือขนาดยาว ชื่อที่ยาวกว่าจะถูกส่งเป็นนามแฝงแบบสั้นและเรียกคืนในการตอบกลับ OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go และ Muse Code มีชื่อนามแฝงมากกว่า 64 ตัวอักษรโดยไม่มีการตั้งค่า ค่าการเชื่อมต่อจะแทนที่ค่าเริ่มต้นของ Azure OpenAI / Azure AI Foundry (การเชื่อมต่อ Azure ที่อยู่หลังเกตเวย์ที่เข้มงวดกว่า) และกำหนดขีดจำกัดสำหรับโหนดที่เข้ากันได้แบบกำหนดเอง OpenAI, Mistral, NVIDIA, OpenCode Zen/Go และ Muse Code รักษาขีดจำกัดการลงทะเบียนและเพิกเฉยต่อมัน
+- `toolNameMaxLength` (จำนวนเต็ม 1–1024) — สำหรับการเชื่อมต่อที่รองรับรูปแบบแชท OpenAI ซึ่งเกตเวย์ปฏิเสธชื่อเครื่องมือขนาดยาว ชื่อที่ยาวกว่าจะถูกส่งเป็นนามแฝงแบบสั้นและเรียกคืนในการตอบกลับ OpenAI, Azure OpenAI, Azure AI Foundry, Mistral, NVIDIA, OpenCode Zen/Go และ Muse Code มีชื่อนามแฝงมากกว่า 64 ตัวอักษรโดยไม่มีการตั้งค่า ค่าการเชื่อมต่อจะแทนที่ค่าเริ่มต้นของ Azure OpenAI / Azure AI Foundry (การเชื่อมต่อ Azure ที่อยู่ด้านหลังเกตเวย์ที่เข้มงวดกว่า) และกำหนดขีดจำกัดสำหรับโหนดที่เข้ากันได้แบบกำหนดเอง OpenAI, Mistral, NVIDIA, OpenCode Zen/Go และ Muse Code รักษาขีดจำกัดการลงทะเบียนและเพิกเฉยต่อมัน
 - `quotaEndpoint` — จุดสิ้นสุด quota/credits ของเกตเวย์ อ่านแถบโควต้าแดชบอร์ดและการกำหนดเส้นทางการรับรู้โควต้า ใช้งานได้กับทั้งการเชื่อมต่อที่เข้ากันได้กับ OpenAI และ Anthropic รูปร่างเต็มมีการบันทึกไว้ใน `open-sse/services/usage/openaiCompatible.ts`
 
 ```json
@@ -881,8 +881,8 @@ curl http://localhost:20128/api/models/catalog
 - `least-used` และ `cost-optimized`
 - `auto` — ขับเคลื่อนด้วยคะแนนจากผู้สมัครทั้งหมด
 - `lkgp` (ผู้ให้บริการที่ดีคนสุดท้าย) — ปักหมุดผู้ให้บริการที่ประสบความสำเร็จคนสุดท้าย จากนั้นกลับไปสู่กฎเกณฑ์
-- `context-optimized` — เลือกโมเดลที่มีหน้าต่างบริบทอิสระที่ใหญ่ที่สุด
-- `context-relay` — เชื่อมโยงโมเดลบริบทแบบยาวสำหรับการเลี้ยวติดตามผล
+- `context-optimized` — ลองใช้โมเดลที่มีหน้าต่างบริบทที่ใหญ่ที่สุดที่รู้จักก่อน
+- ลำดับความสำคัญ `context-relay` — บวกกับสรุปแฮนด์ออฟเมื่อการสนทนาย้ายไปยังบัญชีอื่น
 
 #### ส่วนหัวเซสชัน Sticky ภายนอก
 
@@ -999,7 +999,7 @@ OmniRoute ใช้ความยืดหยุ่นระดับผู้�
    - **ใช้คำแนะนำในการลองอัปสตรีมอีกครั้ง** — ให้เกียรติ `Retry-After` ที่เชื่อถือได้หรือรีเซ็ตคำแนะนำเมื่อระบุไว้
    - **ขั้นตอน Backoff สูงสุด** — ระดับการถอยกลับแบบเอ็กซ์โปเนนเชียลสูงสุดสำหรับความล้มเหลวซ้ำๆ
 
-3. **ผู้ให้บริการเซอร์กิตเบรกเกอร์** — ติดตามความล้มเหลวของผู้ให้บริการตั้งแต่ต้นทางถึงปลายทาง ทำเครื่องหมายผู้ให้บริการว่าลดระดับลงที่เกณฑ์คำเตือนที่กำหนดค่าไว้ และเปิดเบรกเกอร์เมื่อถึงเกณฑ์ความล้มเหลวที่กำหนดค่าไว้:
+3. **ผู้ให้บริการเซอร์กิตเบรกเกอร์** — ติดตามความล้มเหลวของผู้ให้บริการตั้งแต่ต้นทางถึงปลายทาง ทำเครื่องหมายว่าผู้ให้บริการลดระดับลงที่เกณฑ์คำเตือนที่กำหนดค่าไว้ และเปิดเบรกเกอร์เมื่อถึงเกณฑ์ความล้มเหลวที่กำหนดค่าไว้:
    - **เกณฑ์การย่อยสลาย** — ผู้ให้บริการล้มเหลวติดต่อกันก่อนที่จะเข้าสู่ `DEGRADED`
    - **เกณฑ์ความล้มเหลว** — ผู้ให้บริการล้มเหลวติดต่อกันก่อนที่จะเข้าสู่ `OPEN`
    - **รีเซ็ตการหมดเวลา** — กรอบเวลาก่อนที่ผู้ให้บริการจะถูกทดสอบอีกครั้ง
@@ -1157,7 +1157,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 
 สามารถตั้งค่าเริ่มต้นคอมโบสากลได้** แดชบอร์ด การตั้งค่า → → การกำหนดเส้นทาง → Combo ค่าเริ่มต้น** . การหมดเวลาเป้าหมายคำสั่งผสมจะสืบทอดการหมดเวลาคำขอปัจจุบันตามค่าเริ่มต้น ใช้** เป้าหมายหมดเวลา (วินาที)** ในค่าเริ่มต้นของคอมโบหรือคอมโบแต่ละรายการเฉพาะเมื่อขีดจำกัดต่อเป้าหมายที่สั้นลงควรกระตุ้นให้เกิดทางเลือกที่เร็วขึ้น
 
-เลือกใช้การเพิ่มประสิทธิภาพคอมโบแบบ Zero-latency ออกจาก** การเพิ่มประสิทธิภาพแบบ Zero-latency** ปิดการใช้งานเพื่อป้องกันคุณสมบัติเวลาแฝงเหล่านี้จากเป้าหมายทางเลือกการแข่ง ข้ามเป้าหมายตามประวัติ TTFT หรือการบีบอัดคำขอทางเลือกสำรอง การเปิดใช้งานดังกล่าวทำให้สามารถกำหนดค่าการป้องกันความเสี่ยง การข้าม TTFT ที่คาดการณ์ได้ และการบีบอัดทางเลือกเชิงรุกเพื่อแลกเปลี่ยนความเที่ยงตรง routing/request เพื่อลดเวลาแฝงที่ลดลง
+เลือกใช้การเพิ่มประสิทธิภาพคอมโบแบบ Zero-latency ออกจาก** การเพิ่มประสิทธิภาพ Zero-latency** ปิดการใช้งานเพื่อป้องกันคุณสมบัติเวลาแฝงเหล่านี้จากเป้าหมายทางเลือกการแข่ง ข้ามเป้าหมายตามประวัติ TTFT หรือการบีบอัดคำขอทางเลือกสำรอง การเปิดใช้งานดังกล่าวทำให้สามารถกำหนดค่าการป้องกันความเสี่ยง การข้าม TTFT ที่คาดการณ์ได้ และการบีบอัดทางเลือกเชิงรุกเพื่อแลกเปลี่ยนความเที่ยงตรง routing/request เพื่อลดเวลาแฝงที่ลดลง
 
 ปิดการใช้งาน** บัฟเฟอร์โทเค็นการใช้เหตุผล** เมื่อผู้ให้บริการอัปสตรีมต้องการขีดจำกัด `max_tokens` / `maxOutputTokens` ที่เข้มงวด เมื่อเปิดใช้งาน การกำหนดเส้นทางแบบคอมโบจะเพิ่มพื้นที่ส่วนหัวของโมเดลการให้เหตุผลสำหรับโมเดลที่มีขีดจำกัดเอาต์พุตที่รู้จักเท่านั้น และปล่อยให้ขีดจำกัดโทเค็นของไคลเอ็นต์ไม่เปลี่ยนแปลงเมื่อค่าบัฟเฟอร์ที่ปลอดภัยจะเกินขีดจำกัดนั้น หากขีดจำกัดของไคลเอ็นต์อยู่เหนือขีดจำกัดที่ทราบอยู่แล้ว OmniRoute จะยึดขีดจำกัดนั้นไว้จนถึงขีดจำกัดนั้นก่อนที่จะส่งคำขออัปสตรีม
 
@@ -1170,7 +1170,7 @@ curl -X POST http://localhost:20128/v1/audio/transcriptions \
 | การ์ด                     | มันแสดงให้เห็นอะไร                                               |
 | ------------------------- | ---------------------------------------------------------------- |
 | **สถานะของระบบ**          | เวลาทำงาน เวอร์ชัน การใช้หน่วยความจำ ไดเร็กทอรีข้อมูล            |
-| **สุขภาพของผู้ให้บริการ** | สถานะรันไทม์ของเซอร์กิตเบรกเกอร์ของผู้ให้บริการทั่วโลก           |
+| **สุขภาพของผู้ให้บริการ** | สถานะรันไทม์ของเซอร์กิตเบรกเกอร์ของผู้ให้บริการระดับโลก          |
 | **ขีดจำกัดอัตรา**         | คูลดาวน์การเชื่อมต่อที่ใช้งานอยู่ต่อบัญชีพร้อมเวลาที่เหลืออยู่   |
 | **การล็อกที่ใช้งานอยู่**  | การล็อกขอบเขตโมเดลที่ใช้งานอยู่และการยกเว้นชั่วคราว              |
 | **แคชลายเซ็น**            | สถิติแคชการขจัดข้อมูลซ้ำซ้อน (คีย์ที่ใช้งานอยู่ อัตราการเข้าถึง) |
@@ -1329,34 +1329,36 @@ curl -X POST http://localhost:20128/api/keys -H "Authorization: Bearer $OMNIROUT
 
 ---
 
-## 💻 CLI ภายใน
+## 💻 ภายใน CLI
 
-OmniRoute มาพร้อม CLI ภายใน (`omniroute …`) สำหรับการตั้งค่า การวินิจฉัย และการควบคุมขณะรันไทม์ ซึ่ง **แยกจากหน้า "CLI Tools" ในแดชบอร์ด** ที่ใช้กำหนดค่า CLI ของบุคคลที่สาม (Claude Code, Cursor, Codex, Cline, …) เพื่อให้สามารถสื่อสารกับ OmniRoute ได้
+OmniRoute จัดส่ง CLI (`omniroute …`) ภายในสำหรับการตั้งค่า การวินิจฉัย และการควบคุมรันไทม์ นี่คือ** แยกจากหน้า "CLI Tools" ในแดชบอร์ด** ซึ่งกำหนดค่า CLIs บุคคลที่สาม (Claude Code, Cursor, Codex, Cline, …) เพื่อให้พวกเขาสามารถพูดคุยกับ OmniRoute ได้
 
 ```bash
-omniroute setup                    # วิซาร์ดแบบโต้ตอบ (รหัสผ่าน ผู้ให้บริการ คอมโบ)
-omniroute setup --non-interactive  # เหมาะสำหรับ CI
-omniroute doctor                   # การวินิจฉัยสถานะ (ไดเรกทอรีข้อมูล, DB, ผู้ให้บริการ, พอร์ต)
-omniroute providers available      # แสดงรายการผู้ให้บริการที่รองรับ
-omniroute providers list           # แสดงรายการการเชื่อมต่อที่กำหนดค่าไว้
-omniroute providers test <id>      # ทดสอบการเชื่อมต่อผู้ให้บริการแบบสด
-omniroute combos list              # แสดงรายการคอมโบ
-omniroute combos switch <name>     # ตั้งค่าคอมโบเริ่มต้น
-omniroute models                   # แสดงรายการโมเดลที่พร้อมใช้งาน (--json, --search)
-omniroute keys add | list | remove # จัดการคีย์ API จากเทอร์มินัล
-omniroute backup                   # สร้างสแนปช็อตการกำหนดค่า + DB
-omniroute restore [<timestamp>]    # กู้คืนจากสแนปช็อต
-omniroute health                   # สถานะโดยละเอียด (เบรกเกอร์, แคช, หน่วยความจำ)
-omniroute quota                    # การใช้โควตาของผู้ให้บริการ
-omniroute mcp status               # สถานะเซิร์ฟเวอร์ MCP
-omniroute a2a status               # สถานะเซิร์ฟเวอร์ A2A
-omniroute tunnel list|create|stop  # ทันเนล Cloudflare/Tailscale/ngrok
-omniroute reset-password           # รีเซ็ตรหัสผ่านผู้ดูแลระบบ
-omniroute --mcp                    # เริ่มเซิร์ฟเวอร์ MCP ผ่าน stdio
-omniroute --port 3000              # เริ่มเซิร์ฟเวอร์บนพอร์ตที่กำหนดเอง
+omniroute setup                    # Interactive wizard (password, providers, combos)
+omniroute setup --non-interactive  # CI-friendly
+omniroute doctor                   # Local diagnostics (config, DB, ports, Node runtime, native deps)
+omniroute chat "<prompt>"          # One-shot chat prompt (also --file / --stdin)
+omniroute repl                     # Interactive terminal chat (/model, /combo, /skill, /memory)
+omniroute providers available      # List supported providers
+omniroute providers list           # List configured connections
+omniroute providers test <id>      # Live test a provider connection
+omniroute combos list              # List combos
+omniroute combos switch <name>     # Set default combo
+omniroute models                   # List available models (--json, --search)
+omniroute keys add | list | remove # Manage API keys from the terminal
+omniroute backup                   # Snapshot config + DB
+omniroute restore [<timestamp>]    # Restore from a snapshot
+omniroute health                   # Detailed health (breakers, cache, memory)
+omniroute quota                    # Provider quota usage
+omniroute mcp status               # MCP server status
+omniroute a2a status               # A2A server status
+omniroute tunnel list|create|stop  # Cloudflare/Tailscale/ngrok tunnels
+omniroute reset-password           # Reset the admin password
+omniroute --mcp                    # Start MCP server over stdio
+omniroute --port 3000              # Start the server on a custom port
 ```
 
-เคล็ดลับ: ใช้ `omniroute doctor --json` ร่วมกับเครื่องมือตรวจสอบของคุณเพื่อแจ้งเตือนเมื่อการเชื่อมต่อผู้ให้บริการมีปัญหา
+เคล็ดลับ: จับคู่ `omniroute doctor --json` กับเครื่องมือตรวจสอบของคุณเพื่อแจ้งเตือนเมื่อการติดตั้งในเครื่องเสียหาย `doctor` ไม่ได้ทดสอบการเชื่อมต่อของผู้ให้บริการ ใช้ `omniroute providers test <id>` เพื่อสิ่งนั้น
 
 ---
 

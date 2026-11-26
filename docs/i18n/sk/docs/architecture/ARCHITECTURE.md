@@ -502,12 +502,13 @@ Databáza stavu domén (SQLite):
 - Autentifikácia pri nadviazaní spojenia WebSocket: `src/lib/ws/handshake.ts` — overuje požiadavky na prechod na WS pomocou kľúča API alebo súboru cookie relácie
 - Autentifikácia živého pripojenia informačného panela cez WebSocket: `src/server/ws/liveServer.ts` — sprievodná služba (port `LIVE_WS_PORT`) prijíma súbor cookie relácie informačného panela alebo kľúč API typu Bearer s rozsahom oprávnení na správu (`manage`/`admin`); kľúče určené iba na inferenciu sú odmietnuté. Jej interný koncový bod publikovania `POST /__omniroute_event` prijíma partnerov z lokálnej slučky iba vtedy, keď nie je prítomná žiadna hlavička prechodu cez proxy (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`)
 
-## 5) Cloudová synchronizácia
+## 5) Cloud Sync
 
-- Inicializácia plánovača: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
-- Pravidelná úloha: `src/shared/services/cloudSyncScheduler.ts`
-- Pravidelná úloha: `src/shared/services/modelSyncScheduler.ts`
-- Riadiaca trasa: `src/app/api/sync/cloud/route.ts`
+- Spustenie plánovača: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- Periodická úloha: `src/shared/services/cloudSyncScheduler.ts`
+- Periodická úloha: `src/shared/services/modelSyncScheduler.ts`
+- Pravidelná úloha (prihlásenie na pripojenie): `src/shared/services/modelHealthCheckScheduler.ts` — testuje modely pripojenia, automaticky skrýva zlyhania a obnovuje iba to, čo sa skrylo samo (`src/lib/db/modelHealthAutoHidden.ts`)
+- Kontrolná trasa: `src/app/api/sync/cloud/route.ts`
 
 ## Životný cyklus požiadavky (`/v1/chat/completions`)
 

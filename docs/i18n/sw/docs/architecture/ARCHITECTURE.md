@@ -511,12 +511,13 @@ DB ya Hali ya Kikoa (SQLite):
 - Uthibitishaji wa kuanzisha muunganisho wa WebSocket: `src/lib/ws/handshake.ts` — huthibitisha maombi ya uboreshaji wa WS kupitia ufunguo wa API au kidakuzi cha kipindi
 - Uthibitishaji wa WebSocket ya dashibodi ya moja kwa moja: `src/server/ws/liveServer.ts` — huduma saidizi (mlango `LIVE_WS_PORT`) hukubali kidakuzi cha kipindi cha dashibodi au ufunguo wa API wa Bearer wenye wigo wa usimamizi (`manage`/`admin`); funguo za uinferensi pekee hukataliwa. Ncha yake ya ndani ya uchapishaji ya `POST /__omniroute_event` hukubali wenza wa loopback pekee wakati hakuna kichwa cha mpito wa proksi (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`)
 
-## 5) Ulandanishi wa Wingu
+## 5) Usawazishaji wa Wingu
 
-- Uanzishaji wa kipanga ratiba: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
-- Jukumu la mara kwa mara: `src/shared/services/cloudSyncScheduler.ts`
-- Jukumu la mara kwa mara: `src/shared/services/modelSyncScheduler.ts`
-- Njia ya udhibiti: `src/app/api/sync/cloud/route.ts`
+- Init ya kiratibu: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- Kazi ya mara kwa mara: `src/shared/services/cloudSyncScheduler.ts`
+- Kazi ya mara kwa mara: `src/shared/services/modelSyncScheduler.ts`
+- Kazi ya mara kwa mara (chaguo la kuingia kwa kila muunganisho): `src/shared/services/modelHealthCheckScheduler.ts` — hujaribu miundo ya muunganisho, huficha hitilafu kiotomatiki na kurejesha kile tu ilichojificha (`src/lib/db/modelHealthAutoHidden.ts`)
+- Njia ya kudhibiti: `src/app/api/sync/cloud/route.ts`
 
 ## Mzunguko wa Maisha wa Ombi (`/v1/chat/completions`)
 

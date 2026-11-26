@@ -510,12 +510,13 @@ DB Ipò Domain (SQLite):
 - Ìfàṣẹsí ìkíni WebSocket: `src/lib/ws/handshake.ts` — ń fìdí àwọn ìbéèrè ìgbéga WS múlẹ̀ nípasẹ̀ kọ́kọ́rọ́ API tàbí kúkì session
 - Ìfàṣẹsí WebSocket dashboard alààyè: `src/server/ws/liveServer.ts` — sidecar náà (port `LIVE_WS_PORT`) ń gba kúkì session dashboard tàbí kọ́kọ́rọ́ API Bearer tí ó ní scope ìṣàkóso (`manage`/`admin`); a kọ àwọn kọ́kọ́rọ́ tí ó jẹ́ fún inference nìkan. Endpoint atẹ̀jáde inú rẹ̀ `POST /__omniroute_event` ń gba àwọn peer loopback nìkan nígbà tí kò bá sí header proxy-hop (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`)
 
-## 5) Ìmúdọ́gba Cloud
+## 5) Awọsanma Sync
 
-- Ìbẹ̀rẹ̀ scheduler: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
-- Iṣẹ́ àkókò-dé-àkókò: `src/shared/services/cloudSyncScheduler.ts`
-- Iṣẹ́ àkókò-dé-àkókò: `src/shared/services/modelSyncScheduler.ts`
-- Route ìṣàkóso: `src/app/api/sync/cloud/route.ts`
+- Init oluṣeto: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- Iṣẹ-ṣiṣe igbakọọkan: `src/shared/services/cloudSyncScheduler.ts`
+- Iṣẹ-ṣiṣe igbakọọkan: `src/shared/services/modelSyncScheduler.ts`
+- Iṣẹ-ṣiṣe igbakọọkan (ijade-inu fun asopọ): `src/shared/services/modelHealthCheckScheduler.ts` — ṣe idanwo awọn awoṣe asopọ kan, tọju awọn ikuna adaṣe ati mu pada nikan ohun ti o tọju funrararẹ (`src/lib/db/modelHealthAutoHidden.ts`)
+- Ọna iṣakoso: `src/app/api/sync/cloud/route.ts`
 
 ## Ìgbésí-ayé Ìbéèrè (`/v1/chat/completions`)
 

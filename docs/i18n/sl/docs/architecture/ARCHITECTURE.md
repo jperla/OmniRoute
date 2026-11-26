@@ -502,11 +502,12 @@ Podatkovna zbirka stanja domen (SQLite):
 - Avtentikacija rokovanja WebSocket: `src/lib/ws/handshake.ts` — preverja zahteve za nadgradnjo WS s ključem API ali sejnim piškotkom
 - Avtentikacija WebSocket za nadzorno ploščo v živo: `src/server/ws/liveServer.ts` — spremljevalni proces (vrata `LIVE_WS_PORT`) sprejme sejni piškotek nadzorne plošče ali ključ API Bearer z upravljavskim obsegom (`manage`/`admin`); ključi, namenjeni samo sklepanju, so zavrnjeni. Njegova notranja končna točka izdajatelja `POST /__omniroute_event` sprejme vrstnike iz povratne zanke samo, če ni prisotna nobena glava posredniškega prehoda (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`)
 
-## 5) Sinhronizacija z oblakom
+## 5) Sinhronizacija v oblaku
 
-- Inicializacija razporejevalnika: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
-- Periodično opravilo: `src/shared/services/cloudSyncScheduler.ts`
-- Periodično opravilo: `src/shared/services/modelSyncScheduler.ts`
+- Zagon razporejevalnika: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- Periodična naloga: `src/shared/services/cloudSyncScheduler.ts`
+- Periodična naloga: `src/shared/services/modelSyncScheduler.ts`
+- Periodična naloga (opt-in na povezavo): `src/shared/services/modelHealthCheckScheduler.ts` — preizkusi modele povezave, samodejno skrije napake in obnovi le tisto, kar je sama skrila (`src/lib/db/modelHealthAutoHidden.ts`)
 - Nadzorna pot: `src/app/api/sync/cloud/route.ts`
 
 ## Življenjski cikel zahteve (`/v1/chat/completions`)

@@ -8,21 +8,22 @@
 
 ## Obsah
 
-- [Rychlé spuštění](#quick-run)
+- [Rychlý běh](#quick-run)
 - [Se souborem prostředí](#with-environment-file)
-- [Docker Compose](#docker-compose)
+- [Docker Skládat](#docker-compose)
 - [Dostupné profily](#available-profiles)
-- [Konfigurace hostitelských nástrojů CLI při běhu OmniRoute v Dockeru](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
-- [Redis jako sidecar](#redis-sidecar)
-- [Produkční konfigurace Compose](#production-compose)
-- [Fáze Dockerfile](#dockerfile-stages)
+- [Kalení nádoby](#container-hardening)
+- [Konfigurace nástrojů hostitele CLI, když OmniRoute běží v Docker](#configuring-host-cli-tools-when-omniroute-runs-in-docker)
+- [Redis Sidecar](#redis-sidecar)
+- [Výroba Compose](#production-compose)
+- [Fáze dockerfile](#dockerfile-stages)
 - [Kritické proměnné prostředí](#critical-environment-variables)
-- [Docker Compose s Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
-- [Rychlý tunel Cloudflare](#cloudflare-quick-tunnel)
-- [Značky obrazů](#image-tags)
-- [Aktualizace ovládacího panelu v Dockeru](#dashboard-updates-in-docker)
-- [Dostupnost: výchozí SQLite podporuje jedinou repliku](#availability-default-sqlite-is-single-replica)
-- [Regionální chyby Gemini v Dockeru](#gemini-regional-errors-inside-docker)
+- [Docker Compose with Caddy (HTTPS)](#docker-compose-with-caddy-https-auto-tls)
+- [Cloudflare Rychlý tunel](#cloudflare-quick-tunnel)
+- [Značky obrázků](#image-tags)
+- [Aktualizace řídicího panelu v Docker](#dashboard-updates-in-docker)
+- [Dostupnost: výchozí SQLite je jedna replika](#availability-default-sqlite-is-single-replica)
+- [Gemini regionální chyby uvnitř Docker](#gemini-regional-errors-inside-docker)
 - [Důležité poznámky](#important-notes)
 
 ---
@@ -89,6 +90,30 @@ OmniRoute poskytuje profily Compose pro hlavní způsoby nasazení. Vyberte ten,
 | `web`            | `omniroute-web`  | Poskytovatelé webových relací vyžadující prohlížeč: `gemini-web`, `claude-web`, `claude-turnstile` (sestaví `runner-web`, Chromium je zahrnut)           | `docker compose --profile web up -d`         |
 
 > Lze kombinovat více profilů: `docker compose --profile cli --profile cliproxyapi up -d`.
+
+## Kalení nádoby
+
+Aplikační služby `base`, `web`, `cli` a `host` v `docker-compose.yml` používají `cap_drop: [ALL]` a možnost zabezpečení `no-new-privileges:true`. Obraz běží jako uživatel `node` bez oprávnění root a naslouchá na vysokých portech, takže nepotřebuje žádné funkce Linux. Volba zabezpečení zabraňuje procesům získat oprávnění prostřednictvím binárních souborů setuid.
+
+Pouze profil `cli` připojuje zásuvku Docker pro automatickou aktualizaci. Viz [Escape hatch: Konfigurace vlastního CLIs kontejneru](#escape-hatch-configure-the-containers-own-clis-use-sparingly) pro bezpečnostní důsledky.
+
+Kořenový souborový systém zůstává ve výchozím nastavení zapisovatelný. Profil `cli` zapisuje konfiguraci CLI a ukládá do mezipaměti v domovském adresáři kontejneru, profil `web` ukládá stav relace Chromium a runtime Next.js může zapisovat mezipaměti mimo `/app/data`.
+
+Chcete-li vyzkoušet kořenový souborový systém pouze pro čtení s profilem `base`, uložte jej jako `docker-compose.override.yml` vedle `docker-compose.yml`. Compose načte přepsání automaticky.
+
+```yaml
+services:
+  omniroute-base:
+    read_only: true
+    tmpfs:
+      - /tmp
+```
+
+```bash
+docker compose --profile base up -d
+```
+
+Stávající držák `/app/data` zůstane zapisovatelný. Před použitím tohoto přepsání v produkci otestujte svou zátěž, protože možná bude nutné zapisovat do jiných cest.
 
 ## Konfigurace nástrojů CLI na hostiteli, když OmniRoute běží v Dockeru
 
@@ -272,7 +297,7 @@ docker build --target runner-base \
   -t omniroute:base .
 ```
 
-`webpackBuildWorker` je povoleno, takže `next build` spouští rodiče** a** pracovní proces a každý vyznamenává `OMNIROUTE_BUILD_MEMORY_MB` samostatně. Velikost stropu kontejneru je zhruba nad dvojnásobkem této hodnoty, nikoli jednou.
+`webpackBuildWorker` je povoleno, takže `next build` spustí rodiče** a** pracovní proces a každý vyznamenává `OMNIROUTE_BUILD_MEMORY_MB` samostatně. Velikost stropu kontejneru je zhruba nad dvojnásobkem této hodnoty, nikoli jednou.
 
 Naměřeno na tomto stromě (`--target runner-base`, `OMNIROUTE_BUILD_MEMORY_MB=6144`):
 
@@ -295,7 +320,7 @@ Chování paměti v Docker:
 
 ### Runtime RAM pro kódovací agenty
 
-Výchozí hodnota 1 GiB Docker je podlaha dashboard/light-chat, nikoli produkční velikost. Dlouhá těla `POST /v1/responses` (stovky zpráv, desítky nástrojů) uchovávají během komprese více grafů v paměti. Dva překrývající se požadavky ~ 3 MiB / ~ 750k-tokenů přerušily V8 v** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) a také zasáhl 16 GiB cgroup OOM. Viz [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849).
+Výchozí hodnota 1 GiB Docker je podlaha dashboard/light-chat, nikoli produkční velikost. Dlouhá těla `POST /v1/responses` (stovky zpráv, desítky nástrojů) uchovávají během komprese více grafů v paměti. Dva překrývající se požadavky ~ 3 MiB / ~ 750k-tokenů přerušily V8 v** 12 GiB** old-space (`FATAL ERROR: Reached heap limit`) a také zasáhl 16 GiB cgroup OOM. Viz [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849).
 
 Velikost** cgroup `--memory` nad haldou** Nativní vyrovnávací paměti —, SQLite a kompresní meziprodukty jsou umístěny mimo V8.
 
@@ -591,11 +616,11 @@ Služba před stažením odstraní soubor požadavku, aby se neúspěšné spuš
 
 Akcie Docker / Kubernetes OmniRoute jsou** proces jednoho uzlu + jeden zapisovač SQLite** . Vysoká dostupnost je** není podporováno** na té topologii.
 
-| Omezení                                          | Následek                                                                                                                                                                                                                                                                                                   |
-| ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| Jediný spisovatel                                | Dělat** ne** spustit více replik proti stejnému souboru SQLite. To kazí DB.                                                                                                                                                                                                                                |
-| Znovu vytvořit / restartovat / zabít HEALTHCHECK | **Plný výpadek** SSE za letu, relací řídicího panelu a stavu v paměti. Každý připojený klient vypadne. Nové požadavky během okna prázdného koncového bodu získají reverzní proxy**`502 Bad Gateway: Unknown error`** , ne OmniRoute JSON — klienti to nedokážou odlišit od selhání poskytovatele (#11015). |
-| Stejná smyčka událostí jako `/healthz`           | Zaneprázdněný katalog nebo kompresní klíště mohou zpozdit sondy; krátký časový limit a poté se restartuje** pouze** replika.                                                                                                                                                                               |
+| Omezení                                          | Následek                                                                                                                                                                                                                                                                                                       |
+| ------------------------------------------------ | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Jediný spisovatel                                | Dělat** ne** spustit více replik proti stejnému souboru SQLite. To kazí DB.                                                                                                                                                                                                                                    |
+| Znovu vytvořit / restartovat / zabít HEALTHCHECK | **Plný výpadek** SSE za letu, relací řídicího panelu a stavu v paměti. Každý připojený klient vypadne. Nové požadavky během okna prázdného koncového bodu získají reverzní proxy**`502 Bad Gateway: Unknown error`** , nikoli OmniRoute JSON — klienti to nedokážou odlišit od selhání poskytovatele (#11015). |
+| Stejná smyčka událostí jako `/healthz`           | Zaneprázdněný katalog nebo kompresní klíště mohou zpozdit sondy; krátký časový limit a poté se restartuje** pouze** replika.                                                                                                                                                                                   |
 
 **Matrice sondy** (viz také [doporučení Kubernetes sondy](../ops/MONITORING_GUIDE.md#kubernetes-probe-recommendations) ):
 
@@ -605,9 +630,9 @@ Akcie Docker / Kubernetes OmniRoute jsou** proces jednoho uzlu + jeden zapisova�
 | Připravenost   | HTTP `GET /healthz`                                         | Krátké časové limity, které považují smyčku událostí za zaneprázdněnou jako mrtvou |
 | Hluboko / lidé | `/api/monitoring/health`                                    | Automatizovaná živost kubelet                                                      |
 
-**Upgrady:** očekávat pokles každé relace. Vypusťte klienty, pokud můžete; na výchozí SQLite není žádná průběžná aktualizace. Compose `restart: unless-stopped` plus Docker `HEALTHCHECK` také nahradí jediný proces, když je kontejner nezdravý – stejný rádius výbuchu.
+**Upgrady:** očekávat pokles každé relace. Vypusťte klienty, pokud můžete; na výchozí SQLite není žádná průběžná aktualizace. Compose `restart: unless-stopped` plus Docker `HEALTHCHECK` také nahradí jediný proces, když je kontejner Nezdravý — stejný rádius výbuchu.
 
-Hotové manifesty a Helm graf fungují v `deploy/kubernetes/` a `deploy/helm/omniroute/` – viz [Průvodce nasazením Kubernetes](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
+Hotové manifesty a graf Helm živé v `deploy/kubernetes/` a `deploy/helm/omniroute/` — viz [průvodce nasazením Kubernetes](../ops/KUBERNETES_DEPLOYMENT_GUIDE.md).
 
 Fragment Kubernetes pro a** jediná replika** (Je vyžadováno opětovné vytvoření; nezvyšujte `replicas` proti jednomu souboru SQLite ):
 
@@ -636,9 +661,9 @@ spec:
             periodSeconds: 20
 ```
 
-`preStop` sleep umožňuje kube zahodit koncové body služby před SIGTERM tak** nový** provoz přestane narážet na proces umírání. `/v1/responses` SSE za letu je vyčerpán až na `SHUTDOWN_TIMEOUT_MS` (výchozí 30 s) prostřednictvím pronájmů vstupného s vysokou gramáží (#11015). Nové požadavky, které se stále dostanou do procesu, získají `503` + `Retry-After: 5`. Mezera Recreate empty-endpoint, dokud není náhrada připravena, zůstává těžkým výpadkem – to je topologie SQLite, nikoli chybná konfigurace sondy.
+`preStop` sleep umožňuje kube zahodit koncové body služby před SIGTERM tak** nový** provoz přestane narážet na proces umírání. `/v1/responses` SSE za letu je vyčerpán až na `SHUTDOWN_TIMEOUT_MS` (výchozí 30 s) prostřednictvím pronájmů vstupného s vysokou gramáží (#11015). Nové požadavky, které se stále dostanou do procesu, získají `503` + `Retry-After: 5`. Mezera Znovu vytvořit prázdný koncový bod, dokud není náhrada připravena, zůstává tvrdým výpadkem — což je topologie SQLite, nikoli chybná konfigurace sondy.
 
-Externí Postgres / multi-writer HA je** ne** dokumentovaná dráha akcií. Pokud potřebujete HA, ponechte si jednu repliku nebo spusťte topologii, kterou projekt testoval a zdokumentoval samostatně. Práce Postgres/MySQL žije v [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075). Do té doby je to jediný podporovaný způsob množení** velký** Kapacita `/v1/responses` je N nezávislých procesů (další sekce), nikoli `replicas > 1` na jednom svazku.
+Externí Postgres / multi-writer HA je** ne** dokumentovaná dráha akcií. Pokud potřebujete HA, ponechte si jednu repliku nebo spusťte topologii, kterou projekt testoval a zdokumentoval samostatně. Práce Postgres/MySQL žije v [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075). Do té doby je to jediný podporovaný způsob množení** velký** Kapacita `/v1/responses` je N nezávislých procesů (další sekce), nikoli `replicas > 1` na jednom svazku.
 
 ## Scale-out: N nezávislých procesů
 
@@ -648,11 +673,11 @@ Kopie jednoho účtu Codex nesmí nezávisle spotřebovat jeho jednorázový obn
 
 Pasivní instance znovu načte připojení, když je potřeba obnovení, a přijme pouze jiný, nevypršený přístupový token. V opačném případě je obnovení zakázáno, aniž by vypršela platnost nebo se deaktivovalo připojení nebo započítávalo selhání nástroje pro obnovení. Skutečná selhání autentizace proti proudu stále používají normální účtování selhání, exponenciální ochlazení a normální chybu klienta; deaktivace účtu zůstává trvalá. Synchronizujte otočené tokeny vlastníka před vypršením platnosti přístupových tokenů (výchozí proaktivní obnovovací interval je pět minut) nebo znovu naimportujte auth soubor Codex. Pasivní importy ukládají dodané tokeny, aniž by je ověřovaly na koncovém bodu tokenu. Ruční obnova dashboard/API vrátí `409 refresh_disabled`; nová přihlášení OAuth jsou nezměněna. Viz [reference prostředí](../reference/ENVIRONMENT.md#passive-codex-token-refresh).
 
-Jeden proces uzlu je** jedna hromada V8** . Dva překrývající se ~ 3 MiB / ~ 750k-token kódovací agent `POST /v1/responses` (RTK + Caveman) přeruší, že se nahromadí na ~ 12 Gi (`FATAL ERROR: Reached heap limit`) a mohou OOM cgroup 16 Gi. Viz [#7849](https://github.com/diegosouzapw/OmniRoute/issues/7849). To měření je a** paměť-rozpočet** varování, nejde o produkt hard-max dvou souběžných dlouhých `/v1/responses`. Příjem těžkého chatu je brán automaticky odvozeným příjmovým bajtovým rozpočtem (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) dimenzovaným ze stejného stropu V8/cgroup — který jej přepíše nahoru (nebo nastavením staršího omezení počtu požadavků `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ) u již tak velkého procesu znovu zavede přerušení. Malé chaty, `/healthz`, `/v1/models` a MCP jsou** ne** v té čepici.
+Jeden proces uzlu je** jedna hromada V8** . Dva překrývající se ~ 3 MiB / ~ 750k-token kódovací agent `POST /v1/responses` (RTK + Caveman) přeruší, že se nahromadí na ~ 12 Gi (`FATAL ERROR: Reached heap limit`) a mohou OOM cgroup 16 Gi. Viz [#7849](https://github.com/cheaper-inference/OmniRoute/issues/7849). To měření je a** paměť-rozpočet** varování, nejde o produkt hard-max dvou souběžných dlouhých `/v1/responses`. Příjem těžkého chatu je brán automaticky odvozeným příjmovým bajtovým rozpočtem (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES`, `src/shared/middleware/admissionBudget.ts`) dimenzovaným ze stejného stropu V8/cgroup — který jej přepíše směrem nahoru (nebo nastavením staršího omezení počtu požadavků `OMNIROUTE_CHAT_MAX_HEAVY_IN_FLIGHT` ) u již tak velkého procesu znovu zavádí přerušení. Malé chaty, `/healthz`, `/v1/models` a MCP jsou** ne** v té čepici.
 
 ### Jeden proces: více než dvě dlouhé `/v1/responses`
 
-A** zdravý** proces (hromada pod `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, výchozí `0.75`)** květen** spusťte více než dva souběžné dlouhé `POST /v1/responses` když je pro celý procesový bajtový rozpočet (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) stále místo. Těla se `OMNIROUTE_CHAT_LARGE_BODY_BYTES` nebo nad ním (výchozí 256 KiB) si berou stejný pronájem těžké váhy jako strukturně náročné požadavky a používají stejný [#10437](https://github.com/diegosouzapw/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Desítky souběžných dlouhých klientů SSE (operátoři často potřebují 40–50) je a** paměť-rozpočet** otázka — velikost haldy + primary/headroom sloty + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — není pevný limit produktu „max 2“. Tlakovaná hromada se stále odhazuje s opakovatelným `503`, takže #7849 se nevrací.
+A** zdravý** proces (hromada pod `OMNIROUTE_CHAT_ADMISSION_HEAP_SHED_RATIO`, výchozí `0.75`)** květen** spusťte více než dva souběžné dlouhé `POST /v1/responses` když je pro celý procesový letový bajtový rozpočet (`OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` / #10110) stále místo. Těla se `OMNIROUTE_CHAT_LARGE_BODY_BYTES` nebo nad ním (výchozí 256 KiB) si berou stejný pronájem těžké váhy jako strukturně náročné požadavky a používají stejný [#10437](https://github.com/cheaper-inference/OmniRoute/pull/10437) `tryAcquireHealthyHeadroom` escape (`OMNIROUTE_CHAT_ADMISSION_HEALTHY_HEADROOM`). Desítky souběžných long SSE klientů (operátoři často potřebují 40–50) je a** paměť-rozpočet** otázka — velikost haldy + primary/headroom sloty + `OMNIROUTE_CHAT_MAX_INFLIGHT_BYTES` — není pevný limit produktu „max 2“. Natlakovaná hromada se stále shazuje s opakovatelným `503` takže #7849 se nevrací.
 
 Na** množit hromady** (nezávislé staré prostory V8)** dnes** :
 
@@ -666,7 +691,7 @@ Na** množit hromady** (nezávislé staré prostory V8)** dnes** :
 
 Afinitu relace k účtu lze také sdílet prostřednictvím Redis: nastavte `OMNIROUTE_SESSION_AFFINITY_STORE=redis` a `REDIS_URL` pro každý proces se stejným `REDIS_KEY_PREFIX` a kladným nastavením `sessionAffinityTtlMs`. Piny převádějí hašované identity uživatelských účtů na způsobilá místní připojení každého procesu, takže účty OAuth s odpovídajícími metadaty identity nemusí mít odpovídající připojení IDs. Známé identity účtů mají přednost před protichůdnými místními IDs v rozlišení pinů a hlídaném vystěhování; záznamy bez identity (nebo volající po vystěhování bez identity) si ponechávají starší stráž ID. Účty bez stabilní identity používání stále vyžadují shodu IDs. Chyby Redis nebo volání přesahující 100 ms se vrátí do místního SQLite. Každý afinitní obchod Redis omezuje zbývající operace na 8, obchází Redis okamžitě, když je plný, a uvolňuje sloty pouze tehdy, když se podkladová práce usadí, nikoli v termínu pro volání. Během výpadku Redis neexistuje žádná sdílená pravda: každá instance se vrátí ke své vlastní místní afinitě, relace se mohou znovu připnout jednou za instanci a instance se mohou rozcházet. Lepkavost znovu konverguje prostřednictvím Redis, když se obnoví. Časový limit omezuje čekání, nikoli odeslané EVAL, které může přistát po nouzovém režimu. Směrovací zápisy porovnávají přesnou hodnotu pozorovanou rozhodnutím o směrování, nikoli nové čtení v době mutace; pozorovaná chyba nebo záložní pozorování SQLite se porovnává jako chybějící klíč Redis. Zastaralé piny jsou nahrazeny jedním CAS, takže pozdní příkaz nemůže nahradit nebo odstranit novější, jiný pin. Redis čte atomicky vrátí hodnotu a zbývající server TTL; kladné PTTL (nebo žádné vypršení platnosti) určuje životnost, nikoli časové razítko JSON zapisovatele nebo hodiny čtenáře. Místní snímky mapují zbývající TTL do místního termínu; existující klíče JSON zůstávají čitelné a jejich nezpracované bajty jsou zachovány pro CAS. Redis je jediným zdrojem pravdy, zatímco odpovídá. Potvrzené sdílené upserts, touchs a deletes odstranit místní položku, nikdy ji neinstalovat ani aktualizovat. SQLite na cestě Redis obsahuje pouze vlastní nouzová rozhodnutí této instance z chyb Redis, vypršení časového limitu nebo saturace přijetí, ohraničená TTL jako dříve. Chybějící místní pin při pozdějším výpadku stojí jeden nový výběr (jedno vynechání rychlé mezipaměti), nikoli špatný nebo vyřazený účet. Odmítnuté upserts vrátí sdíleného vítěze a jeho zbývající TTL atomicky: běžný výběr znovu zkontroluje mapovaný místní termín a použije stále živého způsobilého vítěze, dotkne se použití a přihlášení pro daný účet bez dalšího sdíleného zápisu. Pokud není k dispozici, výběr zachová místního kandidáta, ponechá sdílený pin nezměněný a vydá jednu ladicí zprávu. Odmítnuté CAS nezapisuje SQLite; chyby Redis, časové limity nebo saturace přijetí místo toho použijí existující místní operaci. Pokud odpověď odeslané mutace dorazí po vypršení časového limitu (přijato, odmítnuto nebo došlo k chybě), synchronní přesné porovnávání a vymazání serializovaných hodnot odstraní pouze bajtově identický řádek záložního časového limitu. Mezi tímto srovnáním a výmazem není žádné čekání; zápis novějšího výpadku je zachován. Hlídané vystěhování odstraní vlastní místní pin účtu, který selhal, i když je Redis vypnutý, a po potvrzeném sdíleném vystěhování jej znovu vyčistí. Čekající dřívější sdílené odpovědi nemohou obnovit vyřazený místní pin, protože sdílené úspěchy nikdy nezapisují SQLite. Pozdější nouzový výpadek může znovu připnout účet; později přijatý sdílený zápis existuje pouze v Redis. Chyby Redis nekonzultují místní záložní stav. S vypnutým ovladačem si nově vybrané piny zachovávají původní čtyřpolní tvar SQLite JSON ; pouze směrování Redis přidá identitu hashovaného účtu. Předem načtené kolíky jsou znovu zkontrolovány na hranici vypršení platnosti. Redis non-lease selection znovu načte obchod, ale synchronní plánování pronájmu může stále používat pin vyřazený mezi přednačtením a plánováním (akceptované okno nejlepšího úsilí). Potvrzení o pronájmu nemůže přepnout účty po trvalé reklamaci: při odmítnutém upsert si ponechá nárokovaného kandidáta pouze pro tento požadavek a ponechá sdíleného vítěze nedotčeno, takže dohoda mezi instancemi je omezena touto cestou. Zbytek tabulky stále platí: toto nesdílí lepivost kombinované relace, nativní Codex turn piny, semafory účtů, uzamčení, limity výdajů, konfiguraci nebo protokoly hovorů.
 
-Hardware: pro každou instanci souběžná dlouhá `/v1/responses` je a** paměť-rozpočet** otázka (hromada + inflight-byte / #10110). `N` nezávislé `DATA_DIR` s stále násobí hromady: hostitel RAM musí pokrývat `N × cgroup`, nikoli „jeden 16 Gi pod s N = 8“. Nikdy `replicas > 1` na jeden soubor SQLite.
+Hardware: pro každou instanci souběžná dlouhá `/v1/responses` je a** paměť-rozpočet** otázka (hromada + inflight-byte / #10110). `N` nezávislé `DATA_DIR` s stále množí hromady: hostitel RAM musí pokrývat `N × cgroup`, nikoli „jeden 16 Gi pod s N = 8“. Nikdy `replicas > 1` na jeden soubor SQLite.
 
 Vytvořte náčrt (dvě hromady, dva svazky — ne `deploy.replicas: 2`):
 
@@ -695,55 +720,32 @@ volumes:
   omniroute-b-data:
 ```
 
-Hustota během procesu (komprese z izolátu HTTP ) je [#11023](https://github.com/diegosouzapw/OmniRoute/issues/11023). Jeden logický cluster ve sdíleném trvalém stavu je [#8075](https://github.com/diegosouzapw/OmniRoute/issues/8075).
+Hustota během procesu (komprese izolátu HTTP ) je [#11023](https://github.com/cheaper-inference/OmniRoute/issues/11023). Jeden logický cluster ve sdíleném trvalém stavu je [#8075](https://github.com/cheaper-inference/OmniRoute/issues/8075).
 
-## Regionální chyby Gemini uvnitř Dockeru
+## Gemini regionální chyby uvnitř Docker
 
-Google AI Studio / Gemini API může vrátit HTTP 400 s chybou FAILED_PRECONDITION a
-`User location is not supported for the API use.` Úspěšný požadavek na hostiteli
-nedokazuje, že kontejner používá stejnou odchozí trasu. Pořadí DNS,
-připojení IPv4/IPv6, směrování VPN a nakonfigurované proxy se mohou lišit. Zkontrolujte
-[regiony podporované společností Google](https://ai.google.dev/gemini-api/docs/available-regions)
-i skutečnou trasu připojení; tato chyba sama o sobě neznamená, že je klíč API neplatný.
+Google AI Studio / Gemini API může vrátit HTTP 400 pomocí FAILED_PRECONDITION a `User location is not supported for the API use.` Úspěšný požadavek na hostiteli neprokazuje, že kontejner používá stejnou odchozí cestu. Uspořádání DNS, konektivita IPv4/IPv6, směrování VPN a nakonfigurované proxy se mohou lišit. Zkontrolujte [podporované oblasti Google](https://ai.google.dev/gemini-api/docs/available-regions) a také skutečnou trasu připojení; tato chyba sama o sobě neidentifikuje špatný klíč API.
 
-### Upřednostněte proxy specifickou pro připojení
+### Preferujte proxy specifický pro připojení
 
-Pro dotčené připojení Gemini použijte [konfiguraci proxy pro jednotlivá připojení](../ops/PROXY_GUIDE.md#4-level-proxy-system)
-v OmniRoute a poté zopakujte **Test Connection** a malý požadavek
-se stejným modelem. Tím zůstane změna směrování omezená na dané připojení. Ověřte,
-že je proxy z kontejneru dostupná a že ji připojení skutečně vybere.
-Změna trasy nezaručuje regionální způsobilost u poskytovatele.
+Pro dotčené připojení Gemini použijte [konfiguraci proxy serveru](../ops/PROXY_GUIDE.md#4-level-proxy-system) OmniRoute pro připojení a poté opakujte** Test připojení** a malý požadavek se stejným modelem. To zachová rozsah změny směrování pro toto připojení. Ověřte, zda je server proxy dostupný z kontejneru a zda jej připojení skutečně vybere. Změna trasy nezaručuje regionální způsobilost proti proudu.
 
-### Porovnání síťového připojení hostitele a kontejneru
+### Porovnejte hostitelské a kontejnerové sítě
 
-Při porovnávání ověřených výsledků zachovejte stejný klíč, model i požadavek; nikdy
-do hlášení problému nevkládejte přihlašovací údaje, hesla k proxy ani úplné autorizační hlavičky.
-Nejprve zjistěte, které rodiny adres překladač operačního systému nabízí, a to pomocí stejného příkazu
-na hostiteli i uvnitř kontejneru:
+Při porovnávání ověřených výsledků udržujte klíč, model a požadavek identické; nikdy do problému nevkládejte přihlašovací údaje, hesla proxy nebo úplné autorizační hlavičky. Nejprve zkontrolujte, které rodiny adres nabízí resolver OS, pomocí stejného příkazu na hostiteli a uvnitř kontejneru:
 
 ```bash
 node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 docker compose exec omniroute node -e 'require("node:dns").lookup("generativelanguage.googleapis.com", {all: true}, (error, addresses) => { if (error) { console.error(error.code); process.exitCode = 1; return; } console.log(addresses.map(({family}) => family)); })'
 ```
 
-Nahraďte `omniroute` službou, kterou používáte (například `omniroute-web`). Tyto
-příkazy vypíší rodiny adres bez přihlašovacích údajů nebo IP adres. Vrácená hodnota `6`
-pouze označuje výsledek DNS pro IPv6: **nedokazuje** funkční trasu IPv6 ani přístup k API.
-Pokud je nainstalován `curl`, porovnejte `curl -4 -I https://generativelanguage.googleapis.com`
-s `curl -6 -I https://generativelanguage.googleapis.com` v obou prostředích.
-Odpověď HTTP dokazuje konektivitu pro daný test, i když jde o chybu
-bez ověření; způsobilost pro Gemini ověří pouze autentizovaný požadavek na model.
+Nahraďte `omniroute` službou, kterou provozujete (například `omniroute-web`). Tyto příkazy tisknou rodiny adres bez pověření nebo adres IP. Vrácené `6` zobrazuje pouze výsledek IPv6 DNS : ano** ne** prokázat použitelnou IPv6 cestu nebo API přístup. Kde je nainstalován `curl`, porovnejte `curl -4 -I https://generativelanguage.googleapis.com` se `curl -6 -I https://generativelanguage.googleapis.com` v obou prostředích. Odpověď HTTP prokazuje konektivitu pro tuto sondu, i když se jedná o neověřenou chybu; pouze ověřený požadavek modelu testuje způsobilost Gemini.
 
-### Alternativa na úrovni hostitele: funkční IPv6 a zásady překladače
+### Alternativa na úrovni hostitele: fungující zásady IPv6 a resolveru
 
-Autor hlášení [#12762](https://github.com/diegosouzapw/OmniRoute/issues/12762) obnovil
-přístup ve svém prostředí povolením IPv6 pro kontejnery a změnou výběru adres v glibc.
-Považujte toto řešení za alternativu specifickou pro dané prostředí. Před úpravou předvoleb překladače
-ověřte funkční IPv6 hostitele, odchozí připojení a směrování kontejneru i pravidla firewallu.
-Samotná privátní adresa ULA nezajišťuje veřejné připojení IPv6.
+Reportér [#12762](https://github.com/cheaper-inference/OmniRoute/issues/12762) obnovil přístup v jejich prostředí povolením kontejneru IPv6 a změnou výběru adresy glibc. Považujte to za alternativu specifickou pro prostředí. Před úpravou předvoleb resolveru potvrďte fungující hostitel IPv6, kontejner egress/routing a pravidla brány firewall. Soukromá adresa ULA sama o sobě nezakládá veřejné připojení IPv6.
 
-U služeb, které jsou již připojené k výchozí síti Compose, povolí tento fragment
-IPv6 v dané síti; zachovejte zbytek konfigurace služby, portů, svazků a dalších nastavení:
+U služeb již připojených k výchozí síti Compose tento fragment umožňuje IPv6 v této síti; ponechat si zbytek služby, porty, svazky a konfiguraci:
 
 ```yaml
 networks:
@@ -751,30 +753,13 @@ networks:
     enable_ipv6: true
 ```
 
-U pojmenované sítě povolte IPv6 v síti, ke které se služba skutečně připojuje. Docker může
-přidělit podsíť ULA; explicitní nepřekrývající se podsíť vyberte pouze tehdy, když to vaše síť
-vyžaduje. Viz [sítě IPv6 v Dockeru](https://docs.docker.com/engine/daemon/ipv6/)
-a [možnosti sítí Compose](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
+U pojmenované sítě ji povolte v síti, ke které se služba skutečně připojuje. Docker může přidělit podsíť ULA ; vyberte explicitní, nepřekrývající se podsíť pouze tehdy, když to vaše síť vyžaduje. Viz možnosti [Docker IPv6 networking](https://docs.docker.com/engine/daemon/ipv6/) a [Compose network](https://docs.docker.com/reference/compose-file/networks/#enable_ipv6).
 
-V **obrazu založeném na glibc** může `/etc/gai.conf` změnit výběr adres. Aktuální
-Dockerfile repozitáře používá Debian; vlastní obrazy založené na musl tento mechanismus nemají.
-Nahlášená úprava mění štítek ULA z `label fc00::/7 6` na
-`label fc00::/7 1`. Začněte s úplnou tabulkou zásad z obrazu a zachovejte její ostatní
-položky: přidání položky `label` nebo `precedence` nahradí danou výchozí tabulku, takže soubor
-obsahující pouze změněný řádek nestačí. Tyto principy popisuje
-[referenční dokumentace konfigurace glibc](https://github.com/bminor/glibc/blob/master/posix/gai.conf).
-Připojte zkontrolovaný soubor pouze pro čtení do `/etc/gai.conf`
-a službu znovu vytvořte, aby se změna použila.
+Na a** obrázek založený na glibc** , `/etc/gai.conf` může změnit výběr adresy. Aktuální úložiště Dockerfile používá Debian; vlastní obrázky založené na musl tento mechanismus nesdílejí. Nahlášená úprava změní označení ULA z `label fc00::/7 6` na `label fc00::/7 1`. Začněte od úplné tabulky zásad obrázku a zachovejte její ostatní položky: přidání položky `label` nebo `precedence` nahradí tuto výchozí tabulku, takže soubor obsahující pouze změněný řádek nestačí. [Referenční příručka pro konfiguraci glibc](https://github.com/bminor/glibc/blob/master/posix/gai.conf) dokumentuje tuto sémantiku. Bind-připojte recenzovaný soubor pouze pro čtení na `/etc/gai.conf` a znovu vytvořte službu, abyste ji mohli použít.
 
-Tím se změní výběr adres operačního systému pro **veškerý odchozí provoz v daném kontejneru**.
-Neznamená to, že každá aplikace bude nucena zvolit IPv6: záleží také na pořadí DNS a výběru
-připojení v Node. Konkrétně `--dns-result-order=ipv4first` upřednostňuje IPv4
-a není řešením selhání, ke kterému dochází pouze přes IPv4. Viz [řazení DNS v Node](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
+Tím se změní výběr adresy OS pro** veškerý odchozí provoz v tomto kontejneru** . Nenutí každou aplikaci, aby si vybrala IPv6: záleží také na pořadí DNS uzlu a výběru připojení. Zejména `--dns-result-order=ipv4first` preferuje IPv4 a není nápravou pro selhání IPv4-only. Viz [Objednání Node DNS](https://nodejs.org/api/dns.html#dnssetdefaultresultorderorder).
 
-Po každé změně na úrovni hostitele znovu otestujte Gemini i ostatní poskytovatele. Chcete-li změny vrátit,
-odeberte vlastní připojení souboru `gai.conf`, obnovte předchozí konfiguraci sítě a
-během údržby znovu vytvořte dotčenou službu nebo síť. Opětovné vytvoření sítě
-může přerušit provoz ostatních kontejnerů, které jsou k ní připojené; trvalý datový svazek neodstraňujte.
+Po jakékoli změně na úrovni hostitele znovu otestujte Gemini a vaše další poskytovatele. Chcete-li se vrátit zpět, odeberte vlastní připojení `gai.conf`, obnovte předchozí konfiguraci sítě a znovu vytvořte dotčené service/network během okna údržby. Opětovné vytvoření sítě může přerušit další k ní připojené kontejnery; nemažte trvalý objem dat.
 
 ## Důležité poznámky
 

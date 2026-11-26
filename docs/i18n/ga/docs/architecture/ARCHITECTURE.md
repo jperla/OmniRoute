@@ -511,11 +511,12 @@ Bunachar Sonraí Staide Fearainn (SQLite):
 - Fíordheimhniú croitheadh láimhe WebSocket: `src/lib/ws/handshake.ts` — bailíochtaíonn sé iarratais uasghrádaithe WS trí eochair API nó fianán seisiúin
 - Fíordheimhniú WebSocket beo na deaise: `src/server/ws/liveServer.ts` — glacann an taobhcharr (port `LIVE_WS_PORT`) le fianán seisiúin deaise nó le heochair API Bearer a bhfuil raon feidhme bainistíochta (`manage`/`admin`) aici; diúltaítear d’eochracha tátail amháin. Ní ghlacann a chríochphointe inmheánach foilsitheora `POST /__omniroute_event` ach le piaraí aisbhacála nuair nach bhfuil aon cheanntásc leannlus seachfhreastalaí (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`) i láthair
 
-## 5) Sioncronú Néalríomhaireachta
+## 5) Cloud Sync
 
-- Túsú sceidealóra: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- Sceidealóir init: `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
 - Tasc tréimhsiúil: `src/shared/services/cloudSyncScheduler.ts`
 - Tasc tréimhsiúil: `src/shared/services/modelSyncScheduler.ts`
+- Tasc tréimhsiúil (rogha an diúltaithe in aghaidh an naisc): déanann `src/shared/services/modelHealthCheckScheduler.ts` — samhlacha ceangail a thástáil, cuireann sé teipeanna i bhfolach go huathoibríoch agus ní athchóiríonn sé ach an rud a d'fholaigh sé é féin (`src/lib/db/modelHealthAutoHidden.ts`)
 - Bealach rialaithe: `src/app/api/sync/cloud/route.ts`
 
 ## Saolré Iarratais (`/v1/chat/completions`)

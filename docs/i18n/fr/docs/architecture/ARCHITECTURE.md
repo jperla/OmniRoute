@@ -502,12 +502,13 @@ Base de données d’état des domaines (SQLite) :
 - Authentification lors de la négociation WebSocket : `src/lib/ws/handshake.ts` — valide les requêtes de mise à niveau WS au moyen d’une clé API ou d’un cookie de session
 - Authentification WebSocket du tableau de bord en direct : `src/server/ws/liveServer.ts` — le sidecar (port `LIVE_WS_PORT`) accepte un cookie de session du tableau de bord ou une clé API Bearer disposant d’une portée de gestion (`manage`/`admin`) ; les clés réservées à l’inférence sont refusées. Son point de terminaison interne de publication `POST /__omniroute_event` n’accepte les pairs en boucle locale que lorsqu’aucun en-tête de transit de proxy (`x-forwarded-*`, `x-real-ip`, `forwarded`, `via`) n’est présent
 
-## 5) Synchronisation cloud
+## 5) Synchronisation avec le cloud
 
-- Initialisation du planificateur : `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
-- Tâche périodique : `src/shared/services/cloudSyncScheduler.ts`
-- Tâche périodique : `src/shared/services/modelSyncScheduler.ts`
-- Route de contrôle : `src/app/api/sync/cloud/route.ts`
+- Initialisation du planificateur : `src/lib/initCloudSync.ts`, `src/shared/services/initializeCloudSync.ts`, `src/shared/services/modelSyncScheduler.ts`
+- Tâche périodique : `src/shared/services/cloudSyncScheduler.ts`
+- Tâche périodique : `src/shared/services/modelSyncScheduler.ts`
+- Tâche périodique (opt-in par connexion) : `src/shared/services/modelHealthCheckScheduler.ts` — teste les modèles d'une connexion, masque automatiquement les échecs et restaure uniquement ce qu'il s'est caché (`src/lib/db/modelHealthAutoHidden.ts`)
+- Voie de contrôle : `src/app/api/sync/cloud/route.ts`
 
 ## Cycle de vie d'une requête (`/v1/chat/completions`)
 
